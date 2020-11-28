@@ -1,0 +1,20 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "target": "es5",
+    "noImplicitAny": false,
+    "module": "commonjs",
+    "removeComments": true,
+    "sourceMap": true,
+    "outDir": "./dist/",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "declaration": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+  },
+  "exclude": [
+    "node_modules",
+    "dist/*"
+  ]
+}

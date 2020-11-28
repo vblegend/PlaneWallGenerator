@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Chrome Debug",
+            "port": 9522,
+            "webRoot": "${workspaceFolder}",
+            "url":"http://localhost:8080",
+            "sourceMaps": true,
+        }
+    ]
+}

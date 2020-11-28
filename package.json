@@ -1,0 +1,36 @@
+{
+  "name": "demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "webpack.config.js",
+  "dependencies": {
+    "lodash": "^4.17.15"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@types/node": "^12.12.14",
+    "babel-loader": "^8.0.4",
+    "babel-preset-env": "^1.7.0",
+    "concurrently": "^5.2.0",
+    "copy-webpack-plugin": "^5.0.5",
+    "css-loader": "^3.2.0",
+    "html-webpack-plugin": "^3.2.0",
+    "http-server": "^0.12.3",
+    "json-loader": "^0.5.7",
+    "style-loader": "^1.0.1",
+    "ts-loader": "^6.2.1",
+    "typescript": "^3.2.4",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10"
+  },
+  "scripts": {
+    "build": "webpack  --watch",
+    "publish": "publish.sh",
+    "httpserver-nocache": "http-server dist\\ --port=8080 -c-1",
+    "httpserver": "http-server dist\\ --port=8080",
+    "debug": "concurrently \"npm run build\" \"npm run httpserver-nocache\"",
+    "debug-cache": "concurrently \"npm run build\" \"npm run httpserver\""
+  },
+  "author": "",
+  "license": "ISC"
+}
