@@ -89,8 +89,6 @@ export class Adorner {
             this.clockwiseSortPoints(this._targets);
             /* generate points */
             for (var i = 0; i < this._targets.length; i++) {
-                var points: Vector2[];
-                var segment: Segment;
                 var cur = i;
                 var next = (i + 1) % this._targets.length;
                 var adorner = this._targets[cur];
@@ -104,8 +102,8 @@ export class Adorner {
                     /* get projective point */
                     intersectionPoint = this.GetProjectivePoint(edge_path[0], edge_path[1], this.point);
                 }
-                segment = this._map.get(adorner);
-                points = segment.getPort(this);
+                var segment = this._map.get(adorner);
+                var points = segment.getPort(this);
                 points[1] = this.point;
                 points[0] = intersectionPoint;
                 segment = this._map.get(nextAdorner);
