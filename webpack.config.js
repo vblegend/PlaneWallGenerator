@@ -54,6 +54,12 @@ module.exports = {
       toType: "dir",
       force: false,
       ignore: ['.*']
+    },{ //wwwroot 静态目录拷贝
+      from: __dirname + '/examples/assets',
+      to: __dirname + '/dist/assets',
+      toType: "dir",
+      force: false,
+      ignore: ['.*']
     }])
   ],
   optimization: {

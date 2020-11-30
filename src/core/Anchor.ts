@@ -1,12 +1,12 @@
 import { Segment } from "./Segment";
 import { Vector2 } from "./Vector2";
 
-export class Adorner {
+export class Anchor {
     private _x: number;
     private _y: number;
     private _id: number;
-    private _targets: Adorner[];
-    private _map: Map<Adorner, Segment>;
+    private _targets: Anchor[];
+    private _map: Map<Anchor, Segment>;
 
     public constructor(id: number, x: number, y: number) {
         this._id = id;
@@ -44,26 +44,44 @@ export class Adorner {
     }
 
 
+    public remove() {
+        if (this._targets.length > 0) {
+
+            // remove all segments and self
+        }
+    }
+
+
+
 
     /**
      * add connection target
      * @param object  target
      * @param segment  segment obejct
      */
-    public addTarget(object: Adorner, segment: Segment) {
+    public addTarget(object: Anchor, segment: Segment) {
         if (!this._map.has(object)) {
             this._targets.push(object);
             this._map.set(object, segment);
         }
     }
 
+    public removeTarget(object: Anchor) {
+        if (this._map.has(object)) {
+            this._map.delete(object);
+        }
+        var index = this._targets.indexOf(object);
+        if (index > -1) {
+            this._targets.splice(index, 1);
+        }
+    }
 
     /**
      * generate the edge on both sides of the path
      * @param target  target 
      * @param right   is right  edge
      */
-    private generateEdgePoints(target: Adorner, right: boolean = true): Vector2[] {
+    private generateEdgePoints(target: Anchor, right: boolean = true): Vector2[] {
         var eulr = right ? 90 : -90;;
         var segment = this._map.get(target);
         var start = new Vector2(this.x, this.y);
@@ -91,41 +109,41 @@ export class Adorner {
             for (var i = 0; i < this._targets.length; i++) {
                 var cur = i;
                 var next = (i + 1) % this._targets.length;
-                var adorner = this._targets[cur];
-                var nextAdorner = this._targets[next];
+                var anchor = this._targets[cur];
+                var nextanchor = this._targets[next];
                 /* generate edge points */
-                var edge_path = this.generateEdgePoints(adorner, true);
-                var nextEdge_path = this.generateEdgePoints(nextAdorner, false);
+                var edge_path = this.generateEdgePoints(anchor, true);
+                var nextEdge_path = this.generateEdgePoints(nextanchor, false);
                 /* get edges intersection point*/
                 var intersectionPoint = this.getIntersection(edge_path[0], edge_path[1], nextEdge_path[0], nextEdge_path[1]);
                 if (intersectionPoint === null) {
                     /* get projective point */
                     intersectionPoint = this.GetProjectivePoint(edge_path[0], edge_path[1], this.point);
                 }
-                var segment = this._map.get(adorner);
+                var segment = this._map.get(anchor);
                 var points = segment.getPort(this);
-                points[1] = this.point;
-                points[0] = intersectionPoint;
-                segment = this._map.get(nextAdorner);
+                points[1] = this.point.clone();
+                points[0] = intersectionPoint.clone();
+                segment = this._map.get(nextanchor);
                 points = segment.getPort(this);
-                points[2] = intersectionPoint;
-                points[1] = this.point;
+                points[2] = intersectionPoint.clone();
+                points[1] = this.point.clone();
             }
         }
         else if (this._targets.length === 1) {
-            var adorner = this._targets[0];
-            var segment = this._map.get(adorner);
+            var anchor = this._targets[0];
+            var segment = this._map.get(anchor);
             var start = new Vector2(this.x, this.y);
-            var end = new Vector2(adorner.x, adorner.y);
+            var end = new Vector2(anchor.x, anchor.y);
             var angle = Math.atan2((end.y - start.y), (end.x - start.x));
             var theta = angle * (180 / Math.PI);
             var ps = new Vector2(start.x + segment.thickness / 2, start.y);
             var left_point = this.rotatePoint(ps, start, theta - 90);
             var right_point = this.rotatePoint(ps, start, theta + 90);
             var points = segment.getPort(this);
-            points[0] = left_point;
-            points[1] = this.point;
-            points[2] = right_point;
+            points[0] = left_point.clone();
+            points[1] = this.point.clone();
+            points[2] = right_point.clone();
         } else {
             console.warn('Unused anchor points!');
         }
@@ -168,7 +186,7 @@ export class Adorner {
 
 
     //若点a大于点b,即点a在点b顺时针方向,返回true,否则返回false
-    private PointCmp(a: Adorner, b: Adorner, center: Adorner): boolean {
+    private PointCmp(a: Anchor, b: Anchor, center: Anchor): boolean {
         if (a.x >= 0 && b.x < 0)
             return true;
         if (a.x === 0 && b.x === 0)
@@ -190,7 +208,7 @@ export class Adorner {
      * https://www.cnblogs.com/dwdxdy/p/3230156.html
      * @param vPoints 
      */
-    private clockwiseSortPoints(vPoints: Adorner[]) {
+    private clockwiseSortPoints(vPoints: Anchor[]) {
         //计算重心
         // var x = 0;
         // var y = 0;

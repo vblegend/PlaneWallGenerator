@@ -1,10 +1,10 @@
-import { Vector2 } from "../../core/Vector2";
+import { Vector2 } from '../../core/Vector2';
 
 export class Bounds {
-    left: number;
-    top: number;
-    right: number;
-    bottom: number;
+    public left: number;
+    public top: number;
+    public right: number;
+    public bottom: number;
 
 
     public constructor(left: number, top: number, right: number, bottom: number) {
@@ -16,19 +16,19 @@ export class Bounds {
 
 
 
-    get width(): number {
+    public get width(): number {
         return this.right - this.left;
     }
 
-    get height(): number {
+    public get height(): number {
         return this.bottom - this.top;
     }
 
-    getCenter(): Vector2 {
+    public getCenter(): Vector2 {
         return new Vector2(this.left + this.width / 2, this.top + this.height / 2);
     }
 
-    extend(bounds: Bounds) {
+    public extend(bounds: Bounds) {
         if (this.left > bounds.left) {
             this.left = bounds.left;
         }
@@ -45,7 +45,7 @@ export class Bounds {
 
 
 
-    intersect(bounds: Bounds) {
+    public intersect(bounds: Bounds) {
         var inLeft = (
             ((bounds.left >= this.left) && (bounds.left <= this.right)) || ((this.left >= bounds.left) && (this.left <= bounds.right))
         );
@@ -64,7 +64,7 @@ export class Bounds {
 
 
 
-    extendFromPoint(point: Vector2) {
+    public extendFromPoint(point: Vector2) {
         if (this.left > point.x) {
             this.left = point.x;
         }
@@ -77,6 +77,16 @@ export class Bounds {
         if (this.right < point.x) {
             this.right = point.x;
         }
+    }
+
+
+
+
+    public contains(point: Vector2): boolean {
+        return point.x >= this.left &&
+            point.x <= this.right &&
+            point.y >= this.top &&
+            point.y <= this.bottom;
     }
 
 

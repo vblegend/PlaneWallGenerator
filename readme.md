@@ -10,38 +10,38 @@ PlaneWallGenerator 是一个使用2D数据来生成3D墙体数据的工具。
 ## DEMO 
 
 ``` typescript
-        var adorners: { [key: number]: Adorner } = {};
-        adorners[0] = new Adorner(0, 100, 100);
-        adorners[1] = new Adorner(1, 200, 100);
-        adorners[2] = new Adorner(2, 400, 100);
-        adorners[3] = new Adorner(3, 200, 200);
-        adorners[4] = new Adorner(4, 100, 300);
-        adorners[5] = new Adorner(5, 150, 350);
-        adorners[6] = new Adorner(6, 200, 300);
-        adorners[7] = new Adorner(7, 270, 350);
-        adorners[8] = new Adorner(8, 400, 250);
-        adorners[9] = new Adorner(9, 180, 200);
-        adorners[10] = new Adorner(10, 220, 200);
-        adorners[11] = new Adorner(11, 300, 200);
+        var anchors: { [key: number]: Anchor } = {};
+        anchors[0] = new Anchor(0, 100, 100);
+        anchors[1] = new Anchor(1, 200, 100);
+        anchors[2] = new Anchor(2, 400, 100);
+        anchors[3] = new Anchor(3, 200, 200);
+        anchors[4] = new Anchor(4, 100, 300);
+        anchors[5] = new Anchor(5, 150, 350);
+        anchors[6] = new Anchor(6, 200, 300);
+        anchors[7] = new Anchor(7, 270, 350);
+        anchors[8] = new Anchor(8, 400, 250);
+        anchors[9] = new Anchor(9, 180, 200);
+        anchors[10] = new Anchor(10, 220, 200);
+        anchors[11] = new Anchor(11, 300, 200);
 
         var smgents: Segment[] = [];
-        smgents.push(new Segment(adorners[0], adorners[1], 20));
-        smgents.push(new Segment(adorners[0], adorners[4], 20));
-        smgents.push(new Segment(adorners[1], adorners[3], 20));
-        smgents.push(new Segment(adorners[2], adorners[1], 40));
-        smgents.push(new Segment(adorners[4], adorners[5], 20));
-        smgents.push(new Segment(adorners[5], adorners[6], 20));
-        smgents.push(new Segment(adorners[6], adorners[7], 20));
-        smgents.push(new Segment(adorners[7], adorners[8], 20));
-        smgents.push(new Segment(adorners[8], adorners[2], 40));
-        smgents.push(new Segment(adorners[3], adorners[9], 20));
-        smgents.push(new Segment(adorners[3], adorners[10], 20));
-        smgents.push(new Segment(adorners[3], adorners[6], 20));
-        smgents.push(new Segment(adorners[1], adorners[11], 20));
-        smgents.push(new Segment(adorners[8], adorners[11], 40));
-        smgents.push(new Segment(adorners[6], adorners[11], 20));
-        for (var key in adorners) {
-            adorners[key].build();
+        smgents.push(new Segment(anchors[0], anchors[1], 20));
+        smgents.push(new Segment(anchors[0], anchors[4], 20));
+        smgents.push(new Segment(anchors[1], anchors[3], 20));
+        smgents.push(new Segment(anchors[2], anchors[1], 40));
+        smgents.push(new Segment(anchors[4], anchors[5], 20));
+        smgents.push(new Segment(anchors[5], anchors[6], 20));
+        smgents.push(new Segment(anchors[6], anchors[7], 20));
+        smgents.push(new Segment(anchors[7], anchors[8], 20));
+        smgents.push(new Segment(anchors[8], anchors[2], 40));
+        smgents.push(new Segment(anchors[3], anchors[9], 20));
+        smgents.push(new Segment(anchors[3], anchors[10], 20));
+        smgents.push(new Segment(anchors[3], anchors[6], 20));
+        smgents.push(new Segment(anchors[1], anchors[11], 20));
+        smgents.push(new Segment(anchors[8], anchors[11], 40));
+        smgents.push(new Segment(anchors[6], anchors[11], 20));
+        for (var key in anchors) {
+            anchors[key].build();
         }
         var script = "";
         for (var segment of smgents) {

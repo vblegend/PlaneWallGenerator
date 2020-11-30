@@ -1,6 +1,5 @@
 import { Vector2 } from "../../core/Vector2";
-import { Events } from "../common/Events";
-import { Renderer, TextAlign } from "../common/Renderer";
+import { Renderer, TextAlign } from "../Renderer";
 import { VectorDesigner } from "../VectorDesigner";
 
 
@@ -16,7 +15,7 @@ export class VerticalRuler {
         this._canvas = canvas;
         this._needUpdate = true;
         this._renderer = new Renderer(canvas);
-        this.designer.addEventListener(Events.RENDER, this.render, this);
+        this.designer.onRender.add(this.render, this);
         this.designer.viewControl.onmove.add(() => {
             this._needUpdate = true;
         }, this);
@@ -44,8 +43,8 @@ export class VerticalRuler {
         this._needUpdate = false;
         var designerlength = this.designer.bounds.bottom - this.designer.bounds.top;
         var offset = this.designer.center.y % (designerlength / this.height * 100);
-        this._renderer.context.strokeStyle = '#ffffff';
-        this._renderer.context.fillStyle = '#ffffff';
+        this._renderer.strokeColor = '#ffffff';
+        this._renderer.fillColor = '#ffffff';
         var center = this.height / 2;
         var offsetCenter = this.designer.center.y / this.designer.res;
         var offsetCalibration = offset / this.designer.res;
@@ -76,10 +75,10 @@ export class VerticalRuler {
         /**
          * fixed triangle pointer
          */
-        this._renderer.context.fillStyle = '#ffffff'
-        this._renderer.fill([new Vector2(0, center - 5), new Vector2(0, center + 5), new Vector2(10, center)], true);
-        this._renderer.context.strokeStyle = '#aaaaaa'
-        this._renderer.stroke([new Vector2(0, center - 5), new Vector2(0, center + 5), new Vector2(10, center)], true);
+        this._renderer.fillColor = '#333333'
+        this._renderer.fillPath([new Vector2(0, center - 5), new Vector2(0, center + 5), new Vector2(10, center)], true);
+        this._renderer.strokeColor = '#aaaaaa'
+        this._renderer.strokePath([new Vector2(0, center - 5), new Vector2(0, center + 5), new Vector2(10, center)], true);
     }
 
     /**
@@ -91,7 +90,7 @@ export class VerticalRuler {
         var calibration = this.width / 3;
         if (value != null) {
             this._renderer.translateRotate(this.width * 0.8, y, 270);
-            this._renderer.drawText(value.toString(), this.width * 0.8, y, null, TextAlign.CENTER);
+            this._renderer.fillText(value.toString(), this.width * 0.8, y, null, TextAlign.CENTER);
             this._renderer.translateRotate(this.width * 0.8, y, -270);
             calibration = this.width / 2;
         }

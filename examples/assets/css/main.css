@@ -1,0 +1,49 @@
+.toolbar {
+    position: absolute;
+    left: 100px;
+    top: 100px;
+    height: 32px;
+    background: #363636;
+    text-align: center;
+    border: solid rgba(88, 88, 88, 1) 1px;
+    box-shadow: 0px 0px 10px rgba(33, 33, 33, 1);
+    display: flex;
+}
+
+
+.toolbar button, #shortcutPanel button {
+    width: 32px;
+    color: #dadada;
+    background-color: #363636;
+    border: 0px;
+    margin: 0px;
+    /* GNOME Web */
+    padding: 5px 8px;
+    text-transform: uppercase;
+    cursor: pointer;
+    outline: none;
+}
+.toolbar button[disabled] {
+    background: rgba(54, 54, 54, 0.5) !important;
+    border: 0px;
+    cursor: not-allowed;
+}
+
+.toolbar button:hover, #shortcutPanel button:hover {
+    background-color: #007fff;
+}
+
+.toolbar button.selected, #shortcutPanel button.selected {
+    background-color: #007fff;
+}
+
+
+.toolbar input {
+    height: 32px;
+}
+
+.toolbar button img {
+    width: 16px;
+    /* opacity: 0.5; */
+    filter: invert(100%) sepia(0%) saturate(3183%) hue-rotate(303deg) brightness(108%) contrast(71%);
+}
