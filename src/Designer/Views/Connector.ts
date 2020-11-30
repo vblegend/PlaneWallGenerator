@@ -1,3 +1,4 @@
+import { Vector2 } from "../../core/Vector2";
 import { VectorDesigner } from "../VectorDesigner";
 import { AnchorControl } from "./AnchorControl";
 import { PolygonControl } from "./PolygonControl";
@@ -7,11 +8,11 @@ import { PolygonControl } from "./PolygonControl";
 export class Connector {
     designer: VectorDesigner;
 
-    origin: AnchorControl; 
+    origin: AnchorControl;
 
-    newAnchor:AnchorControl;
+    newAnchor: AnchorControl;
 
-    newSegment:PolygonControl;
+    newSegment: PolygonControl;
 
     public constructor(designer: VectorDesigner, origin: AnchorControl) {
         this.designer = designer;
@@ -24,21 +25,23 @@ export class Connector {
 
 
 
-    public update() {
+    public update(v?: Vector2) {
+        if (v != null) {
+            this.newAnchor.setPosition(v);
+        }
         this.newAnchor.update();
         this.origin.update();
     }
 
 
     public commit() {
-
-
+        this.designer.selected = this.newAnchor;
     }
 
     public cancel() {
         this.newSegment.dispose();
         this.newAnchor.dispose();
-        this.designer.remove(this.newAnchor, this.newSegment);
+        this.origin.update();
     }
 
 

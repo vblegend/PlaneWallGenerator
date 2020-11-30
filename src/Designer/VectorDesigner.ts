@@ -8,6 +8,7 @@ import { Control } from "./Views/Control";
 import { ToolBar } from "./Menus/ToolBar";
 import { AnchorControl } from './Views/AnchorControl';
 import { PolygonControl } from './Views/PolygonControl';
+import { Connector } from "./Views/Connector";
 
 
 export class VectorDesigner {
@@ -21,11 +22,15 @@ export class VectorDesigner {
     private _res: number;
     private _runState: boolean;
     private _onRender: signals.Signal;
+    private _onZoom: signals.Signal;
     public _width: number;
     public _height: number;
     public _children: Control[];
     private _toolbar: ToolBar;
     private _selected: Control;
+
+    public connector: Connector;
+
 
     public get children(): Control[] {
         return this._children;
@@ -50,9 +55,9 @@ export class VectorDesigner {
             if (this._selected != null) {
                 //
                 var pt = this.convertPoint(this._selected.getCenter());
+                this._selected.selectedUpdate(true);
                 this.toolbar.setPosition(pt);
                 this.toolbar.visible = true;
-                this._selected.selectedUpdate(true);
             }
         }
     }
@@ -76,12 +81,24 @@ export class VectorDesigner {
     }
 
 
+    public toArrray(): number[][][] {
+        var result: number[][][] = [];
+        for (var control of this._children) {
+            if (control instanceof PolygonControl) {
+                result.push(control.toArray());
+            }
+        }
+        return result;
+    }
+
+
 
     public constructor(div: HTMLDivElement) {
         this._div = div;
         this._zoom = 100;
         this._children = [];
-        this._onRender = new signals.Signal;
+        this._onRender = new signals.Signal();
+        this._onZoom = new signals.Signal()
         this._renderer = new Renderer();
         this._viewControl = new ViewController(this);
         this._runState = false;
@@ -90,6 +107,7 @@ export class VectorDesigner {
         this._viewControl.onmove.add(this.moveTo, this);
         this._toolbar = new ToolBar(this);
         this._div.appendChild(this._toolbar.dom);
+
     }
 
 
@@ -110,6 +128,7 @@ export class VectorDesigner {
         }
         if (this._zoom != zoom) {
             this._zoom = zoom;
+            this.onZoom.dispatch(zoom);
         }
         //console.log(center);
         if ((this._center != center) || trans) {
@@ -134,16 +153,16 @@ export class VectorDesigner {
         this.renderer.clear();
         var pt = this.convertPoint(new Vector2(-5, -5));
 
-
         for (var control of this._children) {
             control.render();
         }
 
+        if (this.connector) {
+            this.renderer.strokeColor = '#00FF00'
+            this.renderer.line(0, this.viewControl.position.y, this.width, this.viewControl.position.y, 1);
+            this.renderer.line(this.viewControl.position.x, 0, this.viewControl.position.x, this.height);
+        }
 
-
-        this.renderer.strokeColor = '#00FF00'
-        this.renderer.line(0, this.viewControl.position.y, this.width, this.viewControl.position.y, 1);
-        this.renderer.line(this.viewControl.position.x, 0, this.viewControl.position.x, this.height);
         this.onRender.dispatch();
         if (!this.isDisposed && this._runState) {
             //继续下一帧
@@ -225,6 +244,12 @@ export class VectorDesigner {
     public get onRender(): signals.Signal {
         return this._onRender;
     }
+
+
+    public get onZoom(): signals.Signal {
+        return this._onZoom;
+    }
+    
 
 
     public get container(): HTMLDivElement {

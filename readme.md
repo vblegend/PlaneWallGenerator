@@ -1,13 +1,32 @@
 
 ## 说明
-PlaneWallGenerator 是一个使用2D数据来生成3D墙体数据的工具。
-根据提供的2D锚点坐标和连接锚点的线进行每面墙体的生成 如下图所示，可以单独设置每面墙体的厚度。
+***Plane Wall Designer*** 是一个2D墙体生成器。用来生成3D中墙体所需要的二维数据。
+
+* 矢量绘制，超清晰。
+* 带自动滚动调整的刻度尺。
+* 双击添加锚点。
+* 左键按住可拖动画板。
+* 左键单击锚点或线对象可选中。
+* 单击toolbar上的【连接】可创建新的线。
+* 创建线段模式下单击左键创建、单击右键取消。
+* 单击右键取消选择对象。
+* 鼠标滚轮可在5%-4000%之间缩放。
+* 单击下方生成按钮生成坐标数据，每行6个point组成一个多边形。
+  
+
+![avatar](/documents/pic.png)
+
+---
 
 ## 原理
+* 连接每个锚点，创建线对象，为每条线设置厚度
+* 对锚点下所有连接的锚点进行顺时针排序
+* 对相邻的两条线的左右边界进行交点方程计算得出交点。
 ![avatar](/documents/readme.png)
 
 
 ## DEMO 
+***PlaneWallGenerator***
 
 ``` typescript
         var anchors: { [key: number]: Anchor } = {};
@@ -50,7 +69,7 @@ PlaneWallGenerator 是一个使用2D数据来生成3D墙体数据的工具。
         console.log(script);
 ```
 
-## 效果
+## 结果
 ![avatar](/documents/demo.png)
 
 

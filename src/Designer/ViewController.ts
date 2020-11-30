@@ -1,6 +1,7 @@
 import * as signals from "signals";
 import { Vector2 } from "../core/Vector2";
 import { VectorDesigner } from "./VectorDesigner";
+import { AnchorControl } from "./Views/AnchorControl";
 import { Control } from "./Views/Control";
 
 
@@ -24,6 +25,7 @@ export class ViewController {
         this._iscanceled = false;
         this._onmove = new signals.Signal();
         this.position = new Vector2(-1, -1);
+        this.designer.renderer.canvas.ondblclick = this.mouse_dblclick.bind(this);
         this.designer.renderer.canvas.onmousedown = this.mouse_down.bind(this);
         this.designer.renderer.canvas.onmousemove = this.mouse_move.bind(this);
         this.designer.renderer.canvas.onmouseup = this.mouse_up.bind(this);
@@ -41,18 +43,20 @@ export class ViewController {
         this.designer.renderer.canvas.onmousedown = null;
         this.designer.renderer.canvas.onmousemove = null;
         this.designer.renderer.canvas.onmouseup = null;
+        this.designer.renderer.canvas.ondblclick = null;
     }
 
     private wheelChange(e: WheelEvent) {
-        // var delta = (-e.deltaY / 1000) * 500;
+        //  var delta = (-e.deltaY / 1000) * 50;
         var deltalX = this.designer.width / 2 - e.offsetX;
         var deltalY = this.designer.height / 2 - e.offsetY;
         var px = new Vector2(e.offsetX, e.offsetY);
         //计算缩放的中心点
         var zoomPoint = new Vector2((px.x + this.designer.bounds.left / this.designer.res) * this.designer.res, (px.y + this.designer.bounds.top / this.designer.res) * this.designer.res);
-        var zoom = 0; // this.designer.zoom + delta;
+        //  var zoom =  this.designer.zoom + delta;
+        var zoom = 0;
         {
-            var scales = [50, 100, 200, 250, 400, 500, 800, 1000, 1250, 2000, 2500, 3000, 4000];
+            var scales = [5, 10, 20, 25, 40, 50, 80, 100, 200, 250, 400, 500, 800, 1000, 1250, 2000, 2500, 3000, 4000];
             var index = scales.indexOf(this.designer.zoom);
             if (index == -1) {
                 index = 1;
@@ -84,10 +88,29 @@ export class ViewController {
             window.event.cancelBubble = true;
     }
 
+    private mouse_dblclick(e: MouseEvent) {
+        let v = this.designer.mapPoint(this.position);
+        var anchor = new AnchorControl(this.designer, v.x, v.y);
+        this.designer.add(anchor);
+    }
+
+
 
 
     private mouse_down(e: MouseEvent) {
         this.captureMouse();
+        if (this.designer.connector != null) {
+            if (e.button == 2) {
+                this.designer.connector.cancel();
+            }
+            if (e.button == 0) {
+                this.designer.connector.commit();
+            }
+            this.designer.connector = null;
+            this._iscanceled = true;
+            return;
+        }
+
         this._iscanceled = false;
         if (e.button == 2) {
             if (this.designer.selected != null) {
@@ -117,6 +140,13 @@ export class ViewController {
     private mouse_move(e: MouseEvent) {
         if (this._iscanceled) return;
         this.position = new Vector2(e.pageX - this.designer.renderer.canvas.offsetLeft, e.pageY - this.designer.renderer.canvas.offsetTop);
+
+        if (this.designer.connector != null) {
+            let v = this.designer.mapPoint(this.position);
+            this.designer.connector.update(v);
+            return;
+        }
+
         if (this._dragging) {
             var pos = this.position.sub(this._press_position);
             this._press_position = this.position;
@@ -127,23 +157,24 @@ export class ViewController {
 
 
         let v = this.designer.mapPoint(this.position);
-        if (this._hoverObject != null && this._hoverObject.hit(v)) {
-            this._hoverObject.dispatchEvents('onMouseMove');
-            return;
-        }
+
         for (var i = this.designer.children.length - 1; i >= 0; i--) {
             var control = this.designer.children[i];
-            if (control.hit(v) && this._hoverObject != control) {
-                if (this._hoverObject != null) {
-                    // leave
-                    this._hoverObject.dispatchEvents('onMouseLeave');
-                    this._hoverObject = null;
-                }
-                this._hoverObject = control;
-                if (this._hoverObject != null) {
-                    // enter
-                    this._hoverObject.dispatchEvents('onMouseEnter');
-                    // move
+            if (control.hit(v)) {
+                if (this._hoverObject != control) {
+                    if (this._hoverObject != null) {
+                        // leave
+                        this._hoverObject.dispatchEvents('onMouseLeave');
+                        this._hoverObject = null;
+                    }
+                    this._hoverObject = control;
+                    if (this._hoverObject != null) {
+                        // enter
+                        this._hoverObject.dispatchEvents('onMouseEnter');
+                        // move
+                        this._hoverObject.dispatchEvents('onMouseMove');
+                    }
+                } else {
                     this._hoverObject.dispatchEvents('onMouseMove');
                 }
                 return;

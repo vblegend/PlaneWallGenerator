@@ -28,17 +28,20 @@ export class ToolBar {
         this.dom.className = 'toolbar';
 
         this.btnConnectTo = this.createButton('icon-ATS');
+        this.btnConnectTo.title = '建立新的线段';
         this.btnConnectTo.onclick = this.createObject.bind(this);
         this.dom.appendChild(this.btnConnectTo);
+
         this.btnDelete = this.createButton('icon-delete2');
+        this.btnDelete.title = '删除对象';
         this.btnDelete.onclick = this.deleteObject.bind(this);
         this.dom.appendChild(this.btnDelete);
 
         this.btnSetting = this.createButton('icon-setting');
+        this.btnSetting.title = '设置(未设置)';
         this.btnSetting.onclick = this.settingObject.bind(this);
         this.dom.appendChild(this.btnSetting);
-
-
+        this.visible = false;
         this.designer.viewControl.onmove.add(() => {
 
 
@@ -50,21 +53,21 @@ export class ToolBar {
         var origin = this.designer.selected;
         if (origin instanceof AnchorControl) {
             this.visible = false;
-
-            var c = new Connector(this.designer,origin);
-
-
-
-
-            
-
+            this.designer.connector = new Connector(this.designer, origin);
         }
     }
 
 
     private deleteObject() {
         this.visible = false;
-
+        var origin = this.designer.selected;
+        if (origin instanceof AnchorControl) {
+            this.visible = false;
+            origin.dispose();
+        }
+        else if (origin instanceof PolygonControl) {
+            origin.dispose();
+        }
     }
 
     private settingObject() {
@@ -92,7 +95,6 @@ export class ToolBar {
     }
 
     public set visible(value: boolean) {
-
         this._visible = value;
         this.dom.style.display = value ? "" : "none";
         if (value) {
@@ -107,8 +109,6 @@ export class ToolBar {
                 this.btnSetting.style.display = '';
             }
         }
-
-
     }
 
 

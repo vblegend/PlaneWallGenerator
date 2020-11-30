@@ -6,6 +6,7 @@ import { VectorDesigner } from "../src/Designer/VectorDesigner";
 import { Vector2 } from '../src/core/Vector2';
 import { AnchorControl } from "../src/Designer/Views/AnchorControl";
 import { PolygonControl } from "../src/Designer/Views/PolygonControl";
+import { FORMERR } from "dns";
 
 /**
  * this is example
@@ -28,7 +29,7 @@ export class Examples {
         anthors[1] = new AnchorControl(designer, 0, 0);
         anthors[2] = new AnchorControl(designer, 0, 20);
         anthors[3] = new AnchorControl(designer, 20, 20);
-      //  anthors[4] = new AnchorControl(designer, 50, -18);
+        //  anthors[4] = new AnchorControl(designer, 50, -18);
 
 
         var segments: { [key: string]: PolygonControl } = {};
@@ -36,7 +37,7 @@ export class Examples {
         segments[0] = new PolygonControl(designer, anthors[0], anthors[1]);
         segments[1] = new PolygonControl(designer, anthors[2], anthors[1]);
         segments[2] = new PolygonControl(designer, anthors[1], anthors[3]);
-       // segments[3] = new PolygonControl(designer, anthors[1], anthors[4]);
+        // segments[3] = new PolygonControl(designer, anthors[1], anthors[4]);
 
 
         for (let key in anthors) {
@@ -50,8 +51,28 @@ export class Examples {
             designer.add(segments[key]);
         }
 
+        // 
+        designer.onZoom.add(e=>{
+
+            var scale = document.getElementById("scale") as HTMLDivElement;
+            scale.innerText = e + '%';
+
+        },this);
 
 
+        var btnBuild = document.getElementById("btnBuild") as HTMLCanvasElement;
+        if (btnBuild) {
+            btnBuild.onclick = () => {
+                var result = designer.toArrray();
+                var output = document.getElementById("output") as HTMLTextAreaElement;
+                var outputText = '';
+                for (let data of result) {
+                    outputText += JSON.stringify(data);
+                    outputText += '\r\n';
+                }
+                output.textContent = outputText;
+            }
+        }
 
 
 

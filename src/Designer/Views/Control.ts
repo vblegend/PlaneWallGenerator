@@ -7,13 +7,13 @@ export class Control {
     private _designer: VectorDesigner
     public strokeColor: string;
     public fillColor: string;
-    public hoverColor:string;
-    public opacity:number;
+    public hoverColor: string;
+    public opacity: number;
 
 
 
-    private _isHover: boolean;    
-        private _isSelected: boolean;
+    private _isHover: boolean;
+    private _isSelected: boolean;
 
 
 
@@ -26,7 +26,7 @@ export class Control {
         this.opacity = 0.5;
     }
 
-    public dispose(){
+    public dispose() {
         this._designer = null;
     }
 
@@ -59,9 +59,9 @@ export class Control {
 
     }
 
-    public selectedUpdate(value:boolean){
-        this._isSelected = value;  
-        this.opacity = value ? 1: 0.5;
+    public selectedUpdate(value: boolean) {
+        this._isSelected = value;
+        this.opacity = value ? 1 : 0.5;
     }
 
 

@@ -10,8 +10,11 @@ export class Segment {
 
     public dispose() {
         this.remove();
-        this._points.length = 0;
-        this._points = null;
+        if (this._points) {
+            this._points.length = 0;
+            this._points = null;
+        }
+
     }
 
 

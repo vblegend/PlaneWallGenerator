@@ -14,14 +14,13 @@ export class PolygonControl extends Control {
     public thickness: number;
     private points: Vector2[];
     private _bounds: Bounds;
-    private anchor1: AnchorControl;
-    private anchor2: AnchorControl;
+    private _anchors: AnchorControl[];
+
 
 
     public constructor(designer: VectorDesigner, anchor1: AnchorControl, anchor2: AnchorControl) {
         super(designer);
-        this.anchor1 = anchor1;
-        this.anchor2 = anchor2;
+        this._anchors = [anchor1, anchor2];
         this.thickness = 10;
         this.points = [];
         this._bounds = new Bounds(0, 0, 0, 0);
@@ -29,29 +28,41 @@ export class PolygonControl extends Control {
         this.update();
         this.strokeColor = '#FFFFFF';
         this.fillColor = '#888888';
-        anchor1.onUpdate.add(this.update, this);
-        anchor2.onUpdate.add(this.update, this);
+        this._anchors[0].onUpdate.add(this.update, this);
+        this._anchors[1].onUpdate.add(this.update, this);
+        this._anchors[0].addPolygon(this);
+        this._anchors[1].addPolygon(this);
     }
 
     public dispose() {
-        this._segment.dispose();
-        this._segment = null;
-        this.anchor1.onUpdate.remove(this.update);
-        this.anchor2.onUpdate.remove(this.update);
-        super.dispose();
+        if (this.designer != null) {
+            this.designer.remove(this);
+            this._segment.dispose();
+            while (this._anchors.length > 0) {
+                let anchorControl = this._anchors.shift();
+                anchorControl.onUpdate.remove(this.update, this);
+                if (anchorControl.anchor.targets.length == 0) {
+                    this.designer.remove(anchorControl);
+                    anchorControl.dispose();
+                }
+                else {
+                    anchorControl.update();
+                }
+            }
+            super.dispose();
+        }
+
     }
 
-
-
-
-
     public update() {
-        this.points = [];
-        this._bounds = new Bounds(0, 0, 0, 0);
-        for (let point of this._segment.points) {
-            const v = new Vector2().fromArray(point);
-            this.points.push(v);
-            this._bounds.extendFromPoint(v);
+        if (this._segment != null) {
+            this.points = [];
+            this._bounds = new Bounds(0, 0, 0, 0);
+            for (let point of this._segment.points) {
+                const v = new Vector2().fromArray(point);
+                this.points.push(v);
+                this._bounds.extendFromPoint(v);
+            }
         }
     }
 
@@ -65,11 +76,6 @@ export class PolygonControl extends Control {
         this.fillColor = value ? '#0078d7' : '#888888';
     }
 
-
-
-
-
-
     protected onClick() {
         this.designer.selected = this;
     }
@@ -78,7 +84,6 @@ export class PolygonControl extends Control {
         return this._bounds.getCenter();
     }
 
-
     public render() {
         this.designer.renderer.opacity = this.opacity;
         this.designer.renderer.fillColor = this.isHover && !this.isSelected ? this.hoverColor : this.fillColor;
@@ -86,7 +91,14 @@ export class PolygonControl extends Control {
         this.designer.renderer.polygon(this.designer.convertPoints(this.points), true, RenderType.ALL);
     }
 
+    public get anchors(): AnchorControl[] {
+        return this._anchors;
+    }
 
+
+    public toArray(): number[][] {
+        return this._segment.points;
+    }
 
 
 }

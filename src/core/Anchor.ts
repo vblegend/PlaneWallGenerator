@@ -31,15 +31,29 @@ export class Anchor {
         return new Vector2(this._x, this._y);
     }
 
+    public get targets(): Anchor[] {
+        return this._targets;
+    }
+
+
+    public setPosition(v: Vector2) {
+        this._x = v.x;
+        this._y = v.y;
+    }
+
+
 
     public dispose() {
-        if (this._map) {
-            this._map.clear();
-            this._map = null;
+
+        while (this._targets.length > 0) {
+            let anchor = this._targets.shift();
+            anchor.removeTarget(this);
+            var segment = this._map.get(anchor);
+            this._map.delete(anchor);
+            segment.dispose();
         }
-        if (this._targets) {
-            this._targets.length = 0;
-            this._targets = null;
+        if (this._map) {
+            this._map = null;
         }
     }
 
