@@ -55,7 +55,7 @@ export class HorizontalRuler {
         while (centeroffset + pos < this.width || centeroffset - pos > 0) {
             if (centeroffset + pos < this.width) {
                 var pValue: number = null;
-                if (count % 10 == 0) {
+                if (count % 10 === 0) {
                     pValue = (offsetCenter - offsetCalibration + pos) * this.designer.res;
                     pValue = Number.parseFloat(pValue.toFixed(2));
                 }
@@ -63,7 +63,7 @@ export class HorizontalRuler {
             }
             if (centeroffset - pos > 0) {
                 var pValue: number = null;
-                if (count % 10 == 0) {
+                if (count % 10 === 0) {
                     pValue = (offsetCenter - offsetCalibration - pos) * this.designer.res;
                     pValue = Number.parseFloat(pValue.toFixed(2));
                 }

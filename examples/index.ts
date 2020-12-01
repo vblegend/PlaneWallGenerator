@@ -25,20 +25,24 @@ export class Examples {
         designer.run();
 
         var anthors: { [key: string]: AnchorControl } = {};
-        anthors[0] = new AnchorControl(designer, -20, -10);
-        anthors[1] = new AnchorControl(designer, 0, 0);
-        anthors[2] = new AnchorControl(designer, 0, 20);
-        anthors[3] = new AnchorControl(designer, 20, 20);
-        //  anthors[4] = new AnchorControl(designer, 50, -18);
-
-
         var segments: { [key: string]: PolygonControl } = {};
 
-        segments[0] = new PolygonControl(designer, anthors[0], anthors[1]);
-        segments[1] = new PolygonControl(designer, anthors[2], anthors[1]);
-        segments[2] = new PolygonControl(designer, anthors[1], anthors[3]);
-        // segments[3] = new PolygonControl(designer, anthors[1], anthors[4]);
 
+
+
+        for (var i = 0; i <= 100; i++) {
+            anthors[i] = designer.createAnchor(Math.random() * 2000 - 1000, Math.random() * 2000 - 1000);
+            anthors[i].id = i;
+        }
+
+        for (var i = 0; i < 100; i++) {
+            while (segments[i] == null) {
+                var f = Math.round(Math.random() * 100);
+                var t = Math.round(Math.random() * 100);              
+                segments[i] = designer.createPolygon(anthors[f], anthors[t]);
+            }
+            segments[i].id = i;
+        }
 
         for (let key in anthors) {
             anthors[key].update();
@@ -52,32 +56,27 @@ export class Examples {
         }
 
         // 
-        designer.onZoom.add(e=>{
+        designer.onZoom.add(e => {
 
             var scale = document.getElementById("scale") as HTMLDivElement;
             scale.innerText = e + '%';
 
-        },this);
-
-
+        }, this);
         var btnBuild = document.getElementById("btnBuild") as HTMLCanvasElement;
         if (btnBuild) {
             btnBuild.onclick = () => {
                 var result = designer.toArrray();
                 var output = document.getElementById("output") as HTMLTextAreaElement;
-                var outputText = '';
+                var outputText = 'var arrays = \r\n[\r\n';
                 for (let data of result) {
+                    outputText += '    ';
                     outputText += JSON.stringify(data);
-                    outputText += '\r\n';
+                    outputText += ',\r\n';
                 }
-                output.textContent = outputText;
+                output.value = outputText + ']\r\n';
             }
         }
-
-
-
     }
-
 }
 
 

@@ -2,6 +2,7 @@ import { Anchor } from "./Anchor";
 import { Vector2 } from "./Vector2";
 
 export class Segment {
+    public id: number;
     private _thickness: number;
     private _start: Anchor;
     private _end: Anchor;
@@ -14,9 +15,19 @@ export class Segment {
             this._points.length = 0;
             this._points = null;
         }
-
     }
 
+    /**
+     * remove this segment from graphic
+     */
+    public remove() {
+        if (this._start) {
+            this._start.removeTarget(this._end);
+            this._end.removeTarget(this._start);
+            this._end = null;
+            this._start = null;
+        }
+    }
 
 
     public get points(): number[][] {
@@ -43,7 +54,7 @@ export class Segment {
         this._end = end;
         this._thickness = thickness;
         this._points = [];
-        this._points.push([], [])
+        this._points.push([], []);
         this._start.addTarget(this._end, this);
         this._end.addTarget(this._start, this);
     }
@@ -52,16 +63,8 @@ export class Segment {
         return this._thickness;
     }
 
-    /**
-     * remove this segment from graphic
-     */
-    public remove() {
-        if (this._start) {
-            this._start.removeTarget(this._end);
-            this._end.removeTarget(this._start);
-            this._end = null;
-            this._start = null;
-        }
+    public set thickness(value: number) {
+        this._thickness = value;
     }
 
 

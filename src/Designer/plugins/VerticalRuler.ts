@@ -55,7 +55,7 @@ export class VerticalRuler {
         while (centeroffset + pos < this.height || centeroffset - pos > 0) {
             if (centeroffset + pos < this.height) {
                 var pValue: number = null;
-                if (count % 10 == 0) {
+                if (count % 10 === 0) {
                     pValue = (offsetCenter - offsetCalibration + pos) * this.designer.res;
                     pValue = Number.parseFloat(pValue.toFixed(2));
                 }
@@ -63,7 +63,7 @@ export class VerticalRuler {
             }
             if (centeroffset - pos > 0) {
                 var pValue: number = null;
-                if (count % 10 == 0) {
+                if (count % 10 === 0) {
                     pValue = (offsetCenter - offsetCalibration - pos) * this.designer.res;
                     pValue = Number.parseFloat(pValue.toFixed(2));
                 }

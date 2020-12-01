@@ -4,19 +4,15 @@ import { Vector2 } from "./Vector2";
 export class Anchor {
     private _x: number;
     private _y: number;
-    private _id: number;
+    public id: number;
     private _targets: Anchor[];
     private _map: Map<Anchor, Segment>;
 
     public constructor(id: number, x: number, y: number) {
-        this._id = id;
         this._x = x;
         this._y = y;
         this._targets = [];
         this._map = new Map();
-    }
-    public get id(): number {
-        return this._id;
     }
 
     public get x(): number {
@@ -44,24 +40,18 @@ export class Anchor {
 
 
     public dispose() {
-
-        while (this._targets.length > 0) {
-            let anchor = this._targets.shift();
-            anchor.removeTarget(this);
-            var segment = this._map.get(anchor);
-            this._map.delete(anchor);
-            segment.dispose();
-        }
-        if (this._map) {
-            this._map = null;
-        }
+        this.remove();
     }
 
 
     public remove() {
         if (this._targets.length > 0) {
-
             // remove all segments and self
+            while (this._targets.length > 0) {
+                let anchor = this._targets.shift();
+                var segment = this._map.get(anchor);
+                segment.dispose();
+            }
         }
     }
 
@@ -158,22 +148,21 @@ export class Anchor {
             points[0] = left_point.clone();
             points[1] = this.point.clone();
             points[2] = right_point.clone();
-        } else {
-            console.warn('Unused anchor points!');
         }
+        
     }
 
 
 
     protected GetProjectivePoint(P1: Vector2, P2: Vector2, pOut: Vector2): Vector2 {
         var pLine = P1;
-        if (P1.x == P2.x && P1.y == P2.y) {
+        if (P1.x === P2.x && P1.y === P2.y) {
             return P1;
         }
-        if (P1.x == P2.x) {
+        if (P1.x === P2.x) {
             return new Vector2(pLine.x, pOut.y);
         }
-        else if (P1.y == P2.y) //垂线斜率不存在情况
+        else if (P1.y === P2.y) //垂线斜率不存在情况
         {
             return new Vector2(pOut.x, pLine.y);
         }

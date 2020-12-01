@@ -9,25 +9,32 @@ export class Control {
     public fillColor: string;
     public hoverColor: string;
     public opacity: number;
-
-
-
     private _isHover: boolean;
     private _isSelected: boolean;
+    private _id: number;
 
+    public get id(): number {
+        return this._id;
+    }
+    public set id(value: number) {
+        this._id = value;
+    }
 
-
-    public id: number;
     public constructor(designer: VectorDesigner) {
         this._designer = designer;
-        this.id = 111;
         this._isHover = false;
         this.hoverColor = '#ff8888';
         this.opacity = 0.5;
+        this._isSelected = false;
     }
 
-    public dispose() {
-        this._designer = null;
+
+    public get points(): Vector2[] {
+        return [];
+    }
+
+    public remove() {
+        this.designer.remove(this);
     }
 
     protected get designer(): VectorDesigner {
@@ -55,6 +62,18 @@ export class Control {
         this._isHover = false;
     }
 
+
+    protected onMouseDown(button: number, pos: Vector2) {
+
+    }
+    protected onMouseMove(button: number, pos: Vector2) {
+
+    }
+    protected onMouseUp(button: number, pos: Vector2) {
+
+    }
+
+
     protected onClick() {
 
     }
@@ -75,8 +94,8 @@ export class Control {
     }
 
 
-    public dispatchEvents(event: string) {
-        this[event] && this[event]();
+    public dispatchEvents(event: string, ...params: any[]) {
+        this[event] && this[event].apply(this, params);
     }
 
     public get isSelected(): boolean {

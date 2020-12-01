@@ -3,6 +3,8 @@ import { Vector2 } from "../core/Vector2";
 import { VectorDesigner } from "./VectorDesigner";
 import { AnchorControl } from "./Views/AnchorControl";
 import { Control } from "./Views/Control";
+import { MouseCapturer } from './Utility/MouseCapturer';
+import { PolygonControl } from './Views/PolygonControl';
 
 
 export class ViewController {
@@ -15,7 +17,7 @@ export class ViewController {
     private pressed_state: boolean;
     private _pressedObject: Control;
     private _iscanceled: boolean;
-
+    private capturer: MouseCapturer;
     public get onmove(): signals.Signal {
         return this._onmove;
     }
@@ -25,10 +27,14 @@ export class ViewController {
         this._iscanceled = false;
         this._onmove = new signals.Signal();
         this.position = new Vector2(-1, -1);
+        this.capturer = new MouseCapturer(this.designer.renderer.canvas);
+        this.capturer.onMouseDown.add(this.mouse_down, this);
+        this.capturer.onMouseMove.add(this.mouse_move, this);
+        this.capturer.onMouseUp.add(this.mouse_up, this);
         this.designer.renderer.canvas.ondblclick = this.mouse_dblclick.bind(this);
-        this.designer.renderer.canvas.onmousedown = this.mouse_down.bind(this);
-        this.designer.renderer.canvas.onmousemove = this.mouse_move.bind(this);
-        this.designer.renderer.canvas.onmouseup = this.mouse_up.bind(this);
+        // this.designer.renderer.canvas.onmousedown = this.mouse_down.bind(this);
+        // this.designer.renderer.canvas.onmousemove = this.mouse_move.bind(this);
+        // this.designer.renderer.canvas.onmouseup = this.mouse_up.bind(this);
         this.designer.renderer.canvas.onwheel = this.wheelChange.bind(this);
         this.designer.renderer.canvas.onscroll = this.wheelChange.bind(this);
         this.designer.renderer.canvas.oncontextmenu = (e) => {
@@ -36,13 +42,16 @@ export class ViewController {
         }
     }
 
+    public get hoverObject(): Control {
+        return this._hoverObject;
+    }
 
     public dispose() {
         this.designer.renderer.canvas.onwheel = null;
         this.designer.renderer.canvas.onscroll = null;
-        this.designer.renderer.canvas.onmousedown = null;
-        this.designer.renderer.canvas.onmousemove = null;
-        this.designer.renderer.canvas.onmouseup = null;
+        // this.designer.renderer.canvas.onmousedown = null;
+        // this.designer.renderer.canvas.onmousemove = null;
+        // this.designer.renderer.canvas.onmouseup = null;
         this.designer.renderer.canvas.ondblclick = null;
     }
 
@@ -58,7 +67,7 @@ export class ViewController {
         {
             var scales = [5, 10, 20, 25, 40, 50, 80, 100, 200, 250, 400, 500, 800, 1000, 1250, 2000, 2500, 3000, 4000];
             var index = scales.indexOf(this.designer.zoom);
-            if (index == -1) {
+            if (index === -1) {
                 index = 1;
             } else {
                 if (e.deltaY < 0) {
@@ -92,27 +101,34 @@ export class ViewController {
         let v = this.designer.mapPoint(this.position);
         var anchor = new AnchorControl(this.designer, v.x, v.y);
         this.designer.add(anchor);
+        this.designer.selected = anchor;
     }
 
 
 
 
     private mouse_down(e: MouseEvent) {
-        this.captureMouse();
+        this.capturer.capture();
+        this.pressed_state = this.designer.toolbar.visible;
+        if (this.pressed_state) {
+            this.designer.toolbar.visible = false;
+        }
         if (this.designer.connector != null) {
-            if (e.button == 2) {
+            if (e.button === 2) {
                 this.designer.connector.cancel();
+                this.designer.toolbar.visible = true;
             }
-            if (e.button == 0) {
-                this.designer.connector.commit();
+            if (e.button === 0) {
+                this.designer.connector.commit(this._hoverObject, this.position);
             }
             this.designer.connector = null;
             this._iscanceled = true;
+            this.designer.virtualCursor = null;
             return;
         }
 
         this._iscanceled = false;
-        if (e.button == 2) {
+        if (e.button === 2) {
             if (this.designer.selected != null) {
                 this.designer.selected = null;
                 this._iscanceled = true;
@@ -123,27 +139,52 @@ export class ViewController {
         if (this._hoverObject) {
             this._pressedObject = this._hoverObject;
             // mouse down
-            this._hoverObject.dispatchEvents('onMouseDown');
+            this._hoverObject.dispatchEvents('onMouseDown', e.button, this.position);
             return;
         }
+
         this._press_position = this.position;
         this._dragging = true;
         this.stopEventBubble(e);
         this.designer.renderer.canvas.style.cursor = "move";
-
-        this.pressed_state = this.designer.toolbar.visible;
-        if (this.pressed_state) {
-            this.designer.toolbar.visible = false;
-        }
     }
+
+
+    private hitObject(v: Vector2, excluded?: Control[]): Control {
+        for (var i = this.designer.children.length - 1; i >= 0; i--) {
+            var control = this.designer.children[i];
+            if (control.hit(v)) {
+                if (excluded != null && excluded.length > 0) {
+                    if (excluded.indexOf(control) > -1) continue;
+                }
+                return control;
+            }
+        }
+        return null;
+    }
+
+
 
     private mouse_move(e: MouseEvent) {
         if (this._iscanceled) return;
-        this.position = new Vector2(e.pageX - this.designer.renderer.canvas.offsetLeft, e.pageY - this.designer.renderer.canvas.offsetTop);
+        let v = this.designer.mapPoint(this.position);
+        var excluded: Control[] = [];
+        if (this._pressedObject instanceof AnchorControl) {
+            excluded.push(this._pressedObject);
+            excluded = excluded.concat(this._pressedObject.polygons);
+        } else if (this._pressedObject instanceof PolygonControl) {
 
+        }
+
+        this._hoverObject = this.hitObject(v, excluded);
+        this.position = new Vector2(e.pageX - this.designer.renderer.canvas.offsetLeft, e.pageY - this.designer.renderer.canvas.offsetTop);
         if (this.designer.connector != null) {
             let v = this.designer.mapPoint(this.position);
             this.designer.connector.update(v);
+            return;
+        }
+        if (this._pressedObject) {
+            this._pressedObject.dispatchEvents('onMouseMove', e.button, this.position);
             return;
         }
 
@@ -154,10 +195,6 @@ export class ViewController {
             this.onmove.dispatch(this.designer.zoom, center, true);
             this.stopEventBubble(e);
         }
-
-
-        let v = this.designer.mapPoint(this.position);
-
         for (var i = this.designer.children.length - 1; i >= 0; i--) {
             var control = this.designer.children[i];
             if (control.hit(v)) {
@@ -172,10 +209,10 @@ export class ViewController {
                         // enter
                         this._hoverObject.dispatchEvents('onMouseEnter');
                         // move
-                        this._hoverObject.dispatchEvents('onMouseMove');
+                        this._hoverObject.dispatchEvents('onMouseMove', e.button, this.position);
                     }
                 } else {
-                    this._hoverObject.dispatchEvents('onMouseMove');
+                    this._hoverObject.dispatchEvents('onMouseMove', e.button, this.position);
                 }
                 return;
             }
@@ -191,13 +228,18 @@ export class ViewController {
     }
 
     private mouse_up(e: MouseEvent) {
+        if (this.designer.selected == null) {
+            this.designer.toolbar.visible = false;
+        }
+        this.capturer.release();
         if (this._iscanceled) {
             this._iscanceled = false;
             return;
         }
+        this.designer.toolbar.visible = this.pressed_state;
         if (this._pressedObject) {
             // mouse down
-            this._pressedObject.dispatchEvents('onMouseUp');
+            this._pressedObject.dispatchEvents('onMouseUp', e.button, this.position);
             if (this._pressedObject === this._hoverObject) {
                 // click
                 this._hoverObject.dispatchEvents('onClick');
@@ -205,46 +247,19 @@ export class ViewController {
             this._pressedObject = null;
             return;
         }
-        this.releaseMouse();
-        this.position = new Vector2(e.pageX - this.designer.renderer.canvas.offsetLeft, e.pageY - this.designer.renderer.canvas.offsetTop);
-        this._dragging = false;
-        this.stopEventBubble(e);
-        this.designer.renderer.canvas.style.cursor = "default";
-        document.onmouseup = null;
-        this.designer.toolbar.visible = this.pressed_state;
-    }
-
-
-
-
-
-    private captureMouse() {
-        if (!this._captureing) {
-            this.designer.renderer.canvas.onmousemove = null;
-            this.designer.renderer.canvas.onmouseup = null;
-            this._document_mousemoveHandle = document.onmousemove;
-            this._document_mouseupHandle = document.onmouseup;
-            document.onmousemove = this.mouse_move.bind(this);;
-            document.onmouseup = this.mouse_up.bind(this);
-            this._captureing = true;
+        if (this._dragging) {
+            this.position = new Vector2(e.pageX - this.designer.renderer.canvas.offsetLeft, e.pageY - this.designer.renderer.canvas.offsetTop);
+            this._dragging = false;
+            this.stopEventBubble(e);
+            this.designer.renderer.canvas.style.cursor = "default";
+            document.onmouseup = null;
         }
     }
 
 
-    private releaseMouse() {
-        if (this._captureing) {
-            document.onmousemove = this._document_mousemoveHandle;
-            document.onmouseup = this._document_mouseupHandle;
-            this._captureing = false;
-            this.designer.renderer.canvas.onmousemove = this.mouse_move.bind(this);
-            this.designer.renderer.canvas.onmouseup = this.mouse_up.bind(this);
-        }
-    }
 
 
-    private _captureing: boolean;
-    private _document_mousemoveHandle: (MouseEvent) => void;
-    private _document_mouseupHandle: (MouseEvent) => void;
+
 
 
 

@@ -143,7 +143,7 @@ export class Renderer {
 
 
     public polygon(points: Vector2[], closed: boolean, type: RenderType) {
-        if(points == null || points.length == 0) return;
+        if(points == null || points.length === 0) return;
         this.context.beginPath();
         this.context.moveTo(points[0].x + this._localOffset.x, points[0].y + this._localOffset.y);
         for (var i = 1; i < points.length; i++) {

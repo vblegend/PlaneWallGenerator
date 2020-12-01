@@ -28,7 +28,7 @@ export class VectorDesigner {
     public _children: Control[];
     private _toolbar: ToolBar;
     private _selected: Control;
-
+    public virtualCursor: AnchorControl;
     public connector: Connector;
 
 
@@ -54,10 +54,10 @@ export class VectorDesigner {
             this._selected = value;
             if (this._selected != null) {
                 //
-                var pt = this.convertPoint(this._selected.getCenter());
+                this.toolbar.visible = true;
+                var pt = this.convertPoint(this._selected.getCenter()).add(new Vector2(20,10));
                 this._selected.selectedUpdate(true);
                 this.toolbar.setPosition(pt);
-                this.toolbar.visible = true;
             }
         }
     }
@@ -147,22 +147,37 @@ export class VectorDesigner {
         await this.graphicRender();
     }
 
+    public updateElementPoints() {
+        var xs: number[] = [];
+        var ys: number[] = [];
+        //  console.time('vs');
+        for (let i = 0; i < this._children.length; i++) {
+            var points = this._children[i].points;
+            for (let m = 0; m < points.length; m++) {
+                var point = points[m];
+                xs.push(point.x);
+                ys.push(point.y);
+            }
+        }
+
+        //   console.timeEnd('vs');
+    }
+
+
 
     private async graphicRender() {
         if (!this._runState || this.isDisposed) return;
         this.renderer.clear();
-        var pt = this.convertPoint(new Vector2(-5, -5));
-
         for (var control of this._children) {
             control.render();
         }
-
-        if (this.connector) {
+        if (this.connector) this.connector.render();
+        if (this.virtualCursor) {
             this.renderer.strokeColor = '#00FF00'
-            this.renderer.line(0, this.viewControl.position.y, this.width, this.viewControl.position.y, 1);
-            this.renderer.line(this.viewControl.position.x, 0, this.viewControl.position.x, this.height);
+            var position = this.convertPoint(this.virtualCursor.position);
+            this.renderer.line(0, position.y, this.width, position.y, 1);
+            this.renderer.line(position.x, 0, position.x, this.height);
         }
-
         this.onRender.dispatch();
         if (!this.isDisposed && this._runState) {
             //继续下一帧
@@ -202,6 +217,24 @@ export class VectorDesigner {
         }
         return result;
     }
+
+    public createAnchor(x: number, y: number): AnchorControl {
+        var anchor = new AnchorControl(this, x, y);
+        return anchor;
+    }
+
+    public createPolygon(anchor1: AnchorControl, anchor2: AnchorControl, thickness: number = 10): PolygonControl {
+        if (anchor1.anchor.targets.indexOf(anchor2.anchor) > -1) {
+            return null;
+        }
+        var polygon = new PolygonControl(this, anchor1, anchor2, thickness);
+        return polygon;
+    }
+
+
+
+
+
 
 
 
@@ -249,7 +282,7 @@ export class VectorDesigner {
     public get onZoom(): signals.Signal {
         return this._onZoom;
     }
-    
+
 
 
     public get container(): HTMLDivElement {
