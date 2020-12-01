@@ -21,8 +21,7 @@
 * `角度排序算法有问题，和别角度排序错误`
 
 
-
-![clickme]](/documents/pic.png)
+![click-me](/documents/pic.png)
 
 ---
 
@@ -30,7 +29,7 @@
 * 连接每个锚点，创建线对象，为每条线设置厚度
 * 对锚点下所有连接的锚点进行顺时针排序
 * 对相邻的两条线的左右边界进行交点方程计算得出交点。
-![clickme](/documents/readme.png)
+![click-me](/documents/readme.png)
 
 
 ## DEMO 
