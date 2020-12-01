@@ -1,8 +1,8 @@
 import { Vector2 } from "../../core/Vector2";
 import { VectorDesigner } from "../VectorDesigner";
-import { AnchorControl } from "./AnchorControl";
-import { PolygonControl } from "./PolygonControl";
-import { Control } from './Control';
+import { AnchorControl } from "../Views/AnchorControl";
+import { PolygonControl } from "../Views/PolygonControl";
+import { Control } from '../Views/Control';
 
 
 
@@ -24,15 +24,23 @@ export class Connector {
 
 
 
-    public update(v?: Vector2) {
-        if (v != null) {
-            this.newAnchor.setPosition(v);
+    public update(viewpos?: Vector2) {
+        if (viewpos != null) {
+            let position = viewpos.clone();
+            var result = this.designer.adsorb.adsorption(position, 50);
+            this.newAnchor.setPosition(position);
+            this.designer.horizontalLineColor = result.y ? '#0000FF' : '#00FF00';
+            this.designer.verticalLineColor = result.x ? '#0000FF' : '#00FF00';
         }
         this.newAnchor.update();
         this.origin.update();
-
-        //, 
     }
+
+
+
+
+
+
 
 
     public commit(hover: Control, position: Vector2) {

@@ -78,6 +78,13 @@ export class PolygonControl extends Control {
     }
 
 
+
+    public getSubPoint(canvasPoint: Vector2) {
+        var mousePosition = this.designer.mapPoint(canvasPoint);
+        return this.getProjectivePoint(this.anchors[0].position, this.anchors[1].position, mousePosition);
+    }
+
+
     public split(point: Vector2): AnchorControl {
         var polygons: PolygonControl[] = [];
         var anchors: AnchorControl[] = [];
@@ -141,7 +148,7 @@ export class PolygonControl extends Control {
                 this._points.push(v);
                 this._bounds.extendFromPoint(v);
             }
-            //this.designer.updateElementPoints();
+            this.designer.updateElementPoints();
         }
     }
 
@@ -180,13 +187,6 @@ export class PolygonControl extends Control {
     }
 
     public get points(): Vector2[] {
-        if (this._points.length === 0) {
-            this._anchors[0].update();
-            this._anchors[1].update();
-            this.update();
-        }
-
-
         return this._points;
     }
 

@@ -14,10 +14,12 @@ export class ViewController {
     public position: Vector2;
     private _press_position: Vector2;
     private _hoverObject: Control;
+    private _hitObject: Control;
     private pressed_state: boolean;
     private _pressedObject: Control;
     private _iscanceled: boolean;
     private capturer: MouseCapturer;
+
     public get onmove(): signals.Signal {
         return this._onmove;
     }
@@ -42,8 +44,8 @@ export class ViewController {
         }
     }
 
-    public get hoverObject(): Control {
-        return this._hoverObject;
+    public get hitObject(): Control {
+        return this._hitObject;
     }
 
     public dispose() {
@@ -119,7 +121,7 @@ export class ViewController {
                 this.designer.toolbar.visible = true;
             }
             if (e.button === 0) {
-                this.designer.connector.commit(this._hoverObject, this.position);
+                this.designer.connector.commit(this.hitObject, this.position);
             }
             this.designer.connector = null;
             this._iscanceled = true;
@@ -139,7 +141,7 @@ export class ViewController {
         if (this._hoverObject) {
             this._pressedObject = this._hoverObject;
             // mouse down
-            this._hoverObject.dispatchEvents('onMouseDown', e.button, this.position);
+            this._pressedObject.dispatchEvents('onMouseDown', e.button, this.position);
             return;
         }
 
@@ -150,7 +152,7 @@ export class ViewController {
     }
 
 
-    private hitObject(v: Vector2, excluded?: Control[]): Control {
+    private testhitObject(v: Vector2, excluded?: Control[]): Control {
         for (var i = this.designer.children.length - 1; i >= 0; i--) {
             var control = this.designer.children[i];
             if (control.hit(v)) {
@@ -176,11 +178,11 @@ export class ViewController {
 
         }
 
-        this._hoverObject = this.hitObject(v, excluded);
+        this._hitObject = this.testhitObject(v, excluded);
         this.position = new Vector2(e.pageX - this.designer.renderer.canvas.offsetLeft, e.pageY - this.designer.renderer.canvas.offsetTop);
         if (this.designer.connector != null) {
-            let v = this.designer.mapPoint(this.position);
-            this.designer.connector.update(v);
+            let viewpos = this.designer.mapPoint(this.position);
+            this.designer.connector.update(viewpos);
             return;
         }
         if (this._pressedObject) {
@@ -195,37 +197,34 @@ export class ViewController {
             this.onmove.dispatch(this.designer.zoom, center, true);
             this.stopEventBubble(e);
         }
-        for (var i = this.designer.children.length - 1; i >= 0; i--) {
-            var control = this.designer.children[i];
-            if (control.hit(v)) {
-                if (this._hoverObject != control) {
-                    if (this._hoverObject != null) {
-                        // leave
-                        this._hoverObject.dispatchEvents('onMouseLeave');
-                        this._hoverObject = null;
-                    }
-                    this._hoverObject = control;
-                    if (this._hoverObject != null) {
-                        // enter
-                        this._hoverObject.dispatchEvents('onMouseEnter');
-                        // move
-                        this._hoverObject.dispatchEvents('onMouseMove', e.button, this.position);
-                    }
-                } else {
-                    this._hoverObject.dispatchEvents('onMouseMove', e.button, this.position);
-                }
-                return;
+
+        if (this._hitObject !== this._hoverObject) {
+            if (this._hoverObject != null) {
+                this._hoverObject.dispatchEvents('onMouseLeave');
             }
+            this._hoverObject = this._hitObject;
+            if (this._hoverObject != null) {
+                this._hoverObject.dispatchEvents('onMouseEnter');
+                this._hoverObject.dispatchEvents('onMouseMove', e.button, this.position);
+            }
+        } else if (this._hoverObject != null) {
+            this._hoverObject.dispatchEvents('onMouseMove', e.button, this.position);
         }
-        if (this._hoverObject != null) {
-            // leave
-            this._hoverObject.dispatchEvents('onMouseLeave');
-            this._hoverObject = null;
-        }
-
-
-
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     private mouse_up(e: MouseEvent) {
         if (this.designer.selected == null) {
@@ -252,7 +251,6 @@ export class ViewController {
             this._dragging = false;
             this.stopEventBubble(e);
             this.designer.renderer.canvas.style.cursor = "default";
-            document.onmouseup = null;
         }
     }
 

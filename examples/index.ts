@@ -30,15 +30,15 @@ export class Examples {
 
 
 
-        for (var i = 0; i <= 100; i++) {
+        for (var i = 0; i <= 11; i++) {
             anthors[i] = designer.createAnchor(Math.random() * 2000 - 1000, Math.random() * 2000 - 1000);
             anthors[i].id = i;
         }
 
-        for (var i = 0; i < 100; i++) {
+        for (var i = 0; i < 5; i++) {
             while (segments[i] == null) {
-                var f = Math.round(Math.random() * 100);
-                var t = Math.round(Math.random() * 100);              
+                var f = Math.round(Math.random() * 10);
+                var t = Math.round(Math.random() * 10);              
                 segments[i] = designer.createPolygon(anthors[f], anthors[t]);
             }
             segments[i].id = i;

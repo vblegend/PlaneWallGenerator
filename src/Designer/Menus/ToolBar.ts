@@ -3,7 +3,7 @@ import { VectorDesigner } from '../VectorDesigner';
 import { Control } from '../Views/Control';
 import { AnchorControl } from '../Views/AnchorControl';
 import { PolygonControl } from '../Views/PolygonControl';
-import { Connector } from '../Views/Connector';
+import { Connector } from '../common/Connector';
 import { MouseCapturer } from '../Utility/MouseCapturer';
 
 
@@ -24,6 +24,8 @@ export class ToolBar {
     private _dragCapture: MouseCapturer;
     private _dragPosition: Vector2;
 
+
+    
 
     public constructor(designer: VectorDesigner) {
         this.designer = designer;
@@ -54,7 +56,7 @@ export class ToolBar {
         this.designer.viewControl.onmove.add(() => {
         });
 
-        this.addBreak();
+        this.addBreak(this.dom);
 
         this.inputDiv = document.createElement('div');
         this.inputDiv.className = 'ToolBox-Input';
@@ -72,20 +74,22 @@ export class ToolBar {
         }
         var setThickness = document.createElement('button');
         setThickness.textContent = '修改'
+
         this.inputDiv.appendChild(header);
         this.inputDiv.appendChild(this.thicknessInput);
         this.inputDiv.appendChild(setThickness);
         this.dom.appendChild(this.inputDiv);
+        this.addBreak(this.dom);
 
     }
 
-    private addBreak() {
+    private addBreak(parent:HTMLElement) {
         var hr = document.createElement('hr');
         hr.style.border = '0';
         hr.style.borderLeft = '1px solid #585858';
         hr.style.marginLeft = '2px';
         hr.style.marginRight = '2px';
-        this.dom.appendChild(hr);
+        parent.appendChild(hr);
     }
 
     private createObject() {

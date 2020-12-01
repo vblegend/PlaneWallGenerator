@@ -47,11 +47,9 @@ export class AnchorControl extends Control {
 
     protected onMouseDown(button: number, position: Vector2) {
         var projectPosition = this.designer.mapPoint(position);
-        if (this.isSelected) {
-            if (button === 0) {
-                this.pressedPosition = projectPosition;
-                this.designer.virtualCursor = this;
-            }
+        if (button === 0) {
+            this.pressedPosition = projectPosition;
+            this.designer.virtualCursor = this;
         }
     }
     protected onMouseMove(button: number, position: Vector2) {
@@ -68,15 +66,15 @@ export class AnchorControl extends Control {
     protected onMouseUp(button: number, pos: Vector2) {
         this.pressedPosition = null;
         this.designer.virtualCursor = null;
-        if (this.designer.viewControl.hoverObject != this) {
-            if (this.designer.viewControl.hoverObject instanceof PolygonControl) {
+        if (this.designer.viewControl.hitObject != this) {
+            if (this.designer.viewControl.hitObject instanceof PolygonControl) {
                 // split
-                var targetAnchor = this.designer.viewControl.hoverObject.split(this.designer.viewControl.position);
+                var targetAnchor = this.designer.viewControl.hitObject.split(this.designer.viewControl.position);
                 // merage
                 this.merageTo(targetAnchor);
-            } else if (this.designer.viewControl.hoverObject instanceof AnchorControl) {
+            } else if (this.designer.viewControl.hitObject instanceof AnchorControl) {
                 // merage
-                this.merageTo(this.designer.viewControl.hoverObject);
+                this.merageTo(this.designer.viewControl.hitObject);
             }
         }
     }

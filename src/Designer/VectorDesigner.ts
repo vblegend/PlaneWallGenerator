@@ -8,7 +8,8 @@ import { Control } from "./Views/Control";
 import { ToolBar } from "./Menus/ToolBar";
 import { AnchorControl } from './Views/AnchorControl';
 import { PolygonControl } from './Views/PolygonControl';
-import { Connector } from "./Views/Connector";
+import { Connector } from "./common/Connector";
+import { AdsorbService } from "./common/AdsorbService";
 
 
 export class VectorDesigner {
@@ -30,6 +31,14 @@ export class VectorDesigner {
     private _selected: Control;
     public virtualCursor: AnchorControl;
     public connector: Connector;
+    private _adsorb : AdsorbService;
+    public horizontalLineColor :string;
+    public verticalLineColor :string;
+
+    public get adsorb(): AdsorbService {
+        return this._adsorb;
+    }
+
 
 
     public get children(): Control[] {
@@ -52,10 +61,15 @@ export class VectorDesigner {
                 this.toolbar.visible = false;;
             }
             this._selected = value;
-            if (this._selected != null) {
-                //
+            var pt: Vector2 = null;
+            if (this._selected instanceof AnchorControl) {
+                pt = this.convertPoint(this._selected.getCenter()).add(new Vector2(20, 10));
+            } else if (this._selected instanceof PolygonControl) {
+                pt =  this._selected.getSubPoint(this.viewControl.position);
+                pt =  this.convertPoint(pt).add(new Vector2(20, 10));
+            }
+            if (pt) {
                 this.toolbar.visible = true;
-                var pt = this.convertPoint(this._selected.getCenter()).add(new Vector2(20,10));
                 this._selected.selectedUpdate(true);
                 this.toolbar.setPosition(pt);
             }
@@ -97,6 +111,7 @@ export class VectorDesigner {
         this._div = div;
         this._zoom = 100;
         this._children = [];
+        this._adsorb = new   AdsorbService(this);
         this._onRender = new signals.Signal();
         this._onZoom = new signals.Signal()
         this._renderer = new Renderer();
@@ -107,7 +122,9 @@ export class VectorDesigner {
         this._viewControl.onmove.add(this.moveTo, this);
         this._toolbar = new ToolBar(this);
         this._div.appendChild(this._toolbar.dom);
-
+        this.horizontalLineColor = '#00FF00';
+        this.verticalLineColor = '#00FF00';
+        
     }
 
 
@@ -148,21 +165,11 @@ export class VectorDesigner {
     }
 
     public updateElementPoints() {
-        var xs: number[] = [];
-        var ys: number[] = [];
-        //  console.time('vs');
-        for (let i = 0; i < this._children.length; i++) {
-            var points = this._children[i].points;
-            for (let m = 0; m < points.length; m++) {
-                var point = points[m];
-                xs.push(point.x);
-                ys.push(point.y);
-            }
-        }
-
-        //   console.timeEnd('vs');
+        this._adsorb.update();
     }
 
+
+    
 
 
     private async graphicRender() {
@@ -173,9 +180,11 @@ export class VectorDesigner {
         }
         if (this.connector) this.connector.render();
         if (this.virtualCursor) {
-            this.renderer.strokeColor = '#00FF00'
+
             var position = this.convertPoint(this.virtualCursor.position);
+            this.renderer.strokeColor = this.horizontalLineColor;
             this.renderer.line(0, position.y, this.width, position.y, 1);
+            this.renderer.strokeColor = this.verticalLineColor;
             this.renderer.line(position.x, 0, position.x, this.height);
         }
         this.onRender.dispatch();
@@ -184,6 +193,9 @@ export class VectorDesigner {
             requestAnimationFrame(this.graphicRender.bind(this));
         }
     }
+
+
+
 
 
 
