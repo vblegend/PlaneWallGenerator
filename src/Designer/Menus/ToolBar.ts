@@ -18,19 +18,37 @@ export class ToolBar {
     private btnConnectTo: HTMLButtonElement;
     private btnDelete: HTMLButtonElement;
     private btnSetting: HTMLButtonElement;
-    private inputDiv: HTMLDivElement;
+    private thicknessDiv: HTMLDivElement;
     private thicknessInput: HTMLInputElement;
+
+    private xInput: HTMLInputElement;
+    private yInput: HTMLInputElement;
+
+
+
+
     private _position: Vector2;
     private _dragCapture: MouseCapturer;
     private _dragPosition: Vector2;
 
 
-    
+
+    private positionDiv: HTMLDivElement;
+
+
+
 
     public constructor(designer: VectorDesigner) {
         this.designer = designer;
         this._position = new Vector2();
         this.dom = document.createElement('div');
+
+        this.dom.oncontextmenu = (e: MouseEvent) => {
+            e.preventDefault();
+        }
+
+
+
         this.dom.className = 'toolbar';
         var btnDrag = this.createDragButton();
         this._dragCapture = new MouseCapturer(btnDrag);
@@ -58,8 +76,8 @@ export class ToolBar {
 
         this.addBreak(this.dom);
 
-        this.inputDiv = document.createElement('div');
-        this.inputDiv.className = 'ToolBox-Input';
+        this.thicknessDiv = document.createElement('div');
+        this.thicknessDiv.className = 'ToolBox-Input';
         var header = document.createElement('a');
         header.innerText = '厚度';
         header.style.float = 'left';
@@ -70,20 +88,66 @@ export class ToolBar {
             if (value == null || value.length == 0) return;
             if (this.designer.selected instanceof PolygonControl) {
                 this.designer.selected.updateThickness(Number.parseFloat(value));
+                this.designer.requestRender();
             }
         }
         var setThickness = document.createElement('button');
         setThickness.textContent = '修改'
 
-        this.inputDiv.appendChild(header);
-        this.inputDiv.appendChild(this.thicknessInput);
-        this.inputDiv.appendChild(setThickness);
-        this.dom.appendChild(this.inputDiv);
+        this.thicknessDiv.appendChild(header);
+        this.thicknessDiv.appendChild(this.thicknessInput);
+        this.thicknessDiv.appendChild(setThickness);
+        this.dom.appendChild(this.thicknessDiv);
+
+
+        this.positionDiv = document.createElement('div');
+        this.positionDiv.className = 'ToolBox-Input';
+
+        var header = document.createElement('a');
+        header.innerText = 'x';
+        header.style.float = 'left';
+        this.positionDiv.appendChild(header);
+
+
+        this.xInput = document.createElement('input');
+        this.xInput.type = 'number';
+        this.xInput.onchange = () => {
+            var value = this.xInput.value;
+            if (value == null || value.length == 0) return;
+            if (this.designer.selected instanceof AnchorControl) {
+                var position = this.designer.selected.position.clone();
+                position.x = Number.parseFloat(value);
+                this.designer.selected.setPosition(position);
+                this.designer.requestRender();
+            }
+        }
+        this.positionDiv.appendChild(this.xInput);
+        this.yInput = document.createElement('input');
+        this.yInput.type = 'number';
+        this.yInput.onchange = () => {
+            var value = this.yInput.value;
+            if (value == null || value.length == 0) return;
+            if (this.designer.selected instanceof AnchorControl) {
+                var position = this.designer.selected.position.clone();
+                position.y = Number.parseFloat(value);
+                this.designer.selected.setPosition(position);
+                this.designer.requestRender();
+            }
+        }
+        this.positionDiv.appendChild(this.yInput);
+        var setPosition = document.createElement('button');
+        setPosition.textContent = '修改'
+
+        this.positionDiv.appendChild(setPosition);
+        this.dom.appendChild(this.positionDiv);
         this.addBreak(this.dom);
+
+
+
 
     }
 
-    private addBreak(parent:HTMLElement) {
+    private addBreak(parent: HTMLElement) {
         var hr = document.createElement('hr');
         hr.style.border = '0';
         hr.style.borderLeft = '1px solid #585858';
@@ -146,12 +210,17 @@ export class ToolBar {
                 this.btnConnectTo.style.display = '';
                 this.btnDelete.style.display = '';
                 this.btnSetting.style.display = '';
-                this.inputDiv.style.display = 'none';
+                this.thicknessDiv.style.display = 'none';
+                this.positionDiv.style.display = '';
+                this.xInput.value = this.designer.selected.anchor.x.toString();
+                this.yInput.value = this.designer.selected.anchor.y.toString();
+
             } else if (this.designer.selected instanceof PolygonControl) {
                 this.btnConnectTo.style.display = 'none';
                 this.btnDelete.style.display = '';
                 this.btnSetting.style.display = '';
-                this.inputDiv.style.display = '';
+                this.thicknessDiv.style.display = '';
+                this.positionDiv.style.display = 'none';
                 this.thicknessInput.value = this.designer.selected.thickness.toString();
             }
         }

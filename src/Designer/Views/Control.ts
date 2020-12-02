@@ -12,6 +12,8 @@ export class Control {
     private _isHover: boolean;
     private _isSelected: boolean;
     private _id: number;
+    private _pressedTime: number;
+    protected position:Vector2;
 
     public get id(): number {
         return this._id;
@@ -19,13 +21,28 @@ export class Control {
     public set id(value: number) {
         this._id = value;
     }
+    public get isPressed(): boolean {
+        return this._pressedTime != null;
+    }
+
+    /**
+     * 按下到当前的tick
+     */
+    public get pressedTick(): number {
+        if (this._pressedTime == null) return 0;
+        return new Date().getTime() - this._pressedTime;
+    }
+
+
 
     public constructor(designer: VectorDesigner) {
         this._designer = designer;
         this._isHover = false;
+        this._pressedTime = null;
         this.hoverColor = '#ff8888';
         this.opacity = 0.5;
         this._isSelected = false;
+        this.position = new Vector2();
     }
 
 
@@ -56,21 +73,23 @@ export class Control {
 
     protected onMouseEnter() {
         this._isHover = true;
+        this.designer.requestRender();
     }
 
     protected onMouseLeave() {
         this._isHover = false;
+        this.designer.requestRender();
     }
 
 
     protected onMouseDown(button: number, pos: Vector2) {
-
+        this._pressedTime = new Date().getTime();
     }
     protected onMouseMove(button: number, pos: Vector2) {
-
+        this.position.copy(pos);
     }
     protected onMouseUp(button: number, pos: Vector2) {
-
+        this._pressedTime = null;
     }
 
 

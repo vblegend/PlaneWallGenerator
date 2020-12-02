@@ -11,10 +11,12 @@ import { Bounds } from '../common/Bounds';
 
 export class PolygonControl extends Control {
     private _segment: Segment;
-
+    private _hTime: number;
     private _points: Vector2[];
     private _bounds: Bounds;
     private _anchors: AnchorControl[];
+    private _moveing: boolean;
+
 
     public constructor(designer: VectorDesigner, anchor1: AnchorControl, anchor2: AnchorControl, thickness: number) {
         super(designer);
@@ -49,8 +51,6 @@ export class PolygonControl extends Control {
     }
 
 
-
-
     public get id(): number {
         return this._segment.id;
     }
@@ -59,14 +59,14 @@ export class PolygonControl extends Control {
     }
 
 
-    public remove() {
+    public remove(removeanchor: boolean = true) {
         super.remove();
         this._segment.dispose();
         this._anchors[0].onUpdate.remove(this.update, this);
         this._anchors[1].onUpdate.remove(this.update, this);
         this._anchors[0].removePolygon(this, this._anchors[1]);
         this._anchors[1].removePolygon(this, this._anchors[0]);
-        while (this._anchors.length > 0) {
+        while (this._anchors.length > 0 && removeanchor) {
             let anchorControl = this._anchors.shift();
             if (anchorControl.anchor.targets.length === 0) {
                 anchorControl.remove();
@@ -81,7 +81,7 @@ export class PolygonControl extends Control {
 
     public getSubPoint(canvasPoint: Vector2) {
         var mousePosition = this.designer.mapPoint(canvasPoint);
-        return this.getProjectivePoint(this.anchors[0].position, this.anchors[1].position, mousePosition);
+        return Vector2.getProjectivePoint(this.anchors[0].position, this.anchors[1].position, mousePosition);
     }
 
 
@@ -91,17 +91,18 @@ export class PolygonControl extends Control {
         var anchor1 = this.anchors[0];
         var anchor2 = this.anchors[1];
         var mousePosition = this.designer.mapPoint(point);
-        var target = this.getProjectivePoint(anchor1.position, anchor2.position, mousePosition);
+        var target = Vector2.getProjectivePoint(anchor1.position, anchor2.position, mousePosition);
         var targetAnchor = this.designer.createAnchor(target.x, target.y);
         anchors.push(targetAnchor);
         for (let anchor of this.anchors) {
-            var segment = this.designer.createPolygon(anchor, targetAnchor);
+            var segment = this.designer.createPolygon(anchor, targetAnchor,this.thickness);
             if (segment != null) polygons.push(segment);
             anchors.push(anchor);
         }
         for (let anchor of anchors) {
             anchor.update();
         }
+        targetAnchor.update();
         // update segments
         for (let f of polygons) {
             f.update();
@@ -113,31 +114,100 @@ export class PolygonControl extends Control {
     }
 
 
-    /// <summary>
-    /// 计算直线上距离某坐标最近的一个投影点
-    /// </summary>
-    /// <param name="P1">直线的坐标1</param>
-    /// <param name="P2">直线的坐标2</param>
-    /// <param name="pOut">直线外的坐标</param>
-    /// <returns></returns>
-    protected getProjectivePoint(P1: Vector2, P2: Vector2, pOut: Vector2): Vector2 {
-        var pLine: Vector2 = P1;
-        if (P1.x == P2.x && P1.y == P2.y) {
-            return P1;
+
+
+    protected onMouseEnter() {
+        super.onMouseEnter();
+        if (this.isSelected) {
+
         }
-        if (P1.x == P2.x) {
-            return new Vector2(pLine.x, pOut.y);
-        }
-        else if (P1.y == P2.y) //垂线斜率不存在情况
-        {
-            return new Vector2(pOut.x, pLine.y);
-        }
-        //计算线的斜率
-        var k = ((P1.y - P2.y)) / (P1.x - P2.x);
-        var X = ((k * pLine.x + pOut.x / k + pOut.y - pLine.y) / (1 / k + k));
-        var Y = (-1 / k * (X - pOut.x) + pOut.y);
-        return new Vector2(X, Y);
     }
+
+    protected onMouseLeave() {
+        super.onMouseLeave();
+    }
+
+
+    protected onMouseDown(button: number, pos: Vector2) {
+        super.onMouseDown(button, pos);
+        if (button === 0) {
+            this._hTime = window.setTimeout(() => {
+                this._hTime = null;
+                if (this.designer.viewControl.hitObject == this) {
+                    this.designer.renderer.canvas.style.cursor = 'move';
+                    this._moveing = true;
+                    this.beginDrag(this.position);
+                }
+            }, 200);
+        }
+    }
+
+    protected onMouseMove(button: number, pos: Vector2) {
+        super.onMouseMove(button, pos);
+        if (this._moveing) {
+            this.draging(pos);
+        }
+    }
+
+    protected onMouseUp(button: number, pos: Vector2) {
+        super.onMouseUp(button, pos);
+        if (this._hTime) {
+            window.clearTimeout(this._hTime);
+            this._hTime = null;
+        }
+        if (this._moveing) {
+            this._moveing = false;
+            this.designer.renderer.canvas.style.cursor = 'default';
+            this.EndDrag(this.position);
+        }
+    }
+
+
+
+
+    private _anchorPositions: Vector2[];
+
+    private beginDrag(canvasPosition: Vector2) {
+        var viewPos = this.designer.mapPoint(canvasPosition);
+        this._anchorPositions = [viewPos.sub(this.anchors[0].position), viewPos.sub(this.anchors[1].position)];
+    }
+
+    private draging(canvasPosition: Vector2) {
+        console.log('draging');
+        var viewPos = this.designer.mapPoint(canvasPosition);
+
+        // var pos1 = viewPos.sub(this._anchorPositions[0]);
+        // var pos2 = viewPos.sub(this._anchorPositions[1]);
+
+        // var result1 = this.designer.adsorb.adsorption(pos1);
+        // var result2 = this.designer.adsorb.adsorption(pos2);
+
+        // var minx = Math.min(result1.x ? result1.x : pos1.x, result2.x ? result2.x : pos2.x);
+        // var miny = Math.min(result1.y ? result1.y : pos1.y, result2.y ? result2.y : pos2.y);
+
+
+
+
+
+
+        this.anchors[0].setPosition(viewPos.sub(this._anchorPositions[0]));
+        this.anchors[1].setPosition(viewPos.sub(this._anchorPositions[1]));
+        this.anchors[0].updateNearby();
+        this.anchors[1].updateNearby();
+        this.designer.requestRender();
+    }
+
+    private EndDrag(canvasPosition: Vector2) {
+        console.log('EndDrag');
+    }
+
+
+
+
+
+
+
+
 
     public update() {
         if (this._segment != null) {
@@ -148,7 +218,6 @@ export class PolygonControl extends Control {
                 this._points.push(v);
                 this._bounds.extendFromPoint(v);
             }
-            this.designer.updateElementPoints();
         }
     }
 

@@ -1,6 +1,21 @@
-import { Vector2 } from "../../core/Vector2";
+import { IVector2, Vector2 } from "../../core/Vector2";
 import { VectorDesigner } from "../VectorDesigner";
 import { AnchorControl } from "../Views/AnchorControl";
+
+
+export interface AdsorbResult {
+    /**
+     * x distance absolute value
+     * no return null found
+     */
+    x: number;
+
+    /**
+     * y distance absolute value
+     * no return null found
+     */
+    y: number;
+}
 
 
 export class AdsorbService {
@@ -15,11 +30,16 @@ export class AdsorbService {
      */
     private verticalTraces: number[];
 
+    public enabled: boolean;
+
+
+
 
     public constructor(designer: VectorDesigner) {
         this.designer = designer;
         this.horizontalTraces = [];
         this.verticalTraces = [];
+        this.enabled = true;
     }
 
 
@@ -27,6 +47,7 @@ export class AdsorbService {
      * 更新所有锚点的坐标
      */
     public update() {
+        if (!this.enabled) return;
         this.horizontalTraces.length = 0;
         this.verticalTraces.length = 0;
         for (let object of this.designer.children) {
@@ -43,6 +64,11 @@ export class AdsorbService {
 
 
 
+
+    public clear() {
+        this.horizontalTraces.length = 0;
+        this.verticalTraces.length = 0;
+    }
 
     /**
      * 二分查找近似值
@@ -83,17 +109,20 @@ export class AdsorbService {
      * @param lessValue     小于范围
      * @param return        Vector2 (x,y) 返回 x,y轴坐标是否有修正
      */
-    public adsorption(in_out_Point: Vector2, lessValue: number): Vector2 {
-        var result = new Vector2();
+    public adsorption(in_out_Point: Vector2, lessValue: number = 15): IVector2 {
+        var result: IVector2 = { x: null, y: null };
+        lessValue *= this.designer.res;
         var x = this.binarySearch(this.horizontalTraces, in_out_Point.x);
         var y = this.binarySearch(this.verticalTraces, in_out_Point.y);
-        if (x != null && Math.abs(x - in_out_Point.x) <= lessValue) {
+        var x_dis = Math.abs(x - in_out_Point.x);
+        if (x != null && x_dis <= lessValue) {
             in_out_Point.x = x;
-            result.x = 1;
+            result.x = x_dis;
         }
-        if (y != null && Math.abs(y - in_out_Point.y) <= lessValue) {
+        var y_dis = Math.abs(y - in_out_Point.y);
+        if (y != null && y_dis <= lessValue) {
             in_out_Point.y = y;
-            result.y = 1;
+            result.y = y_dis;
         }
         return result;
     }

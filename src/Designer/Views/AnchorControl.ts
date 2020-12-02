@@ -1,5 +1,5 @@
 
-import { Vector2 } from '../../core/Vector2';
+import { Vector2, IVector2 } from '../../core/Vector2';
 import { Control } from './Control';
 import { VectorDesigner } from '../VectorDesigner';
 import { Anchor } from '../../core/Anchor';
@@ -7,6 +7,7 @@ import { RenderType } from '../Renderer';
 import { PolygonControl } from './PolygonControl';
 import * as signals from 'signals';
 import { Segment } from '../../core/Segment';
+import { AdsorbResult } from '../common/AdsorbService';
 
 
 export class AnchorControl extends Control {
@@ -35,7 +36,7 @@ export class AnchorControl extends Control {
         this._onupdate = new signals.Signal();
         this._polygons = [];
         this._linked = [];
-        this.position = new Vector2(x | 0, y | 0);
+        this.position = new Vector2(x, y);
         this._anchor = new Anchor(0, this.position.x, this.position.y);
         this.fillColor = '#b5e61d';
         this.strokeColor = '#FFFFFF';
@@ -43,29 +44,48 @@ export class AnchorControl extends Control {
 
 
 
-    private pressedPosition: Vector2;
+    private pressed: boolean;
 
     protected onMouseDown(button: number, position: Vector2) {
-        var projectPosition = this.designer.mapPoint(position);
+        this.designer.grabObjects([this]);
+        this.designer.updateElementPoints();
         if (button === 0) {
-            this.pressedPosition = projectPosition;
+            this.pressed = true;
             this.designer.virtualCursor = this;
         }
     }
     protected onMouseMove(button: number, position: Vector2) {
         var projectPosition = this.designer.mapPoint(position);
-        if (this.pressedPosition) {
-            var pos = projectPosition.sub(this.pressedPosition);
-            this.pressedPosition = projectPosition;
-            this.setPosition(pos.add(this.position));
+        var result: IVector2;
+        if (this.pressed) {
+            var hitObject = this.designer.viewControl.hitObject;
+            // 如果鼠标在墙上  吸附到墙壁上
+            if (hitObject != this && hitObject instanceof PolygonControl) {
+                result = projectPosition = hitObject.getSubPoint(position);
+            }
+            else {
+                // 寻找默认吸附点
+                result = this.designer.adsorb.adsorption(projectPosition);
+            }
+            this.designer.horizontalLineColor = result.y != null ? '#0000FF' : '#00FF00';
+            this.designer.verticalLineColor = result.x != null ? '#0000FF' : '#00FF00';
+            this.setPosition(projectPosition);
             this.updateNearby();
+            this.designer.requestRender();
         }
     }
 
 
     protected onMouseUp(button: number, pos: Vector2) {
-        this.pressedPosition = null;
+        this.pressed = null;
         this.designer.virtualCursor = null;
+        var anchor = this.designer._children.find(e => e instanceof AnchorControl && e.anchor.x === this.anchor.x && e.anchor.y === this.anchor.y) as AnchorControl;
+        if (anchor != null && anchor != this) {
+            this.merageTo(anchor);
+            this.designer.discardGrabObjects();
+            return;
+        }
+
         if (this.designer.viewControl.hitObject != this) {
             if (this.designer.viewControl.hitObject instanceof PolygonControl) {
                 // split
@@ -77,18 +97,19 @@ export class AnchorControl extends Control {
                 this.merageTo(this.designer.viewControl.hitObject);
             }
         }
+        this.designer.releaseGrabObjects();
+        this.designer.updateElementPoints();
     }
 
 
-    merageTo(ANCHOR: AnchorControl): boolean {
+    public merageTo(ANCHOR: AnchorControl): boolean {
         //不支持合并到自己的另一端
         if (this.anchor.targets.indexOf(ANCHOR.anchor) > -1) return false;
-        var polygons: PolygonControl[] = [];
         // look look 与自己相连的锚点
-        for (let anchor of this._linked) {
-            var poly = this.designer.createPolygon(anchor, ANCHOR);
+        for (let polygon of this._polygons) {
+            var poly = this.designer.createPolygon(polygon.anchors[0] == this ? polygon.anchors[1] : polygon.anchors[0], ANCHOR,polygon.thickness);
             if (poly != null) {
-                polygons.push(poly);
+                this.designer.add(poly);
             }
         }
         //remove self
@@ -96,10 +117,6 @@ export class AnchorControl extends Control {
         // update anchor
         ANCHOR.update();
         // update segments
-        for (let f of polygons) {
-            f.update();
-            this.designer.add(f);
-        }
         this.designer.selected = ANCHOR;
         return true;
     }
@@ -110,7 +127,7 @@ export class AnchorControl extends Control {
 
 
 
-    private updateNearby() {
+    public updateNearby() {
         for (let target of this._polygons) {
             for (let v of target.anchors) {
                 if (v !== this) {
@@ -144,6 +161,9 @@ export class AnchorControl extends Control {
         this.position = v.clone();
         this._anchor.setPosition(v);
     }
+
+
+
 
     public remove() {
         super.remove();

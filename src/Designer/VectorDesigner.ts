@@ -31,12 +31,43 @@ export class VectorDesigner {
     private _selected: Control;
     public virtualCursor: AnchorControl;
     public connector: Connector;
-    private _adsorb : AdsorbService;
-    public horizontalLineColor :string;
-    public verticalLineColor :string;
+    private _adsorb: AdsorbService;
+    public horizontalLineColor: string;
+    public verticalLineColor: string;
+    public _mouseGrabObjects: Control[];
+
+    private _requestRender: boolean;
+
 
     public get adsorb(): AdsorbService {
         return this._adsorb;
+    }
+
+    public grabObjects(objects: Control[]) {
+        this.releaseGrabObjects();
+        this._adsorb.enabled = false;
+        for (let object of objects) {
+            if (this.remove(object).length > 0) {
+                this._mouseGrabObjects.push(object);
+            }
+        }
+        this._adsorb.enabled = true;
+    }
+
+    public releaseGrabObjects() {
+        this._adsorb.enabled = false;
+        while (this._mouseGrabObjects.length > 0) {
+            var object = this._mouseGrabObjects.shift();
+            this.add(object);
+        }
+        this._adsorb.enabled = true;
+    }
+    public discardGrabObjects() {
+        this._adsorb.enabled = false;
+        while (this._mouseGrabObjects.length > 0) {
+            this._mouseGrabObjects.shift();
+        }
+        this._adsorb.enabled = true;
     }
 
 
@@ -65,8 +96,8 @@ export class VectorDesigner {
             if (this._selected instanceof AnchorControl) {
                 pt = this.convertPoint(this._selected.getCenter()).add(new Vector2(20, 10));
             } else if (this._selected instanceof PolygonControl) {
-                pt =  this._selected.getSubPoint(this.viewControl.position);
-                pt =  this.convertPoint(pt).add(new Vector2(20, 10));
+                pt = this._selected.getSubPoint(this.viewControl.position);
+                pt = this.convertPoint(pt).add(new Vector2(20, 10));
             }
             if (pt) {
                 this.toolbar.visible = true;
@@ -74,25 +105,93 @@ export class VectorDesigner {
                 this.toolbar.setPosition(pt);
             }
         }
+        this.requestRender();
     }
 
     public add(...ctls: Control[]) {
         for (let ctl of ctls) {
-            if (ctl instanceof AnchorControl) {
-                this.children.push(ctl);
-            } else if (ctl instanceof PolygonControl) {
-                this.children.unshift(ctl);
+            if (ctl != null) {
+                var index = this.children.indexOf(ctl);
+                if (index == -1) {
+                    if (ctl instanceof AnchorControl) {
+                        this.children.push(ctl);
+                    } else if (ctl instanceof PolygonControl) {
+                        this.children.unshift(ctl);
+                    }
+                }
             }
         }
+        this.requestRender();
+        this._adsorb.update();
     }
-    public remove(...ctls: Control[]) {
+    public remove(...ctls: Control[]): Control[] {
+        let result = [];
         for (let ctl of ctls) {
             var index = this.children.indexOf(ctl);
             if (index > -1) {
+                result.push(this.children[index]);
                 this.children.splice(index, 1);
             }
+            index = this._mouseGrabObjects.indexOf(ctl);
+            if (index > -1) {
+                this._mouseGrabObjects.splice(index, 1);
+            }
         }
+        this.requestRender();
+        this._adsorb.update();
+        return result;
     }
+
+    public clear() {
+        this.releaseGrabObjects();
+        this.connector = null;
+        this.virtualCursor = null;
+        this._adsorb.clear();
+        this._adsorb.enabled = false;
+        while (this.children.length > 0) {
+            var control = this.children.shift();
+            control.remove();
+        }
+        this._adsorb.enabled = true;
+    }
+
+    public from(data: number[][][]) {
+        this.clear();
+        var map: { [key: string]: AnchorControl } = {};
+        var objects: Control[] = [];
+        for (let block of data) {
+            var fromKey = block[1][0] + ',' + block[1][1];
+            var frompoint = new Vector2(block[1][0], block[1][1]);
+            var fromanchor: AnchorControl;
+            var toKey = block[4][0] + ',' + block[4][1];
+            var topoint = new Vector2(block[4][0], block[4][1]);
+            var toanchor: AnchorControl;
+            // ============================
+            fromanchor = map[fromKey];
+            if (fromanchor == null) {
+                fromanchor = this.createAnchor(frompoint.x, frompoint.y);
+                map[fromKey] = fromanchor;
+                objects.push(fromanchor);
+            }
+            // ============================
+            toanchor = map[toKey];
+            if (toanchor == null) {
+                toanchor = this.createAnchor(topoint.x, topoint.y);
+                map[toKey] = toanchor;
+                objects.push(toanchor);
+            }
+            // ============================
+            var segment = this.createPolygon(fromanchor, toanchor);
+            objects.push(segment);
+        }
+        for (let key in map) {
+            map[key].update();
+        }
+        this.add.apply(this, objects);
+        map = {};
+    }
+
+
 
 
     public toArrray(): number[][][] {
@@ -111,7 +210,8 @@ export class VectorDesigner {
         this._div = div;
         this._zoom = 100;
         this._children = [];
-        this._adsorb = new   AdsorbService(this);
+        this._mouseGrabObjects = [];
+        this._adsorb = new AdsorbService(this);
         this._onRender = new signals.Signal();
         this._onZoom = new signals.Signal()
         this._renderer = new Renderer();
@@ -124,7 +224,7 @@ export class VectorDesigner {
         this._div.appendChild(this._toolbar.dom);
         this.horizontalLineColor = '#00FF00';
         this.verticalLineColor = '#00FF00';
-        
+        this._requestRender = true;
     }
 
 
@@ -157,10 +257,12 @@ export class VectorDesigner {
         //获取新的视图范围。
         this._bounds = new Bounds(center.x - width / 2, center.y - height / 2, center.x + width / 2, center.y + height / 2);
         //redraw
+        this.requestRender();
     }
 
     public async run() {
         this._runState = true;
+        this._requestRender = true;
         await this.graphicRender();
     }
 
@@ -169,25 +271,37 @@ export class VectorDesigner {
     }
 
 
-    
+    public requestRender() {
+        this._requestRender = true;
+    }
 
 
     private async graphicRender() {
         if (!this._runState || this.isDisposed) return;
-        this.renderer.clear();
-        for (var control of this._children) {
-            control.render();
-        }
-        if (this.connector) this.connector.render();
-        if (this.virtualCursor) {
+        if (this._requestRender) {
+            this._requestRender = false;
+            this.renderer.clear();
+            for (var control of this._children) {
+                control.render();
+            }
+            if (this.connector) this.connector.render();
 
-            var position = this.convertPoint(this.virtualCursor.position);
-            this.renderer.strokeColor = this.horizontalLineColor;
-            this.renderer.line(0, position.y, this.width, position.y, 1);
-            this.renderer.strokeColor = this.verticalLineColor;
-            this.renderer.line(position.x, 0, position.x, this.height);
+            if (this._mouseGrabObjects.length > 0) {
+                for (var control of this._mouseGrabObjects) {
+                    control.render();
+                }
+            }
+
+            if (this.virtualCursor) {
+                var position = this.convertPoint(this.virtualCursor.position);
+                this.renderer.strokeColor = this.horizontalLineColor;
+                this.renderer.line(0, position.y, this.width, position.y, 1);
+                this.renderer.strokeColor = this.verticalLineColor;
+                this.renderer.line(position.x, 0, position.x, this.height);
+            }
+            this.onRender.dispatch();
         }
-        this.onRender.dispatch();
+
         if (!this.isDisposed && this._runState) {
             //继续下一帧
             requestAnimationFrame(this.graphicRender.bind(this));
@@ -230,12 +344,23 @@ export class VectorDesigner {
         return result;
     }
 
+
     public createAnchor(x: number, y: number): AnchorControl {
+        var x = Number.parseFloat(x.toFixed(4));
+        var y = Number.parseFloat(y.toFixed(4));
+        for (let anchor of this.children) {
+            if (anchor instanceof AnchorControl) {
+                if (anchor.anchor.x === x && anchor.anchor.y === y) {
+                    return anchor;
+                }
+            }
+        }
         var anchor = new AnchorControl(this, x, y);
         return anchor;
     }
 
     public createPolygon(anchor1: AnchorControl, anchor2: AnchorControl, thickness: number = 10): PolygonControl {
+        if (anchor1 == anchor2) return null;
         if (anchor1.anchor.targets.indexOf(anchor2.anchor) > -1) {
             return null;
         }

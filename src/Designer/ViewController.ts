@@ -100,10 +100,21 @@ export class ViewController {
     }
 
     private mouse_dblclick(e: MouseEvent) {
-        let v = this.designer.mapPoint(this.position);
-        var anchor = new AnchorControl(this.designer, v.x, v.y);
-        this.designer.add(anchor);
-        this.designer.selected = anchor;
+        if (this.hitObject instanceof AnchorControl) {
+            return;
+        }
+        if (this.hitObject instanceof PolygonControl) {
+            var anchor = this.hitObject.split(this.position);
+            this.designer.selected = anchor;
+            return;
+        }
+        if (this.designer.selected == null) {
+            let v = this.designer.mapPoint(this.position);
+            var anchor = this.designer.createAnchor(v.x, v.y);
+            this.designer.add(anchor);
+            this.designer.selected = anchor;
+        }
+
     }
 
 
@@ -181,8 +192,7 @@ export class ViewController {
         this._hitObject = this.testhitObject(v, excluded);
         this.position = new Vector2(e.pageX - this.designer.renderer.canvas.offsetLeft, e.pageY - this.designer.renderer.canvas.offsetTop);
         if (this.designer.connector != null) {
-            let viewpos = this.designer.mapPoint(this.position);
-            this.designer.connector.update(viewpos);
+            this.designer.connector.update(this.position, this._hitObject);
             return;
         }
         if (this._pressedObject) {

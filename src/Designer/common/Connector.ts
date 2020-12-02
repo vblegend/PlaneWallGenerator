@@ -1,4 +1,4 @@
-import { Vector2 } from "../../core/Vector2";
+import { IVector2, Vector2 } from "../../core/Vector2";
 import { VectorDesigner } from "../VectorDesigner";
 import { AnchorControl } from "../Views/AnchorControl";
 import { PolygonControl } from "../Views/PolygonControl";
@@ -24,16 +24,27 @@ export class Connector {
 
 
 
-    public update(viewpos?: Vector2) {
-        if (viewpos != null) {
-            let position = viewpos.clone();
-            var result = this.designer.adsorb.adsorption(position, 50);
+    public update(canvasPoint?: Vector2, control?: Control) {
+        let position: Vector2;
+        var result: IVector2;
+        if (control instanceof PolygonControl) {
+            position = control.getSubPoint(canvasPoint);
+            result = new Vector2(1, 1);
+        }
+        else if (canvasPoint != null) {
+            position = this.designer.mapPoint(canvasPoint);
+            result = this.designer.adsorb.adsorption(position);
+        }
+        if (position) {
             this.newAnchor.setPosition(position);
-            this.designer.horizontalLineColor = result.y ? '#0000FF' : '#00FF00';
-            this.designer.verticalLineColor = result.x ? '#0000FF' : '#00FF00';
+        }
+        if (result) {
+            this.designer.horizontalLineColor = result.y != null ? '#0000FF' : '#00FF00';
+            this.designer.verticalLineColor = result.x != null ? '#0000FF' : '#00FF00';
         }
         this.newAnchor.update();
         this.origin.update();
+        this.designer.requestRender();
     }
 
 
@@ -44,24 +55,32 @@ export class Connector {
 
 
     public commit(hover: Control, position: Vector2) {
+        var point = this.newAnchor.points[0];
+        var anchor = this.designer._children.find(e => e instanceof AnchorControl && e.anchor.x === point.x && e.anchor.y === point.y) as AnchorControl;
         if (hover instanceof AnchorControl) {
-            /* connect to old anchor , remove new anchor and  segment */
-            this.newSegment.remove();
+            anchor = hover;
+        }
+        if (hover instanceof PolygonControl) {
+            this.newSegment.remove(false);
             this.newAnchor.remove();
-            this.newAnchor = hover;
+            // split
+            this.newAnchor = hover.split(this.designer.viewControl.position);
+            // merage
+            this.newSegment = new PolygonControl(this.designer, this.origin, this.newAnchor, 10);
+            this.newAnchor.update();
+            this.origin.update();
+        } else if (anchor != null) {
+            /* connect to old anchor , remove new anchor and  segment */
+            this.newSegment.remove(false);
+            this.newAnchor.remove();
+            this.newAnchor = anchor;
             /* use old anchor create new anchor */
             this.newSegment = new PolygonControl(this.designer, this.origin, this.newAnchor, 10);
             this.update();
             /* add objects to designer */
             this.designer.add(this.newAnchor, this.newSegment);
-        } else if (hover instanceof PolygonControl) {
-            // split
-            var targetAnchor = hover.split(this.designer.viewControl.position);
-            // merage
-            this.newAnchor.merageTo(targetAnchor);
-        } else {
-            this.designer.add(this.newAnchor, this.newSegment);
         }
+        this.designer.add(this.newAnchor, this.newSegment);
         this.designer.selected = this.newAnchor;
     }
 
@@ -78,7 +97,7 @@ export class Connector {
 
 
     public cancel() {
-        this.newSegment.remove();
+        this.newSegment.remove(false);
         this.newAnchor.remove();
         this.newSegment = null;
         this.newAnchor = null;
