@@ -8,11 +8,10 @@ import { PolygonControl } from './PolygonControl';
 import * as signals from 'signals';
 import { Segment } from '../../core/Segment';
 import { AdsorbResult } from '../common/AdsorbService';
+import { AnchorConfig2d } from '../../core/WallElement';
 
 
 export class AnchorControl extends Control {
-
-    public position: Vector2;
     private _anchor: Anchor;
     private _onupdate: signals.Signal;
     private _polygons: PolygonControl[];
@@ -36,48 +35,42 @@ export class AnchorControl extends Control {
         this._onupdate = new signals.Signal();
         this._polygons = [];
         this._linked = [];
-        this.position = new Vector2(x, y);
+        this.dragDelayTime = 50;
+        this.position.set(x, y);
         this._anchor = new Anchor(0, this.position.x, this.position.y);
         this.fillColor = '#b5e61d';
         this.strokeColor = '#FFFFFF';
     }
 
 
-
-    private pressed: boolean;
-
-    protected onMouseDown(button: number, position: Vector2) {
+    protected onBeginDrag(canvasPosition: Vector2) {
+        var viewPos = this.designer.mapPoint(canvasPosition);
         this.designer.grabObjects([this]);
         this.designer.updateElementPoints();
-        if (button === 0) {
-            this.pressed = true;
-            this.designer.virtualCursor = this;
-        }
+        this.designer.virtualCursor = this;
     }
-    protected onMouseMove(button: number, position: Vector2) {
-        var projectPosition = this.designer.mapPoint(position);
+
+
+    protected onDraging(canvasPosition: Vector2) {
+        var viewPos = this.designer.mapPoint(canvasPosition);
         var result: IVector2;
-        if (this.pressed) {
-            var hitObject = this.designer.viewControl.hitObject;
-            // 如果鼠标在墙上  吸附到墙壁上
-            if (hitObject != this && hitObject instanceof PolygonControl) {
-                result = projectPosition = hitObject.getSubPoint(position);
-            }
-            else {
-                // 寻找默认吸附点
-                result = this.designer.adsorb.adsorption(projectPosition);
-            }
-            this.designer.horizontalLineColor = result.y != null ? '#0000FF' : '#00FF00';
-            this.designer.verticalLineColor = result.x != null ? '#0000FF' : '#00FF00';
-            this.setPosition(projectPosition);
-            this.updateNearby();
-            this.designer.requestRender();
+        var hitObject = this.designer.viewControl.hitObject;
+        // 如果鼠标在墙上  吸附到墙壁上
+        if (hitObject != this && hitObject instanceof PolygonControl) {
+            result = viewPos = hitObject.getSubPoint(canvasPosition);
         }
+        else {
+            // 寻找默认吸附点
+            result = this.designer.adsorb.adsorption(viewPos);
+        }
+        this.designer.horizontalLineColor = result.y != null ? '#0000FF' : '#00FF00';
+        this.designer.verticalLineColor = result.x != null ? '#0000FF' : '#00FF00';
+        this.setPosition(viewPos);
+        this.updateNearby();
+        this.designer.requestRender();
     }
 
-
-    protected onMouseUp(button: number, pos: Vector2) {
-        this.pressed = null;
+    protected onEndDrag(canvasPosition: Vector2) {
         this.designer.virtualCursor = null;
         var anchor = this.designer._children.find(e => e instanceof AnchorControl && e.anchor.x === this.anchor.x && e.anchor.y === this.anchor.y) as AnchorControl;
         if (anchor != null && anchor != this) {
@@ -102,12 +95,30 @@ export class AnchorControl extends Control {
     }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     public merageTo(ANCHOR: AnchorControl): boolean {
         //不支持合并到自己的另一端
         if (this.anchor.targets.indexOf(ANCHOR.anchor) > -1) return false;
         // look look 与自己相连的锚点
         for (let polygon of this._polygons) {
-            var poly = this.designer.createPolygon(polygon.anchors[0] == this ? polygon.anchors[1] : polygon.anchors[0], ANCHOR,polygon.thickness);
+            var poly = this.designer.createPolygon(null, polygon.anchors[0] == this ? polygon.anchors[1] : polygon.anchors[0], ANCHOR, polygon.thickness);
             if (poly != null) {
                 this.designer.add(poly);
             }
@@ -158,7 +169,7 @@ export class AnchorControl extends Control {
 
 
     public setPosition(v: Vector2) {
-        this.position = v.clone();
+        this.position.copy(v);
         this._anchor.setPosition(v);
     }
 
@@ -185,9 +196,6 @@ export class AnchorControl extends Control {
         this.designer.selected = this;
     }
 
-    public getCenter(): Vector2 {
-        return this.position;
-    }
 
     public selectedUpdate(value: boolean) {
         super.selectedUpdate(value);
@@ -218,7 +226,18 @@ export class AnchorControl extends Control {
     public get anchor(): Anchor {
         return this._anchor;
     }
-    public get points(): Vector2[] {
-        return [this.position];
+
+    public get point(): Vector2 {
+        return this.position;
     }
+
+
+    public serialize(): AnchorConfig2d {
+        return {
+            id: this.id,
+            x: this.position.x,
+            y: this.position.y
+        };
+    }
+
 }

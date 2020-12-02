@@ -16,9 +16,21 @@ export class Vector2 {
     }
 
 
-    public round(): this {
+    public round4(): this {
         this.x = (this.x * 10000 | 0) / 10000;
         this.y = (this.y * 10000 | 0) / 10000;
+        return this;
+    }
+
+    public round2(): this {
+        this.x = (this.x * 100 | 0) / 100;
+        this.y = (this.y * 100 | 0) / 100;
+        return this;
+    }
+    
+    public round0(): this {
+        this.x = this.x | 0;
+        this.y = this.y | 0;
         return this;
     }
 
@@ -50,6 +62,11 @@ export class Vector2 {
     public copy(v: Vector2) {
         this.x = v.x;
         this.y = v.y;
+    }
+
+    public set(x: number, y: number) {
+        this.x = x;
+        this.y = y;
     }
 
 

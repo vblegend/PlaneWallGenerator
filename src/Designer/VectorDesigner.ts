@@ -10,6 +10,7 @@ import { AnchorControl } from './Views/AnchorControl';
 import { PolygonControl } from './Views/PolygonControl';
 import { Connector } from "./common/Connector";
 import { AdsorbService } from "./common/AdsorbService";
+import { AreaWalls, WallConfig2d } from "../core/WallElement";
 
 
 export class VectorDesigner {
@@ -35,14 +36,22 @@ export class VectorDesigner {
     public horizontalLineColor: string;
     public verticalLineColor: string;
     public _mouseGrabObjects: Control[];
-
+    public defaultHeight: number;
+    public defaultthickness: number;
     private _requestRender: boolean;
+    private _maxSerialNumber: number;
 
-
+    /**
+     * 磁性吸附服务
+     */
     public get adsorb(): AdsorbService {
         return this._adsorb;
     }
 
+    /**
+     * 抓住对象 把对象从子集中拿出来，防止生成磁吸点时把抓住的对象加进去
+     * @param objects 
+     */
     public grabObjects(objects: Control[]) {
         this.releaseGrabObjects();
         this._adsorb.enabled = false;
@@ -54,6 +63,9 @@ export class VectorDesigner {
         this._adsorb.enabled = true;
     }
 
+    /**
+     * 释放抓住的对象，再把对象放入到子集中去
+     */
     public releaseGrabObjects() {
         this._adsorb.enabled = false;
         while (this._mouseGrabObjects.length > 0) {
@@ -62,6 +74,10 @@ export class VectorDesigner {
         }
         this._adsorb.enabled = true;
     }
+
+    /**
+     * 丢弃所有抓住的对象，不再放回子集中
+     */
     public discardGrabObjects() {
         this._adsorb.enabled = false;
         while (this._mouseGrabObjects.length > 0) {
@@ -80,10 +96,10 @@ export class VectorDesigner {
         return this._toolbar;
     }
 
-
     public get selected(): Control {
         return this._selected;
     }
+
     public set selected(value: Control) {
         if (this._selected != value) {
             if (this._selected != null) {
@@ -94,7 +110,7 @@ export class VectorDesigner {
             this._selected = value;
             var pt: Vector2 = null;
             if (this._selected instanceof AnchorControl) {
-                pt = this.convertPoint(this._selected.getCenter()).add(new Vector2(20, 10));
+                pt = this.convertPoint(this._selected.point).add(new Vector2(20, 10));
             } else if (this._selected instanceof PolygonControl) {
                 pt = this._selected.getSubPoint(this.viewControl.position);
                 pt = this.convertPoint(pt).add(new Vector2(20, 10));
@@ -108,101 +124,7 @@ export class VectorDesigner {
         this.requestRender();
     }
 
-    public add(...ctls: Control[]) {
-        for (let ctl of ctls) {
-            if (ctl != null) {
-                var index = this.children.indexOf(ctl);
-                if (index == -1) {
-                    if (ctl instanceof AnchorControl) {
-                        this.children.push(ctl);
-                    } else if (ctl instanceof PolygonControl) {
-                        this.children.unshift(ctl);
-                    }
-                }
-            }
-        }
-        this.requestRender();
-        this._adsorb.update();
-    }
-    public remove(...ctls: Control[]): Control[] {
-        let result = [];
-        for (let ctl of ctls) {
-            var index = this.children.indexOf(ctl);
-            if (index > -1) {
-                result.push(this.children[index]);
-                this.children.splice(index, 1);
-            }
-            index = this._mouseGrabObjects.indexOf(ctl);
-            if (index > -1) {
-                this._mouseGrabObjects.splice(index, 1);
-            }
-        }
-        this.requestRender();
-        this._adsorb.update();
-        return result;
-    }
 
-    public clear() {
-        this.releaseGrabObjects();
-        this.connector = null;
-        this.virtualCursor = null;
-        this._adsorb.clear();
-        this._adsorb.enabled = false;
-        while (this.children.length > 0) {
-            var control = this.children.shift();
-            control.remove();
-        }
-        this._adsorb.enabled = true;
-    }
-
-    public from(data: number[][][]) {
-        this.clear();
-        var map: { [key: string]: AnchorControl } = {};
-        var objects: Control[] = [];
-        for (let block of data) {
-            var fromKey = block[1][0] + ',' + block[1][1];
-            var frompoint = new Vector2(block[1][0], block[1][1]);
-            var fromanchor: AnchorControl;
-            var toKey = block[4][0] + ',' + block[4][1];
-            var topoint = new Vector2(block[4][0], block[4][1]);
-            var toanchor: AnchorControl;
-            // ============================
-            fromanchor = map[fromKey];
-            if (fromanchor == null) {
-                fromanchor = this.createAnchor(frompoint.x, frompoint.y);
-                map[fromKey] = fromanchor;
-                objects.push(fromanchor);
-            }
-            // ============================
-            toanchor = map[toKey];
-            if (toanchor == null) {
-                toanchor = this.createAnchor(topoint.x, topoint.y);
-                map[toKey] = toanchor;
-                objects.push(toanchor);
-            }
-            // ============================
-            var segment = this.createPolygon(fromanchor, toanchor);
-            objects.push(segment);
-        }
-        for (let key in map) {
-            map[key].update();
-        }
-        this.add.apply(this, objects);
-        map = {};
-    }
-
-
-
-
-    public toArrray(): number[][][] {
-        var result: number[][][] = [];
-        for (var control of this._children) {
-            if (control instanceof PolygonControl) {
-                result.push(control.toArray());
-            }
-        }
-        return result;
-    }
 
 
 
@@ -225,6 +147,9 @@ export class VectorDesigner {
         this.horizontalLineColor = '#00FF00';
         this.verticalLineColor = '#00FF00';
         this._requestRender = true;
+        this.defaultHeight = 100;
+        this.defaultthickness = 10;
+        this._maxSerialNumber = 0;
     }
 
 
@@ -335,7 +260,6 @@ export class VectorDesigner {
     }
 
 
-
     public convertPoints(points: Vector2[]): Vector2[] {
         var result = [];
         for (let point of points) {
@@ -345,29 +269,155 @@ export class VectorDesigner {
     }
 
 
-    public createAnchor(x: number, y: number): AnchorControl {
+    public createAnchor(id: number, x: number, y: number): AnchorControl {
         var x = Number.parseFloat(x.toFixed(4));
         var y = Number.parseFloat(y.toFixed(4));
-        for (let anchor of this.children) {
-            if (anchor instanceof AnchorControl) {
-                if (anchor.anchor.x === x && anchor.anchor.y === y) {
-                    return anchor;
+        if (id == null) {
+            for (let anchor of this.children) {
+                if (anchor instanceof AnchorControl) {
+                    if (anchor.anchor.x === x && anchor.anchor.y === y) {
+                        return anchor;
+                    }
                 }
             }
+            id = ++this._maxSerialNumber;
         }
         var anchor = new AnchorControl(this, x, y);
+        anchor.id = id;
+        if (id >= this._maxSerialNumber) {
+            this._maxSerialNumber = id + 1;
+        }
         return anchor;
     }
 
-    public createPolygon(anchor1: AnchorControl, anchor2: AnchorControl, thickness: number = 10): PolygonControl {
+    public createPolygon(id: number, anchor1: AnchorControl, anchor2: AnchorControl, thickness?: number): PolygonControl {
         if (anchor1 == anchor2) return null;
         if (anchor1.anchor.targets.indexOf(anchor2.anchor) > -1) {
             return null;
         }
+        if (id && id >= this._maxSerialNumber) {
+            this._maxSerialNumber = id + 1;
+        } else {
+            id = ++this._maxSerialNumber;
+        }
+        if (thickness == null) thickness = this.defaultthickness;
         var polygon = new PolygonControl(this, anchor1, anchor2, thickness);
+        polygon.id = id;
+        polygon.height = this.defaultHeight;
         return polygon;
     }
 
+
+
+    public add(...ctls: Control[]) {
+        for (let ctl of ctls) {
+            if (ctl != null) {
+                var index = this.children.indexOf(ctl);
+                if (ctl.id && ctl.id >= this._maxSerialNumber) {
+                    this._maxSerialNumber = ctl.id + 1;
+                }
+                if (index == -1) {
+                    if (ctl instanceof AnchorControl) {
+                        this.children.push(ctl);
+                    } else if (ctl instanceof PolygonControl) {
+                        this.children.unshift(ctl);
+                    }
+                }
+            }
+        }
+        this.requestRender();
+        this._adsorb.update();
+    }
+
+
+    public remove(...ctls: Control[]): Control[] {
+        let result = [];
+        for (let ctl of ctls) {
+            var index = this.children.indexOf(ctl);
+            if (index > -1) {
+                result.push(this.children[index]);
+                this.children.splice(index, 1);
+            }
+            index = this._mouseGrabObjects.indexOf(ctl);
+            if (index > -1) {
+                this._mouseGrabObjects.splice(index, 1);
+            }
+        }
+        this.requestRender();
+        this._adsorb.update();
+        return result;
+    }
+
+    public clear() {
+        this.releaseGrabObjects();
+        this.connector = null;
+        this.selected = null;
+        this.virtualCursor = null;
+        this._adsorb.clear();
+        this._adsorb.enabled = false;
+        while (this.children.length > 0) {
+            var control = this.children.shift();
+            control.remove();
+        }
+        this._adsorb.enabled = true;
+        this._maxSerialNumber = 0;
+    }
+
+
+    public toArrray(): number[][][] {
+        var result: number[][][] = [];
+        for (var control of this._children) {
+            if (control instanceof PolygonControl) {
+                result.push(control.toArray());
+            }
+        }
+        return result;
+    }
+
+
+    public serialize(): AreaWalls {
+        var area: AreaWalls = {
+            anchors: [],
+            walls: []
+        };
+        for (var control of this._children) {
+            if (control instanceof PolygonControl) {
+                area.walls.push(control.serialize());
+            } else if (control instanceof AnchorControl) {
+                if (control.polygons.length > 0) {
+                    area.anchors.push(control.serialize());
+                }
+            }
+        }
+        return area;
+    }
+
+
+    public from(area: AreaWalls) {
+        this.clear();
+        var map: { [key: string]: AnchorControl } = {};
+        var objects: Control[] = [];
+        for (let anchor of area.anchors) {
+            map[anchor.id] = this.createAnchor(anchor.id, anchor.x, anchor.y);
+            objects.push(map[anchor.id]);
+        }
+        for (let wall of area.walls) {
+            var from = map[wall.anchors[0]];
+            var to = map[wall.anchors[1]];
+            if (from && to) {
+                var segment = this.createPolygon(wall.id, from, to, wall.thick);
+                if (segment) {
+                    segment.height = wall.height;
+                    objects.push(segment);
+                }
+            }
+        }
+        for (let key in map) {
+            map[key].update();
+        }
+        this.add.apply(this, objects);
+        map = {};
+    }
 
 
 

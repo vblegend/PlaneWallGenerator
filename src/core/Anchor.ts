@@ -33,7 +33,7 @@ export class Anchor {
     public setPosition(v: Vector2) {
         this._point.x = v.x;
         this._point.y = v.y;
-        this._point.round();
+        this._point.round4();
     }
 
     public dispose() {
@@ -102,7 +102,7 @@ export class Anchor {
                     /* get projective point */
                     intersectionPoint = Vector2.getProjectivePoint(edge_path[0], edge_path[1], this.point);
                 }
-                intersectionPoint.round();
+                intersectionPoint.round4();
                 var segment = this._map.get(anchor);
                 var points = segment.getPort(this);
                 points[1] = this.point.clone();
@@ -124,9 +124,9 @@ export class Anchor {
             var left_point = ps.rotatePoint(start, theta - 90);
             var right_point = ps.rotatePoint(start, theta + 90);
             var points = segment.getPort(this);
-            points[0] = left_point.round();
+            points[0] = left_point.round4();
             points[1] = this.point.clone();
-            points[2] = right_point.round();
+            points[2] = right_point.round4();
         }
 
     }

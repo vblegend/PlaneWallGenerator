@@ -7,21 +7,22 @@ import { Anchor } from '../../core/Anchor';
 import { AnchorControl } from './AnchorControl';
 import { RenderType } from '../Renderer';
 import { Bounds } from '../common/Bounds';
+import { WallConfig2d } from '../../core/WallElement';
 
 
 export class PolygonControl extends Control {
     private _segment: Segment;
-    private _hTime: number;
     private _points: Vector2[];
     private _bounds: Bounds;
     private _anchors: AnchorControl[];
-    private _moveing: boolean;
-
+    private _anchorPositions: Vector2[];
+    public height: number;
 
     public constructor(designer: VectorDesigner, anchor1: AnchorControl, anchor2: AnchorControl, thickness: number) {
         super(designer);
         this._anchors = [anchor1, anchor2];
         this._points = [];
+        this.dragDelayTime = 200;
         this._bounds = new Bounds(0, 0, 0, 0);
         this._segment = new Segment(anchor1.anchor, anchor2.anchor, thickness);
         this.strokeColor = '#FFFFFF';
@@ -92,10 +93,10 @@ export class PolygonControl extends Control {
         var anchor2 = this.anchors[1];
         var mousePosition = this.designer.mapPoint(point);
         var target = Vector2.getProjectivePoint(anchor1.position, anchor2.position, mousePosition);
-        var targetAnchor = this.designer.createAnchor(target.x, target.y);
+        var targetAnchor = this.designer.createAnchor(null, target.x, target.y);
         anchors.push(targetAnchor);
         for (let anchor of this.anchors) {
-            var segment = this.designer.createPolygon(anchor, targetAnchor,this.thickness);
+            var segment = this.designer.createPolygon(null, anchor, targetAnchor, this.thickness);
             if (segment != null) polygons.push(segment);
             anchors.push(anchor);
         }
@@ -114,66 +115,15 @@ export class PolygonControl extends Control {
     }
 
 
-
-
-    protected onMouseEnter() {
-        super.onMouseEnter();
-        if (this.isSelected) {
-
-        }
-    }
-
-    protected onMouseLeave() {
-        super.onMouseLeave();
-    }
-
-
-    protected onMouseDown(button: number, pos: Vector2) {
-        super.onMouseDown(button, pos);
-        if (button === 0) {
-            this._hTime = window.setTimeout(() => {
-                this._hTime = null;
-                if (this.designer.viewControl.hitObject == this) {
-                    this.designer.renderer.canvas.style.cursor = 'move';
-                    this._moveing = true;
-                    this.beginDrag(this.position);
-                }
-            }, 200);
-        }
-    }
-
-    protected onMouseMove(button: number, pos: Vector2) {
-        super.onMouseMove(button, pos);
-        if (this._moveing) {
-            this.draging(pos);
-        }
-    }
-
-    protected onMouseUp(button: number, pos: Vector2) {
-        super.onMouseUp(button, pos);
-        if (this._hTime) {
-            window.clearTimeout(this._hTime);
-            this._hTime = null;
-        }
-        if (this._moveing) {
-            this._moveing = false;
-            this.designer.renderer.canvas.style.cursor = 'default';
-            this.EndDrag(this.position);
-        }
-    }
-
-
-
-
-    private _anchorPositions: Vector2[];
-
-    private beginDrag(canvasPosition: Vector2) {
+    protected onBeginDrag(canvasPosition: Vector2) {
+        this.designer.renderer.canvas.style.cursor = 'move';
         var viewPos = this.designer.mapPoint(canvasPosition);
         this._anchorPositions = [viewPos.sub(this.anchors[0].position), viewPos.sub(this.anchors[1].position)];
     }
 
-    private draging(canvasPosition: Vector2) {
-        console.log('draging');
+
+
+    protected onDraging(canvasPosition: Vector2) {
         var viewPos = this.designer.mapPoint(canvasPosition);
 
         // var pos1 = viewPos.sub(this._anchorPositions[0]);
@@ -186,10 +136,6 @@ export class PolygonControl extends Control {
         // var miny = Math.min(result1.y ? result1.y : pos1.y, result2.y ? result2.y : pos2.y);
 
 
-
-
-
-
         this.anchors[0].setPosition(viewPos.sub(this._anchorPositions[0]));
         this.anchors[1].setPosition(viewPos.sub(this._anchorPositions[1]));
         this.anchors[0].updateNearby();
@@ -197,16 +143,10 @@ export class PolygonControl extends Control {
         this.designer.requestRender();
     }
 
-    private EndDrag(canvasPosition: Vector2) {
-        console.log('EndDrag');
+
+    protected onEndDrag(canvasPosition: Vector2) {
+        this.designer.renderer.canvas.style.cursor = 'default';
     }
-
-
-
-
-
-
-
 
 
     public update() {
@@ -235,10 +175,6 @@ export class PolygonControl extends Control {
         this.designer.selected = this;
     }
 
-    public getCenter(): Vector2 {
-        return this._bounds.getCenter();
-    }
-
     public render() {
         this.designer.renderer.opacity = this.opacity;
         this.designer.renderer.fillColor = this.isHover && !this.isSelected ? this.hoverColor : this.fillColor;
@@ -255,16 +191,14 @@ export class PolygonControl extends Control {
         return this._segment.points;
     }
 
-    public get points(): Vector2[] {
-        return this._points;
+    public serialize(): WallConfig2d {
+        return {
+            id: this.id,
+            anchors: [this.anchors[0].id, this.anchors[1].id],
+            thick: this.thickness,
+            height: this.height,
+        };
     }
-
-
-    public toString(): string {
-        return `id=${this.id}`;
-    }
-
-
 
 
 }

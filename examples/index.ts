@@ -9,6 +9,7 @@ import { PolygonControl } from "../src/Designer/Views/PolygonControl";
 import { FORMERR } from "dns";
 import { stringify } from "querystring";
 import { Control } from "../src/Designer/Views/Control";
+import { AreaWalls } from "../src/core/WallElement";
 
 /**
  * this is example
@@ -26,45 +27,17 @@ export class Examples {
         var vRuler = new VerticalRuler(designer, vrulercanvas);
         designer.run();
 
-        var anthors: { [key: string]: AnchorControl } = {};
-        var segments: { [key: string]: PolygonControl } = {};
-        var objects: Control[] = [];
-        for (var i = 0; i <= 11; i++) {
-            anthors[i] = designer.createAnchor(Math.random() * 2000 - 1000, Math.random() * 2000 - 1000);
-            anthors[i].id = i;
-            objects.push(anthors[i]);
-        }
-        for (var i = 0; i < 5; i++) {
-            while (segments[i] == null) {
-                var f = Math.round(Math.random() * 10);
-                var t = Math.round(Math.random() * 10);
-                segments[i] = designer.createPolygon(anthors[f], anthors[t]);
-            }
-            objects.push(segments[i]);
-        }
-
-        for (let key in anthors) {
-            anthors[key].update();
-        }
-
-        designer.add.apply(designer, objects);
-
         // 
         designer.onZoom.add(e => {
             var scale = document.getElementById("scale") as HTMLDivElement;
             scale.innerText = e + '%';
         }, this);
+
         var btnBuild = document.getElementById("btnBuild") as HTMLCanvasElement;
         if (btnBuild) {
             btnBuild.onclick = () => {
-                var result = designer.toArrray();
                 var output = document.getElementById("output") as HTMLTextAreaElement;
-                var block = [];
-                for (let data of result) {
-                    block.push(JSON.stringify(data));
-                }
-                var outputText = '[\r\n    ' + block.join(',\r\n    ') + '\r\n]\r\n';
-                output.value = outputText;
+                output.value = JSON.stringify(designer.serialize());
             }
         }
 
@@ -72,7 +45,7 @@ export class Examples {
         if (btnParse) {
             btnParse.onclick = () => {
                 var output = document.getElementById("output") as HTMLTextAreaElement;
-                var arrays = JSON.parse(output.value) as number[][][];
+                var arrays = JSON.parse(output.value) as AreaWalls;
                 console.time('Parse');
                 // console.profile('Parse')
                 designer.from(arrays);
@@ -80,6 +53,78 @@ export class Examples {
                 console.timeEnd('Parse');
             }
         }
+
+
+
+        var btnClean = document.getElementById("btnClean") as HTMLCanvasElement;
+        if (btnClean) {
+            btnClean.onclick = () => {
+                designer.clear();
+            }
+        }
+
+        var btnGoCenter = document.getElementById("btnGoCenter") as HTMLCanvasElement;
+        if (btnGoCenter) {
+            btnGoCenter.onclick = () => {
+                designer.viewControl.onmove.dispatch(100, new Vector2(), true);
+            }
+        }
+
+        var btnRandom = document.getElementById("btnRandom") as HTMLCanvasElement;
+        if (btnRandom) {
+            btnRandom.onclick = () => {
+                var anthors: AnchorControl[] = [];
+                var segments: PolygonControl[] = [];
+                var objects: Control[] = [];
+                for (let anchor of designer.children) {
+                    if (anchor instanceof AnchorControl) {
+                        anthors.push(anchor);
+                    }
+                }
+                for (var i = 0; i <= 20; i++) {
+                    var anchor = designer.createAnchor(null, Math.random() * 2000 - 1000, Math.random() * 2000 - 1000);
+                    anthors.push(anchor);
+                    objects.push(anchor);
+                }
+                for (var i = 0; i < 20; i++) {
+                    while (segments[i] == null) {
+                        var f = Math.round(Math.random() * (anthors.length - 1));
+                        var t = Math.round(Math.random() * (anthors.length - 1));
+                        segments[i] = designer.createPolygon(null, anthors[f], anthors[t]);
+                    }
+                    objects.push(segments[i]);
+                }
+
+
+                for (let object of anthors) {
+                    if (object instanceof AnchorControl) {
+                        if (object.polygons.length == 0) {
+                            var index = objects.indexOf(object);
+                            if (index > -1) {
+                                objects.splice(index, 1);
+                            }
+                        }
+                    }
+                }
+
+                for (let object of anthors) {
+                    if (object instanceof AnchorControl) {
+                        object.update();
+                    }
+                }
+
+                designer.add.apply(designer, objects);
+
+            }
+        }
+
+
+
+
+
+
+
+
     }
 }
 

@@ -110,7 +110,7 @@ export class ViewController {
         }
         if (this.designer.selected == null) {
             let v = this.designer.mapPoint(this.position);
-            var anchor = this.designer.createAnchor(v.x, v.y);
+            var anchor = this.designer.createAnchor(null, v.x, v.y);
             this.designer.add(anchor);
             this.designer.selected = anchor;
         }
@@ -180,6 +180,7 @@ export class ViewController {
 
     private mouse_move(e: MouseEvent) {
         if (this._iscanceled) return;
+
         let v = this.designer.mapPoint(this.position);
         var excluded: Control[] = [];
         if (this._pressedObject instanceof AnchorControl) {

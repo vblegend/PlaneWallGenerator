@@ -16,8 +16,8 @@ export class Connector {
         this.designer = designer;
         this.origin = origin;
         var v = this.designer.mapPoint(this.designer.viewControl.position);
-        this.newAnchor = new AnchorControl(this.designer, v.x, v.y);
-        this.newSegment = new PolygonControl(this.designer, origin, this.newAnchor, 10);
+        this.newAnchor = this.designer.createAnchor(null, v.x, v.y);
+        this.newSegment = this.designer.createPolygon(null, origin, this.newAnchor, 10);
         this.designer.virtualCursor = this.newAnchor;
         this.update();
     }
@@ -55,7 +55,7 @@ export class Connector {
 
 
     public commit(hover: Control, position: Vector2) {
-        var point = this.newAnchor.points[0];
+        var point = this.newAnchor.point;
         var anchor = this.designer._children.find(e => e instanceof AnchorControl && e.anchor.x === point.x && e.anchor.y === point.y) as AnchorControl;
         if (hover instanceof AnchorControl) {
             anchor = hover;
@@ -66,7 +66,7 @@ export class Connector {
             // split
             this.newAnchor = hover.split(this.designer.viewControl.position);
             // merage
-            this.newSegment = new PolygonControl(this.designer, this.origin, this.newAnchor, 10);
+            this.newSegment = this.designer.createPolygon(null, this.origin, this.newAnchor, 10);
             this.newAnchor.update();
             this.origin.update();
         } else if (anchor != null) {
@@ -75,7 +75,7 @@ export class Connector {
             this.newAnchor.remove();
             this.newAnchor = anchor;
             /* use old anchor create new anchor */
-            this.newSegment = new PolygonControl(this.designer, this.origin, this.newAnchor, 10);
+            this.newSegment = this.designer.createPolygon(null, this.origin, this.newAnchor, 10);
             this.update();
             /* add objects to designer */
             this.designer.add(this.newAnchor, this.newSegment);

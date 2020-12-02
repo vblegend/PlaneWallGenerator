@@ -30,6 +30,9 @@ export class AdsorbService {
      */
     private verticalTraces: number[];
 
+    /**
+     * 
+     */
     public enabled: boolean;
 
 
@@ -52,10 +55,8 @@ export class AdsorbService {
         this.verticalTraces.length = 0;
         for (let object of this.designer.children) {
             if (object instanceof AnchorControl) {
-                for (let point of object.points) {
-                    this.horizontalTraces.push(point.x);
-                    this.verticalTraces.push(point.y);
-                }
+                this.horizontalTraces.push(object.point.x);
+                this.verticalTraces.push(object.point.y);
             }
         }
         this.horizontalTraces = Array.from(new Set(this.horizontalTraces)).sort((a, b) => a - b);
@@ -64,7 +65,9 @@ export class AdsorbService {
 
 
 
-
+    /**
+     * 
+     */
     public clear() {
         this.horizontalTraces.length = 0;
         this.verticalTraces.length = 0;
