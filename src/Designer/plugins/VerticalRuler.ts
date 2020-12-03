@@ -1,5 +1,5 @@
 import { Vector2 } from "../../Core/Vector2";
-import { Renderer, TextAlign } from "../Renderer";
+import { Renderer, HorizontalAlign } from "../Renderer";
 import { VectorDesigner } from "../VectorDesigner";
 
 
@@ -45,6 +45,7 @@ export class VerticalRuler {
         var offset = this.designer.center.y % (designerlength / this.height * 100);
         this._renderer.strokeColor = '#000000';
         this._renderer.fillColor = '#000000';
+        this._renderer.fontSize = 10;
         var center = this.height / 2;
         var offsetCenter = this.designer.center.y / this.designer.res;
         var offsetCalibration = offset / this.designer.res;
@@ -89,9 +90,9 @@ export class VerticalRuler {
     private drawCalibration(y: number, value?: number) {
         var calibration = this.width / 3;
         if (value != null) {
-            this._renderer.translateRotate(this.width * 0.8, y, 270);
-            this._renderer.fillText(value.toString(), this.width * 0.8, y, null, TextAlign.CENTER);
-            this._renderer.translateRotate(this.width * 0.8, y, -270);
+            this._renderer.translateRotate(this.width * 0.65, y, 270);
+            this._renderer.fillText(value.toString(), this.width * 0.65, y, null, HorizontalAlign.CENTER);
+            this._renderer.translateRotate(this.width * 0.65, y, -270);
             calibration = this.width / 2;
         }
         this._renderer.line(0, y, calibration, y, 1);

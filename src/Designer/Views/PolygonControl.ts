@@ -5,7 +5,7 @@ import { VectorDesigner } from '../VectorDesigner';
 import { Segment } from '../../Core/Segment';
 import { Anchor } from '../../Core/Anchor';
 import { AnchorControl } from './AnchorControl';
-import { RenderType } from '../Renderer';
+import { RenderType, HorizontalAlign, VerticalAlign } from '../Renderer';
 import { Bounds } from '../Common/Bounds';
 import { WallSegment } from '../../Core/WallElement';
 
@@ -129,6 +129,8 @@ export class PolygonControl extends Control {
         // var result2 = this.designer.adsorb.adsorption(pos2);
         // var minx = Math.min(result1.x ? result1.x : pos1.x, result2.x ? result2.x : pos2.x);
         // var miny = Math.min(result1.y ? result1.y : pos1.y, result2.y ? result2.y : pos2.y);
+
+
         this.anchors[0].setPosition(e.viewPos.sub(this._anchorPositions[0]));
         this.anchors[1].setPosition(e.viewPos.sub(this._anchorPositions[1]));
         this.anchors[0].updateNearby();
@@ -143,14 +145,17 @@ export class PolygonControl extends Control {
 
 
     public update() {
-        if (this._segment != null) {
+        if (this._segment != null && this._segment.pointsUpdated) {
             this._points = [];
             this._bounds = new Bounds(0, 0, 0, 0);
-            for (let point of this._segment.points) {
+            var points = this._segment.points;
+            for (let point of points) {
                 const v = new Vector2().fromArray(point);
                 this._points.push(v);
                 this._bounds.extendFromPoint(v);
             }
+
+
         }
     }
 
@@ -173,6 +178,28 @@ export class PolygonControl extends Control {
         this.designer.renderer.fillColor = this.isHover && !this.isSelected ? this.hoverColor : this.fillColor;
         this.designer.renderer.strokeColor = this.strokeColor;
         this.designer.renderer.polygon(this.designer.convertPoints(this._points), true, RenderType.ALL);
+
+        if (this.isHover || this.isSelected || this.anchors.indexOf(this.designer.selected as any) > -1 || this.designer.viewControl.alt) {
+            //取 最长边的距离 而不是取锚点的距离
+            let d1 = this._points[2].distanceTo(this._points[3]);
+            let d2 = this._points[0].distanceTo(this._points[5]);
+            var distance = Math.max(d1, d2).toFixed(2) + 'mm';
+            let pointa = this.anchors[0].position;
+            let pointb = this.anchors[1].position;
+            if (pointa.x < pointb.x) {
+                let m = pointa;
+                pointa = pointb;
+                pointb = m;
+            }
+            this.designer.renderer.fontSize = 10 / this.designer.res;
+            let pos = this.designer.convertPoint(pointa.center(pointb));
+            let angle = pointa.angle(pointb);
+            this.designer.renderer.fillColor = this.isSelected ? '#FFFFFF' : '#ABABAB';
+            this.designer.renderer.translateRotate(pos.x, pos.y, angle);
+            this.designer.renderer.fillText(distance, pos.x, pos.y, null, HorizontalAlign.CENTER, VerticalAlign.CENTER);
+            this.designer.renderer.translateRotate(pos.x, pos.y, -angle);
+        }
+
     }
 
     public get anchors(): AnchorControl[] {

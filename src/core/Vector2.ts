@@ -27,7 +27,7 @@ export class Vector2 {
         this.y = (this.y * 100 | 0) / 100;
         return this;
     }
-    
+
     public round0(): this {
         this.x = this.x | 0;
         this.y = this.y | 0;
@@ -69,6 +69,21 @@ export class Vector2 {
         this.y = y;
     }
 
+    public equals(v: Vector2): boolean {
+        return this.x === v.x && this.y === v.y;
+    }
+
+
+    /**
+     * Updates the value of the vector and returns the change
+     * @param v 
+     */
+    public update(v: Vector2): boolean {
+        let updated = !this.equals(v);
+        this.x = v.x;
+        this.y = v.y;
+        return updated;
+    }
 
     /**
      * 判断当前点是否位于多边形内
@@ -106,7 +121,26 @@ export class Vector2 {
         return Math.sqrt(dx * dx + dy * dy);
     }
 
+    public radian(v: Vector2): number {
+        let angle = Math.atan2(this.y - v.y, this.x - v.x)
+        return angle;
+    }
 
+    public angle(v: Vector2): number {
+        return this.radian(v) / Math.PI * 180;
+    }
+
+    public center(v: Vector2): Vector2 {
+        let left = this.x;
+        let top = this.y;
+        let right = this.x;
+        let bottom = this.y;
+        if (left > v.x) left = v.x;
+        if (top > v.y) top = v.y;
+        if (bottom < v.y) bottom = v.y;
+        if (right < v.x) right = v.x;
+        return new Vector2(left + (right - left) / 2, top + (bottom - top) / 2);
+    }
 
 
     /**

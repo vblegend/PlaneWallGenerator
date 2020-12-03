@@ -89,4 +89,9 @@ export class MouseCapturer {
         return this._captureing;
     }
 
+    public focus(){
+        this._element.focus();
+    }
+
+
 }

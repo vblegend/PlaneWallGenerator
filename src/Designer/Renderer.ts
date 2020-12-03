@@ -1,9 +1,14 @@
 import { Vector2 } from "../Core/Vector2";
 
-export enum TextAlign {
+export enum HorizontalAlign {
     LEFT = 0,
     CENTER = 1,
     RIGHT = 2
+}
+export enum VerticalAlign {
+    TOP = 0,
+    CENTER = 1,
+    BOTTOM = 2
 }
 
 
@@ -23,6 +28,9 @@ export class Renderer {
     private _height: number;
     private _localOffset: Vector2;
 
+    private _font: string;
+    private _fontsize: number;
+
 
     public constructor(canvas?: HTMLCanvasElement) {
         if (canvas) {
@@ -30,10 +38,14 @@ export class Renderer {
         } else {
             this._canvas = document.createElement("canvas");
         }
+        this._canvas.tabIndex = 0;
+        this._canvas.style.outline = 'none';
         this._context = this.canvas.getContext("2d");
         this._context.globalAlpha = 1.0;
         this._context.translate(0, 0);
         this._localOffset = new Vector2(0.5, 0.5);
+        this._font = 'sans-serif';
+        this._fontsize = 10;
     }
 
     public apply(div: HTMLDivElement) {
@@ -56,10 +68,8 @@ export class Renderer {
         this.canvas.width = width;
         this.canvas.height = height;
         var ratio = this.getPixelRatio(this.context);
-
         this.canvas.style.width = width + 'px';
         this.canvas.style.height = height + 'px';
-
         this.canvas.width = width * ratio;
         this.canvas.height = height * ratio;
     }
@@ -98,6 +108,26 @@ export class Renderer {
         return this._height;
     }
 
+    public get font(): string {
+        return this._font;
+    }
+
+    public set font(value: string) {
+        this._font = value;
+        this._context.font = `${this._fontsize}px ${this._font}`;
+    }
+
+    public get fontSize(): number {
+        return this._fontsize;
+    }
+
+    public set fontSize(value: number) {
+        this._fontsize = value;
+        this._context.font = `${this._fontsize}px ${this._font}`;
+    }
+
+
+
 
     /**
      * 
@@ -107,16 +137,23 @@ export class Renderer {
      * @param width 
      * @param align 
      */
-    public fillText(text: string, x: number, y: number, width: number, align: TextAlign) {
+    public fillText(text: string, x: number, y: number, width?: number, align?: HorizontalAlign, vertical?: VerticalAlign) {
         var left = x;
-        if (align === TextAlign.RIGHT) {
+        var top = y + this.fontSize - 1;
+        if (vertical === VerticalAlign.CENTER) {
+            top = top - this.fontSize / 2;
+        } else if (vertical === VerticalAlign.BOTTOM) {
+            top = y + this.fontSize * 2;
+        }
+        top -= this.fontSize * 0.1;
+        if (align === HorizontalAlign.RIGHT) {
             const measure = this.context.measureText(text);
             if (width == null) {
                 left = x - measure.width;
             } else {
                 left = x + width - measure.width;
             }
-        } else if (align === TextAlign.CENTER) {
+        } else if (align === HorizontalAlign.CENTER) {
             const measure = this.context.measureText(text);
             if (width == null) {
                 left = x - measure.width / 2;
@@ -124,7 +161,7 @@ export class Renderer {
                 left = x + (width + measure.width) / 2;
             }
         }
-        this.context.fillText(text, left + this._localOffset.x, y + this._localOffset.y);
+        this.context.fillText(text, left + this._localOffset.x, top + this._localOffset.y);
     }
 
 
@@ -187,11 +224,11 @@ export class Renderer {
      * Rotate
      * @param x 
      * @param y 
-     * @param angle 
+     * @param radian 
      */
-    public translateRotate(x: number, y: number, angle: number) {
+    public translateRotate(x: number, y: number, r: number) {
         this.context.translate(x, y);
-        this.context.rotate(angle / 180 * Math.PI);
+        this.context.rotate(r / 180 * Math.PI);
         this.context.translate(-x, -y);
     }
 

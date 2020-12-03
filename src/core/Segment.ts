@@ -7,6 +7,10 @@ export class Segment {
     private _start: Anchor;
     private _end: Anchor;
     private _points: Vector2[][];
+    private _updated: boolean;
+
+
+
 
     public constructor(id: number, start: Anchor, end: Anchor, thickness: number) {
         this.id = id;
@@ -14,9 +18,10 @@ export class Segment {
         this._end = end;
         this._thickness = thickness;
         this._points = [];
-        this._points.push([], []);
+        this._points.push([new Vector2(), new Vector2(), new Vector2()], [new Vector2(), new Vector2(), new Vector2()]);
         this._start.addTarget(this._end, this);
         this._end.addTarget(this._start, this);
+        this._updated = false;
     }
 
     public dispose() {
@@ -26,6 +31,24 @@ export class Segment {
             this._points = null;
         }
     }
+
+
+    /**
+     * The points has been updated
+     */
+    public get pointsUpdated(): boolean {
+        return this._updated;
+    }
+
+
+    /**
+     * The points need updated
+     */
+    public needUpdate(): boolean {
+        this._updated = true;
+        return true;
+    }
+
 
     /**
      * remove this segment from graphic
@@ -41,13 +64,12 @@ export class Segment {
 
 
     public get points(): number[][] {
-        var arry: number[][] = [];
-        for (var o of this._points[0]) {
-            arry.push([o.x, o.y]);
+        const arry: number[][] = [];
+        for (let i = 0; i < 3; i++) {
+            arry[i] = [this._points[0][i].x, this._points[0][i].y];
+            arry[i + 3] = [this._points[1][i].x, this._points[1][i].y];
         }
-        for (var o of this._points[1]) {
-            arry.push([o.x, o.y]);
-        }
+        this._updated = false;
         return arry;
     }
 

@@ -19,7 +19,17 @@ export class ViewController {
     private _pressedObject: Control;
     private _iscanceled: boolean;
     private capturer: MouseCapturer;
+    private _button: number;
+    public _altState: boolean;
 
+
+    public get alt(): boolean {
+        return this._altState;
+    }
+
+    public get button(): number {
+        return this._button;
+    }
     public get onmove(): signals.Signal {
         return this._onmove;
     }
@@ -27,6 +37,7 @@ export class ViewController {
     public constructor(designer: VectorDesigner) {
         this.designer = designer;
         this._iscanceled = false;
+        this._button = null;
         this._onmove = new signals.Signal();
         this.position = new Vector2(-1, -1);
         this.capturer = new MouseCapturer(this.designer.renderer.canvas);
@@ -34,11 +45,11 @@ export class ViewController {
         this.capturer.onMouseMove.add(this.mouse_move, this);
         this.capturer.onMouseUp.add(this.mouse_up, this);
         this.designer.renderer.canvas.ondblclick = this.mouse_dblclick.bind(this);
-        // this.designer.renderer.canvas.onmousedown = this.mouse_down.bind(this);
-        // this.designer.renderer.canvas.onmousemove = this.mouse_move.bind(this);
-        // this.designer.renderer.canvas.onmouseup = this.mouse_up.bind(this);
         this.designer.renderer.canvas.onwheel = this.wheelChange.bind(this);
         this.designer.renderer.canvas.onscroll = this.wheelChange.bind(this);
+        this.designer.renderer.canvas.onkeydown = this.key_down.bind(this);
+        this.designer.renderer.canvas.onkeyup = this.key_up.bind(this);
+        //   window.addEventListener('keydown', this.key_down, true);
         this.designer.renderer.canvas.oncontextmenu = (e) => {
             e.preventDefault();
         }
@@ -51,11 +62,32 @@ export class ViewController {
     public dispose() {
         this.designer.renderer.canvas.onwheel = null;
         this.designer.renderer.canvas.onscroll = null;
-        // this.designer.renderer.canvas.onmousedown = null;
-        // this.designer.renderer.canvas.onmousemove = null;
-        // this.designer.renderer.canvas.onmouseup = null;
         this.designer.renderer.canvas.ondblclick = null;
+        this.designer.renderer.canvas.onkeydown = null;
+        this.designer.renderer.canvas.onkeyup = null;
     }
+
+    private key_down(e: KeyboardEvent) {
+        if (e.key === 'Alt') {
+            if (!this._altState) {
+                this._altState = true;
+                this.designer.requestRender();
+                e.preventDefault();
+            }
+        }
+    }
+
+    private key_up(e: KeyboardEvent) {
+        if (e.key === 'Alt') {
+            this._altState = false;
+            this.designer.requestRender();
+            e.preventDefault();
+        }
+        this.capturer.focus();
+    }
+
+
+
 
     private wheelChange(e: WheelEvent) {
         //  var delta = (-e.deltaY / 1000) * 50;
@@ -122,6 +154,8 @@ export class ViewController {
 
     private mouse_down(e: MouseEvent) {
         this.capturer.capture();
+        this.capturer.focus();
+        this._button = e.button;
         this.pressed_state = this.designer.toolbar.visible;
         if (this.pressed_state) {
             this.designer.toolbar.visible = false;
@@ -129,7 +163,6 @@ export class ViewController {
         if (this.designer.connector != null) {
             if (e.button === 2) {
                 this.designer.connector.cancel();
-                this.designer.toolbar.visible = true;
             }
             if (e.button === 0) {
                 this.designer.connector.commit(this.hitObject, this.position);
@@ -137,6 +170,7 @@ export class ViewController {
             this.designer.connector = null;
             this._iscanceled = true;
             this.designer.virtualCursor = null;
+            this.designer.toolbar.visible = true;
             return;
         }
 
@@ -238,6 +272,7 @@ export class ViewController {
 
 
     private mouse_up(e: MouseEvent) {
+        this._button = null;
         if (this.designer.selected == null) {
             this.designer.toolbar.visible = false;
         }
@@ -263,6 +298,7 @@ export class ViewController {
             this.stopEventBubble(e);
             this.designer.renderer.canvas.style.cursor = "default";
         }
+        this.capturer.focus();
     }
 
 

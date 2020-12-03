@@ -138,16 +138,7 @@ export class AnchorControl extends Control {
 
 
 
-    public updateNearby() {
-        for (let target of this._polygons) {
-            for (let v of target.anchors) {
-                if (v !== this) {
-                    v.update();
-                }
-            }
-        }
-        this.update();
-    }
+
 
     public addPolygon(p: PolygonControl, a: AnchorControl) {
         this._polygons.push(p);
@@ -186,6 +177,21 @@ export class AnchorControl extends Control {
         this._anchor.remove();
         this._onupdate.removeAll();
     }
+
+    /**
+     * Updates surrounding anchor points
+     * @param excluded Excluded anchor points
+     */
+    public updateNearby(excluded?: AnchorControl) {
+        for (let anchor of this._linked) {
+            if (anchor !== excluded) {
+                anchor.update();
+            }
+        }
+        this.update();
+    }
+
+
 
     public update() {
         this._anchor.build();
