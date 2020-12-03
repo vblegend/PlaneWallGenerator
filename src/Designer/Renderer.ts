@@ -1,4 +1,4 @@
-import { Vector2 } from "../core/Vector2";
+import { Vector2 } from "../Core/Vector2";
 
 export enum TextAlign {
     LEFT = 0,
@@ -142,8 +142,16 @@ export class Renderer {
     }
 
 
+    public image(image: HTMLImageElement, pos: Vector2, width: number, height: number) {
+        this.context.drawImage(image, pos.x, pos.y, width, height);
+    }
+
+
+
+
+
     public polygon(points: Vector2[], closed: boolean, type: RenderType) {
-        if(points == null || points.length === 0) return;
+        if (points == null || points.length === 0) return;
         this.context.beginPath();
         this.context.moveTo(points[0].x + this._localOffset.x, points[0].y + this._localOffset.y);
         for (var i = 1; i < points.length; i++) {

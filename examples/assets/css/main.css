@@ -1,9 +1,9 @@
-.toolbar {
+.designer-toolbar {
     position: absolute;
     left: 100px;
     top: 100px;
     height: 32px;
-    background: #363636;
+    background: #1b1b1b;
     text-align: center;
     border: solid rgba(88, 88, 88, 1) 1px;
     box-shadow: 0px 0px 10px rgba(33, 33, 33, 1);
@@ -11,10 +11,21 @@
 }
 
 
-.toolbar button, #shortcutPanel button {
+.designer-toolbar .dragbutton {
+    fill: #585858;
+    height: 32px;
+    width: 16px;
+    background-color: #222222;
+    cursor: move;
+    
+    align-content: center;
+}
+
+.designer-toolbar button,
+#shortcutPanel button {
     height: 32px;
     color: #dadada;
-    background-color: #363636;
+    background-color: #1b1b1b;
     border: 0px;
     margin: 0px;
     /* GNOME Web */
@@ -23,27 +34,62 @@
     cursor: pointer;
     outline: none;
 }
-.toolbar button[disabled] {
+
+.designer-toolbar button[disabled] {
     background: rgba(54, 54, 54, 0.5) !important;
     border: 0px;
     cursor: not-allowed;
 }
 
-.toolbar button:hover, #shortcutPanel button:hover {
+.designer-toolbar button:hover,
+#shortcutPanel button:hover {
     background-color: #007fff;
 }
 
-.toolbar button.selected, #shortcutPanel button.selected {
+.designer-toolbar button.selected,
+#shortcutPanel button.selected {
     background-color: #007fff;
 }
 
 
-.toolbar input {
+.designer-toolbar input {
     height: 32px;
 }
 
-.toolbar button img {
+.designer-toolbar button img {
     width: 16px;
     /* opacity: 0.5; */
     filter: invert(100%) sepia(0%) saturate(3183%) hue-rotate(303deg) brightness(108%) contrast(71%);
+}
+
+.designer-toolbar-block {
+    text-align: center;
+}
+
+.designer-toolbar-block a {
+    color: #ffffff;
+    margin-left: 9px;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    /* No support for these yet */
+    -o-user-select: none;
+    user-select: none;
+}
+
+.designer-toolbar-block input {
+    height: 20px;
+    outline: none;
+    vertical-align: middle;
+    width: 30px;
+    background-color: #222222;
+    color: aliceblue;
+    border: 0px;
+    padding: 2px 5px 2px 5px;
+    margin: -3px 5px 0px 5px;
+}
+
+.designer-toolbar-block input::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0;
 }

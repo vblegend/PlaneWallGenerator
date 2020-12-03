@@ -1,4 +1,4 @@
-import { Vector2 } from '../../core/Vector2';
+import { Vector2 } from '../../Core/Vector2';
 
 export class Bounds {
     public left: number;

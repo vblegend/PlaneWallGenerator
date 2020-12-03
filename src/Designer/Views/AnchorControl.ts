@@ -1,14 +1,14 @@
 
-import { Vector2, IVector2 } from '../../core/Vector2';
-import { Control } from './Control';
+import { Vector2, IVector2 } from '../../Core/Vector2';
+import { Control, ControlDragEvent } from './Control';
 import { VectorDesigner } from '../VectorDesigner';
-import { Anchor } from '../../core/Anchor';
+import { Anchor } from '../../Core/Anchor';
 import { RenderType } from '../Renderer';
 import { PolygonControl } from './PolygonControl';
 import * as signals from 'signals';
-import { Segment } from '../../core/Segment';
-import { AdsorbResult } from '../common/AdsorbService';
-import { AnchorConfig2d } from '../../core/WallElement';
+import { Segment } from '../../Core/Segment';
+import { AdsorbResult } from '../Common/AdsorbService';
+import { AnchorPoint } from '../../Core/WallElement';
 
 
 export class AnchorControl extends Control {
@@ -43,21 +43,21 @@ export class AnchorControl extends Control {
     }
 
 
-    protected onBeginDrag(canvasPosition: Vector2) {
-        var viewPos = this.designer.mapPoint(canvasPosition);
+
+    protected onBeginDrag(e: ControlDragEvent) {
         this.designer.grabObjects([this]);
         this.designer.updateElementPoints();
         this.designer.virtualCursor = this;
     }
 
 
-    protected onDraging(canvasPosition: Vector2) {
-        var viewPos = this.designer.mapPoint(canvasPosition);
+    protected onDraging(e: ControlDragEvent) {
+        var viewPos = e.viewPos.sub(e.offset);
         var result: IVector2;
         var hitObject = this.designer.viewControl.hitObject;
         // 如果鼠标在墙上  吸附到墙壁上
         if (hitObject != this && hitObject instanceof PolygonControl) {
-            result = viewPos = hitObject.getSubPoint(canvasPosition);
+            result = viewPos = hitObject.getSubPoint(e.position);
         }
         else {
             // 寻找默认吸附点
@@ -70,7 +70,7 @@ export class AnchorControl extends Control {
         this.designer.requestRender();
     }
 
-    protected onEndDrag(canvasPosition: Vector2) {
+    protected onEndDrag(e: ControlDragEvent) {
         this.designer.virtualCursor = null;
         var anchor = this.designer._children.find(e => e instanceof AnchorControl && e.anchor.x === this.anchor.x && e.anchor.y === this.anchor.y) as AnchorControl;
         if (anchor != null && anchor != this) {
@@ -232,7 +232,7 @@ export class AnchorControl extends Control {
     }
 
 
-    public serialize(): AnchorConfig2d {
+    public serialize(): AnchorPoint {
         return {
             id: this.id,
             x: this.position.x,

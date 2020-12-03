@@ -1,13 +1,13 @@
 
-import { Vector2 } from '../../core/Vector2';
-import { Control } from './Control';
+import { Vector2 } from '../../Core/Vector2';
+import { Control, ControlDragEvent } from './Control';
 import { VectorDesigner } from '../VectorDesigner';
-import { Segment } from '../../core/Segment';
-import { Anchor } from '../../core/Anchor';
+import { Segment } from '../../Core/Segment';
+import { Anchor } from '../../Core/Anchor';
 import { AnchorControl } from './AnchorControl';
 import { RenderType } from '../Renderer';
-import { Bounds } from '../common/Bounds';
-import { WallConfig2d } from '../../core/WallElement';
+import { Bounds } from '../Common/Bounds';
+import { WallSegment } from '../../Core/WallElement';
 
 
 export class PolygonControl extends Control {
@@ -18,13 +18,13 @@ export class PolygonControl extends Control {
     private _anchorPositions: Vector2[];
     public height: number;
 
-    public constructor(designer: VectorDesigner, anchor1: AnchorControl, anchor2: AnchorControl, thickness: number) {
+    public constructor(designer: VectorDesigner, id: number, anchor1: AnchorControl, anchor2: AnchorControl, thickness: number) {
         super(designer);
         this._anchors = [anchor1, anchor2];
         this._points = [];
         this.dragDelayTime = 200;
         this._bounds = new Bounds(0, 0, 0, 0);
-        this._segment = new Segment(anchor1.anchor, anchor2.anchor, thickness);
+        this._segment = new Segment(id, anchor1.anchor, anchor2.anchor, thickness);
         this.strokeColor = '#FFFFFF';
         this.fillColor = '#888888';
         this._anchors[0].onUpdate.add(this.update, this);
@@ -115,36 +115,29 @@ export class PolygonControl extends Control {
     }
 
 
-    protected onBeginDrag(canvasPosition: Vector2) {
+    protected onBeginDrag(e: ControlDragEvent) {
         this.designer.renderer.canvas.style.cursor = 'move';
-        var viewPos = this.designer.mapPoint(canvasPosition);
-        this._anchorPositions = [viewPos.sub(this.anchors[0].position), viewPos.sub(this.anchors[1].position)];
+        this._anchorPositions = [e.viewPos.sub(this.anchors[0].position), e.viewPos.sub(this.anchors[1].position)];
     }
 
 
 
-    protected onDraging(canvasPosition: Vector2) {
-        var viewPos = this.designer.mapPoint(canvasPosition);
-
+    protected onDraging(e: ControlDragEvent) {
         // var pos1 = viewPos.sub(this._anchorPositions[0]);
         // var pos2 = viewPos.sub(this._anchorPositions[1]);
-
         // var result1 = this.designer.adsorb.adsorption(pos1);
         // var result2 = this.designer.adsorb.adsorption(pos2);
-
         // var minx = Math.min(result1.x ? result1.x : pos1.x, result2.x ? result2.x : pos2.x);
         // var miny = Math.min(result1.y ? result1.y : pos1.y, result2.y ? result2.y : pos2.y);
-
-
-        this.anchors[0].setPosition(viewPos.sub(this._anchorPositions[0]));
-        this.anchors[1].setPosition(viewPos.sub(this._anchorPositions[1]));
+        this.anchors[0].setPosition(e.viewPos.sub(this._anchorPositions[0]));
+        this.anchors[1].setPosition(e.viewPos.sub(this._anchorPositions[1]));
         this.anchors[0].updateNearby();
         this.anchors[1].updateNearby();
         this.designer.requestRender();
     }
 
 
-    protected onEndDrag(canvasPosition: Vector2) {
+    protected onEndDrag(e: ControlDragEvent) {
         this.designer.renderer.canvas.style.cursor = 'default';
     }
 
@@ -187,11 +180,11 @@ export class PolygonControl extends Control {
     }
 
 
-    public toArray(): number[][] {
+    public toPolygon(): number[][] {
         return this._segment.points;
     }
 
-    public serialize(): WallConfig2d {
+    public serialize(): WallSegment {
         return {
             id: this.id,
             anchors: [this.anchors[0].id, this.anchors[1].id],

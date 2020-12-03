@@ -1,23 +1,35 @@
-import { Vector2 } from "./Vector2";
-
-
-
-
-export interface WallConfig2d {
+/**
+ * 墙面2D位置信息
+ */
+export interface WallSegment {
     id: number;
     anchors: number[];
     thick: number;
     height: number;
 }
 
-export interface AnchorConfig2d {
+/**
+ * 锚点信息
+ */
+export interface AnchorPoint {
     id: number;
-    x:number;
-    y:number;
+    x: number;
+    y: number;
 }
 
 
-export interface AreaWalls {
-    anchors: AnchorConfig2d[];
-    walls: WallConfig2d[];
+export interface GroupWalls {
+    anchors: AnchorPoint[];
+    walls: WallSegment[];
+}
+
+
+
+/**
+ * 每面墙的多边形数据
+ */
+export class WallPolygon {
+    public id: number;
+    public height: number;
+    public points: number[][];
 }

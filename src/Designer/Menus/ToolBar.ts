@@ -1,9 +1,9 @@
-import { Vector2 } from '../../core/Vector2';
+import { Vector2 } from '../../Core/Vector2';
 import { VectorDesigner } from '../VectorDesigner';
 import { Control } from '../Views/Control';
 import { AnchorControl } from '../Views/AnchorControl';
 import { PolygonControl } from '../Views/PolygonControl';
-import { Connector } from '../common/Connector';
+import { Connector } from '../Common/Connector';
 import { MouseCapturer } from '../Utility/MouseCapturer';
 
 
@@ -20,23 +20,12 @@ export class ToolBar {
     private btnSetting: HTMLButtonElement;
     private thicknessDiv: HTMLDivElement;
     private thicknessInput: HTMLInputElement;
-
     private xInput: HTMLInputElement;
     private yInput: HTMLInputElement;
-
-
-
-
     private _position: Vector2;
     private _dragCapture: MouseCapturer;
     private _dragPosition: Vector2;
-
-
-
     private positionDiv: HTMLDivElement;
-
-
-
 
     public constructor(designer: VectorDesigner) {
         this.designer = designer;
@@ -47,9 +36,7 @@ export class ToolBar {
             e.preventDefault();
         }
 
-
-
-        this.dom.className = 'toolbar';
+        this.dom.className = 'designer-toolbar';
         var btnDrag = this.createDragButton();
         this._dragCapture = new MouseCapturer(btnDrag);
         this._dragCapture.onMouseDown.add(this.drag_start, this);
@@ -77,10 +64,10 @@ export class ToolBar {
         this.addBreak(this.dom);
 
         this.thicknessDiv = document.createElement('div');
-        this.thicknessDiv.className = 'ToolBox-Input';
+        this.thicknessDiv.className = 'designer-toolbar-block';
         var header = document.createElement('a');
         header.innerText = '厚度';
-        header.style.float = 'left';
+       // header.style.float = 'left';
         this.thicknessInput = document.createElement('input');
         this.thicknessInput.type = 'number';
         this.thicknessInput.onchange = () => {
@@ -101,11 +88,11 @@ export class ToolBar {
 
 
         this.positionDiv = document.createElement('div');
-        this.positionDiv.className = 'ToolBox-Input';
+        this.positionDiv.className = 'designer-toolbar-block';
 
         var header = document.createElement('a');
         header.innerText = 'x';
-        header.style.float = 'left';
+       // header.style.float = 'left';
         this.positionDiv.appendChild(header);
 
 
@@ -238,10 +225,8 @@ export class ToolBar {
 
     private createDragButton(): HTMLElement {
         var button = document.createElement('div');
-        button.style.height = '32px';
-        button.style.width = '16px';
-        button.style.backgroundColor = '#282828'
-        button.style.cursor = 'move';
+        button.className = 'dragbutton';
+        button.innerHTML ='<svg xmlns="http://www.w3.org/2000/svg" width="10px" height="20px"  style="margin-top: 6px;" viewBox="0 0 5 14" ><path fill-rule="evenodd" d="M1 2a1 1 0 110-2 1 1 0 010 2zm3 0a1 1 0 110-2 1 1 0 010 2zM1 6a1 1 0 110-2 1 1 0 010 2zm3 0a1 1 0 110-2 1 1 0 010 2zm-3 4a1 1 0 110-2 1 1 0 010 2zm3 0a1 1 0 110-2 1 1 0 010 2zm-3 4a1 1 0 110-2 1 1 0 010 2zm3 0a1 1 0 110-2 1 1 0 010 2z"></path></svg>';
         return button;
     }
 

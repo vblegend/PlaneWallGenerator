@@ -1,15 +1,12 @@
-import { Anchor } from "../src/core/Anchor";
-import { Segment } from "../src/core/Segment";
-import { HorizontalRuler } from "../src/Designer/plugins/HorizontalRuler";
-import { VerticalRuler } from "../src/Designer/plugins/VerticalRuler";
+import { HorizontalRuler } from "../src/Designer/Plugins/HorizontalRuler";
+import { VerticalRuler } from "../src/Designer/Plugins/VerticalRuler";
 import { VectorDesigner } from "../src/Designer/VectorDesigner";
-import { Vector2 } from '../src/core/Vector2';
+import { Vector2 } from '../src/Core/Vector2';
 import { AnchorControl } from "../src/Designer/Views/AnchorControl";
 import { PolygonControl } from "../src/Designer/Views/PolygonControl";
-import { FORMERR } from "dns";
-import { stringify } from "querystring";
 import { Control } from "../src/Designer/Views/Control";
-import { AreaWalls } from "../src/core/WallElement";
+import { GroupWalls } from "../src/Core/WallElement";
+import { WallPolygonParser } from "../src/WallPolygonParser";
 
 /**
  * this is example
@@ -45,7 +42,7 @@ export class Examples {
         if (btnParse) {
             btnParse.onclick = () => {
                 var output = document.getElementById("output") as HTMLTextAreaElement;
-                var arrays = JSON.parse(output.value) as AreaWalls;
+                var arrays = JSON.parse(output.value) as GroupWalls;
                 console.time('Parse');
                 // console.profile('Parse')
                 designer.from(arrays);
@@ -54,6 +51,18 @@ export class Examples {
             }
         }
 
+
+        var btnPolygon = document.getElementById("btnPolygon") as HTMLCanvasElement;
+        if (btnPolygon) {
+            btnPolygon.onclick = () => {
+                var output = document.getElementById("output") as HTMLTextAreaElement;
+                var group = JSON.parse(output.value) as GroupWalls;
+                console.time('to Polygon');
+                var polygon = WallPolygonParser.parse(group);
+                console.timeEnd('to Polygon');
+                output.value = JSON.stringify(polygon);
+            }
+        }
 
 
         var btnClean = document.getElementById("btnClean") as HTMLCanvasElement;
@@ -69,6 +78,30 @@ export class Examples {
                 designer.viewControl.onmove.dispatch(100, new Vector2(), true);
             }
         }
+
+
+        var btnBackground = document.getElementById("btnBackground") as HTMLCanvasElement;
+        if (btnBackground) {
+            btnBackground.onclick = () => {
+                var input = document.createElement('input');
+                input.type = 'file';
+                input.onchange = async (event: InputEvent) => {
+                    var file = event.target['files'][0];
+                    var image = await this.readImage(file);
+                    designer.background.setImage(image);
+                }
+                input.click();
+            }
+        }
+
+
+
+
+
+
+
+
+
 
         var btnRandom = document.getElementById("btnRandom") as HTMLCanvasElement;
         if (btnRandom) {
@@ -125,6 +158,27 @@ export class Examples {
 
 
 
+    }
+
+    /**
+ * 从本地读取Json对象
+ * @param file 
+ */
+    public async readImage(file: File): Promise<HTMLImageElement> {
+        return new Promise<HTMLImageElement>((resolve, reject) => {
+            var reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event: any) => {
+                var image = document.createElement('img');
+
+                image.src = event.target.result;
+
+                resolve(image);
+            };
+            reader.onerror = (ex) => {
+                reject(ex);
+            }
+        });
     }
 }
 

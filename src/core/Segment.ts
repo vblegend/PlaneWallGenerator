@@ -8,6 +8,16 @@ export class Segment {
     private _end: Anchor;
     private _points: Vector2[][];
 
+    public constructor(id: number, start: Anchor, end: Anchor, thickness: number) {
+        this.id = id;
+        this._start = start;
+        this._end = end;
+        this._thickness = thickness;
+        this._points = [];
+        this._points.push([], []);
+        this._start.addTarget(this._end, this);
+        this._end.addTarget(this._start, this);
+    }
 
     public dispose() {
         this.remove();
@@ -49,15 +59,6 @@ export class Segment {
             return this._points[1];
     }
 
-    public constructor(start: Anchor, end: Anchor, thickness: number) {
-        this._start = start;
-        this._end = end;
-        this._thickness = thickness;
-        this._points = [];
-        this._points.push([], []);
-        this._start.addTarget(this._end, this);
-        this._end.addTarget(this._start, this);
-    }
 
     public get thickness(): number {
         return this._thickness;

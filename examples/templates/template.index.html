@@ -41,39 +41,7 @@
             justify-content: center;
         }
 
-        .ToolBox-Input {
-            text-align: center;
-            line-height: 32px;
-        }
-
-        .ToolBox-Input a {
-            float: left;
-            color: #ffffff;
-            margin-left: 9px;
-            -moz-user-select: none;
-            -webkit-user-select: none;
-            -ms-user-select: none;
-            /* No support for these yet */
-            -o-user-select: none;
-            user-select: none;
-        }
-
-        .ToolBox-Input input {
-            height: 20px;
-            outline: none;
-            vertical-align: middle;
-            width: 30px;
-            background-color: #222222;
-            color: aliceblue;
-            border: 0px;
-            padding: 2px 5px 2px 5px;
-            margin: -3px 5px 0px 5px;
-        }
-
-        .ToolBox-Input input::-webkit-inner-spin-button {
-            -webkit-appearance: none !important;
-            margin: 0;
-        }
+ 
     </style>
 
 
@@ -105,12 +73,18 @@
         <i style="background-color:#F7704C; color: rgb(255, 255, 255);">左键按住拖动画板</i>
         <i style="background-color: #06a028; color: rgb(255, 255, 255);">左键单击选中对象</i>
         <i style="background-color: #0072f5; color: rgb(255, 255, 255);">右键单击取消选中</i>
-
+        <button id='btnPolygon' style='float: right;'>转多边形</button>
         <button id='btnBuild' style='float: right;'>生成</button>
         <button id='btnParse' style='float: right;'>解析</button>
         <button id='btnRandom' style='float: right;'>随机生成</button>
         <button id='btnClean' style='float: right;'>清空</button>
         <button id='btnGoCenter' style='float: right;'>回到中心</button>
+        <button id='btnBackground' style='float: right;'>加载底图</button>
+
+
+        
+
+
     </div>
 
     <textarea id='output' style="width: 1595px; height: 100px; "></textarea>

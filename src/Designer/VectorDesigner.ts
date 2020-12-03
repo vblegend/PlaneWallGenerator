@@ -1,20 +1,22 @@
 import * as signals from "signals";
-import { Vector2 } from "../core/Vector2";
-import { Bounds } from "./common/Bounds";
+import { Vector2 } from "../Core/Vector2";
+import { Bounds } from "./Common/Bounds";
 import { Renderer } from "./Renderer";
-import { Size } from "./common/Size";
+import { Size } from "./Common/Size";
 import { ViewController } from "./ViewController";
 import { Control } from "./Views/Control";
 import { ToolBar } from "./Menus/ToolBar";
 import { AnchorControl } from './Views/AnchorControl';
 import { PolygonControl } from './Views/PolygonControl';
-import { Connector } from "./common/Connector";
-import { AdsorbService } from "./common/AdsorbService";
-import { AreaWalls, WallConfig2d } from "../core/WallElement";
+import { Connector } from "./Common/Connector";
+import { AdsorbService } from "./Common/AdsorbService";
+import { GroupWalls, WallSegment } from "../Core/WallElement";
+import { ImageControl } from "./Views/ImageControl";
 
 
 export class VectorDesigner {
 
+    private _isdisposed: boolean;
     private _viewControl: ViewController;
     private _div: HTMLDivElement;
     private _bounds: Bounds;
@@ -40,6 +42,14 @@ export class VectorDesigner {
     public defaultthickness: number;
     private _requestRender: boolean;
     private _maxSerialNumber: number;
+
+    private _background: ImageControl;
+
+
+    public get background(): ImageControl {
+        return this._background;
+    }
+
 
     /**
      * 磁性吸附服务
@@ -141,6 +151,7 @@ export class VectorDesigner {
         this._runState = false;
         this._renderer.apply(div);
         this.resize();
+        this._background = new ImageControl(this);
         this._viewControl.onmove.add(this.moveTo, this);
         this._toolbar = new ToolBar(this);
         this._div.appendChild(this._toolbar.dom);
@@ -201,11 +212,20 @@ export class VectorDesigner {
     }
 
 
+
+    public dispose() {
+        this.clear();
+        this._isdisposed = true;
+    }
+
+
+
     private async graphicRender() {
         if (!this._runState || this.isDisposed) return;
         if (this._requestRender) {
             this._requestRender = false;
             this.renderer.clear();
+            this._background.render();
             for (var control of this._children) {
                 control.render();
             }
@@ -226,7 +246,6 @@ export class VectorDesigner {
             }
             this.onRender.dispatch();
         }
-
         if (!this.isDisposed && this._runState) {
             //继续下一帧
             requestAnimationFrame(this.graphicRender.bind(this));
@@ -259,7 +278,10 @@ export class VectorDesigner {
         return new Vector2(ux, uy);
     }
 
-
+    /**
+     * 将视图坐标转换为canvas坐标
+     * @param points 
+     */
     public convertPoints(points: Vector2[]): Vector2[] {
         var result = [];
         for (let point of points) {
@@ -268,7 +290,10 @@ export class VectorDesigner {
         return result;
     }
 
-
+    /**
+     * 批量将视图坐标转换为canvas坐标
+     * @param points 
+     */
     public createAnchor(id: number, x: number, y: number): AnchorControl {
         var x = Number.parseFloat(x.toFixed(4));
         var y = Number.parseFloat(y.toFixed(4));
@@ -301,8 +326,7 @@ export class VectorDesigner {
             id = ++this._maxSerialNumber;
         }
         if (thickness == null) thickness = this.defaultthickness;
-        var polygon = new PolygonControl(this, anchor1, anchor2, thickness);
-        polygon.id = id;
+        var polygon = new PolygonControl(this, id, anchor1, anchor2, thickness);
         polygon.height = this.defaultHeight;
         return polygon;
     }
@@ -364,19 +388,19 @@ export class VectorDesigner {
     }
 
 
-    public toArrray(): number[][][] {
+    public toPolygon(): number[][][] {
         var result: number[][][] = [];
         for (var control of this._children) {
             if (control instanceof PolygonControl) {
-                result.push(control.toArray());
+                result.push(control.toPolygon());
             }
         }
         return result;
     }
 
 
-    public serialize(): AreaWalls {
-        var area: AreaWalls = {
+    public serialize(): GroupWalls {
+        var area: GroupWalls = {
             anchors: [],
             walls: []
         };
@@ -393,7 +417,7 @@ export class VectorDesigner {
     }
 
 
-    public from(area: AreaWalls) {
+    public from(area: GroupWalls) {
         this.clear();
         var map: { [key: string]: AnchorControl } = {};
         var objects: Control[] = [];
@@ -425,9 +449,8 @@ export class VectorDesigner {
 
 
 
-
     public get isDisposed(): boolean {
-        return false;
+        return this._isdisposed;
     }
 
     public get zoom(): number {

@@ -1,5 +1,5 @@
 import * as signals from "signals";
-import { Vector2 } from "../core/Vector2";
+import { Vector2 } from "../Core/Vector2";
 import { VectorDesigner } from "./VectorDesigner";
 import { AnchorControl } from "./Views/AnchorControl";
 import { Control } from "./Views/Control";

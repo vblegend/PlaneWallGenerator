@@ -1,4 +1,4 @@
-import { IVector2, Vector2 } from "../../core/Vector2";
+import { IVector2, Vector2 } from "../../Core/Vector2";
 import { VectorDesigner } from "../VectorDesigner";
 import { AnchorControl } from "../Views/AnchorControl";
 import { PolygonControl } from "../Views/PolygonControl";
