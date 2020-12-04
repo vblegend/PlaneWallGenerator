@@ -74,6 +74,8 @@ export class Segment {
     }
 
 
+
+
     public getPort(anchor: Anchor): Vector2[] {
         if (this._start === anchor)
             return this._points[0];

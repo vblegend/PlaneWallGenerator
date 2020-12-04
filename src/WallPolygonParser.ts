@@ -1,15 +1,29 @@
 import { GroupWalls, WallPolygon } from "./Core/WallElement";
 import { Anchor } from './Core/Anchor';
 import { Segment } from "./Core/Segment";
+import { Vector2 } from './Core/Vector2';
+
+export enum P {
+    ABSOLUTE,
+    RELATIVE
+}
+
+
+
+
+
+
 
 export class WallPolygonParser {
+
 
 
     /**
      * 解析点数据成多边形数据
      * @param area 
+     * @param relocation 是否重定位墙的初始坐标位置为墙中心，如果为否 强的 position始终为0
      */
-    public static parse(area: GroupWalls): WallPolygon[] {
+    public static parse(area: GroupWalls, relocation?: boolean): WallPolygon[] {
         var result: WallPolygon[] = [];
         var anchors: { [key: number]: Anchor } = {};
         var walls: { [key: number]: Segment } = {};
@@ -48,6 +62,11 @@ export class WallPolygonParser {
                 polygon.id = wall.id;
                 polygon.height = heights[wall.id];
                 polygon.points = wall.points;
+                if (relocation) {
+                    polygon.position = this.reLocation(polygon.points);
+                } else {
+                    polygon.position = [0, 0];
+                }
                 result.push(polygon);
             }
             return result;
@@ -60,5 +79,36 @@ export class WallPolygonParser {
             heights = {};
         }
     }
+
+
+
+    private static reLocation(points: number[][]): number[] {
+        var center = this.getCenter(points);
+        for (let i = 0; i < points.length; i++) {
+            var point = points[i];
+            point[0] += center[0];
+            point[1] += center[1];
+        }
+        return center;
+    }
+
+
+    private static getCenter(points: number[][]): number[] {
+        let left = point[0][0];
+        let right = point[0][0];
+        let top = point[0][1];
+        let bottom = point[0][1];
+        for (let i = 1; i < points.length; i++) {
+            var point = points[i];
+            if (point[0] > right) right = point[0];
+            if (point[0] < left) left = point[0];
+            if (point[1] > bottom) bottom = point[1];
+            if (point[1] < top) top = point[1];
+        }
+        return [left + (right - left) / 2, top + (bottom - top) / 2];
+    }
+
+
+
 
 }

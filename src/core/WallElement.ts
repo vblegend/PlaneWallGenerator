@@ -32,4 +32,5 @@ export class WallPolygon {
     public id: number;
     public height: number;
     public points: number[][];
+    public position: number[];
 }
