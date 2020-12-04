@@ -12,6 +12,7 @@ import { Connector } from "./Common/Connector";
 import { AdsorbService } from "./Common/AdsorbService";
 import { GroupWalls, WallSegment } from "../Core/WallElement";
 import { ImageControl } from "./Views/ImageControl";
+import { Cursor } from "./Views/Cursor";
 
 
 export class VectorDesigner {
@@ -27,16 +28,19 @@ export class VectorDesigner {
     private _runState: boolean;
     private _onRender: signals.Signal;
     private _onZoom: signals.Signal;
+    private _onCursor: signals.Signal;
+
+    private _cursor:Cursor;
+
     public _width: number;
     public _height: number;
     public _children: Control[];
     private _toolbar: ToolBar;
     private _selected: Control;
-    public virtualCursor: AnchorControl;
+
     public connector: Connector;
     private _adsorb: AdsorbService;
-    public horizontalLineColor: string;
-    public verticalLineColor: string;
+
     public _mouseGrabObjects: Control[];
     public defaultHeight: number;
     public defaultthickness: number;
@@ -143,9 +147,11 @@ export class VectorDesigner {
         this._zoom = 100;
         this._children = [];
         this._mouseGrabObjects = [];
+        this._cursor = new Cursor(this);
         this._adsorb = new AdsorbService(this);
         this._onRender = new signals.Signal();
-        this._onZoom = new signals.Signal()
+        this._onZoom = new signals.Signal();
+        this._onCursor = new signals.Signal();
         this._renderer = new Renderer();
         this._viewControl = new ViewController(this);
         this._runState = false;
@@ -155,8 +161,6 @@ export class VectorDesigner {
         this._viewControl.onmove.add(this.moveTo, this);
         this._toolbar = new ToolBar(this);
         this._div.appendChild(this._toolbar.dom);
-        this.horizontalLineColor = '#00FF00';
-        this.verticalLineColor = '#00FF00';
         this._requestRender = true;
         this.defaultHeight = 100;
         this.defaultthickness = 10;
@@ -236,14 +240,7 @@ export class VectorDesigner {
                     control.render();
                 }
             }
-
-            if (this.virtualCursor) {
-                var position = this.convertPoint(this.virtualCursor.position);
-                this.renderer.strokeColor = this.horizontalLineColor;
-                this.renderer.line(0, position.y, this.width, position.y, 1);
-                this.renderer.strokeColor = this.verticalLineColor;
-                this.renderer.line(position.x, 0, position.x, this.height);
-            }
+            this._cursor.render();
             this.onRender.dispatch();
         }
         if (!this.isDisposed && this._runState) {
@@ -376,7 +373,7 @@ export class VectorDesigner {
         this.releaseGrabObjects();
         this.connector = null;
         this.selected = null;
-        this.virtualCursor = null;
+        this.cursor.update(null);
         this._adsorb.clear();
         this._adsorb.enabled = false;
         while (this.children.length > 0) {
@@ -444,11 +441,6 @@ export class VectorDesigner {
     }
 
 
-
-
-
-
-
     public get isDisposed(): boolean {
         return this._isdisposed;
     }
@@ -487,6 +479,16 @@ export class VectorDesigner {
     public get onRender(): signals.Signal {
         return this._onRender;
     }
+
+    public get cursor(): Cursor {
+        return this._cursor;
+    }
+
+
+    public get onCursorChange(): signals.Signal {
+        return this._onCursor;
+    }
+
 
 
     public get onZoom(): signals.Signal {

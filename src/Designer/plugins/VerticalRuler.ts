@@ -1,5 +1,5 @@
 import { Vector2 } from "../../Core/Vector2";
-import { Renderer, HorizontalAlign } from "../Renderer";
+import { Renderer, HorizontalAlign, RenderType } from "../Renderer";
 import { VectorDesigner } from "../VectorDesigner";
 
 
@@ -8,21 +8,28 @@ export class VerticalRuler {
     private designer: VectorDesigner;
     private _renderer: Renderer;
     private _needUpdate: boolean;
+    private _cursorRenderer: Renderer;
     private _width: number;
     private _height: number;
     public constructor(designer: VectorDesigner, canvas: HTMLCanvasElement) {
         this.designer = designer;
         this._canvas = canvas;
         this._needUpdate = true;
+        this._cursorRenderer = new Renderer();
         this._renderer = new Renderer(canvas);
         this.designer.onRender.add(this.render, this);
         this.designer.viewControl.onmove.add(() => {
             this._needUpdate = true;
         }, this);
+
+        this.designer.onCursorChange.add(() => {
+            this.renderCursor();
+            this._needUpdate = true;
+        }, this);
+
         this._canvas.oncontextmenu = (e) => {
             e.preventDefault();
         }
-
         this.resize();
     }
 
@@ -32,8 +39,43 @@ export class VerticalRuler {
         this._width = this._canvas.clientWidth;
         this._height = this._canvas.clientHeight;
         this._renderer.resize(this.width, this.height);
+        this._cursorRenderer.resize(this.width, this.height);
     }
 
+
+
+    private renderCursor() {
+        this._cursorRenderer.clear();
+        var designerlength = this.designer.bounds.bottom - this.designer.bounds.top;
+        var position = this.designer.cursor.position;
+        if (position.y >= this.designer.bounds.top && position.y <= this.designer.bounds.bottom) {
+            this._cursorRenderer.fontSize = 16;
+            var posy = (position.y - this.designer.bounds.top) / designerlength * this.height;
+            var text = position.y.toFixed(4);
+            var height = this._cursorRenderer.measureTextWidth(text) + this._cursorRenderer.fontSize;
+            var top = posy - height / 2;
+            var bottom = posy + height / 2;
+            if (top < 0) {
+                bottom -= top;
+                top = 0;
+            } else if (bottom > this.height) {
+                let v = bottom - this.height;
+                top -= v;
+                bottom = this.height;
+            }
+            this._cursorRenderer.rectangle(this.width - 7 - this._cursorRenderer.fontSize, top, this._cursorRenderer.fontSize, bottom - top, RenderType.ALL);
+            this._cursorRenderer.translateRotate(this.width - 7 - this._cursorRenderer.fontSize, top + height / 2, 270);
+            this._cursorRenderer.fillColor = '#ffffff';
+            this._cursorRenderer.fillText(text, this.width - 7 - this._cursorRenderer.fontSize, top + height / 2, null, HorizontalAlign.CENTER);
+            this._cursorRenderer.translateRotate(this.width - 7 - this._cursorRenderer.fontSize, top + height / 2, -270);
+            var paths: Vector2[] = [];
+            paths.push(new Vector2(this.width - 1, posy));
+            paths.push(new Vector2(this.width - 7, posy - 5 < 0 ? 0 : posy - 5));
+            paths.push(new Vector2(this.width - 7, posy + 5 > this.height ? this.height : posy + 5));
+            this._cursorRenderer.fillColor = '#333333'
+            this._cursorRenderer.fillPath(paths, true);
+        }
+    }
 
 
 
@@ -80,6 +122,9 @@ export class VerticalRuler {
         this._renderer.fillPath([new Vector2(0, center - 5), new Vector2(0, center + 5), new Vector2(10, center)], true);
         this._renderer.strokeColor = '#aaaaaa'
         this._renderer.strokePath([new Vector2(0, center - 5), new Vector2(0, center + 5), new Vector2(10, center)], true);
+        if (this.designer.cursor.visible) {
+            this._renderer.draw(this._cursorRenderer, 0, 0);
+        }
     }
 
     /**

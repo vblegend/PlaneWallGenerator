@@ -47,7 +47,7 @@ export class AnchorControl extends Control {
     protected onBeginDrag(e: ControlDragEvent) {
         this.designer.grabObjects([this]);
         this.designer.updateElementPoints();
-        this.designer.virtualCursor = this;
+        this.designer.cursor.update(this.position);
     }
 
 
@@ -63,15 +63,15 @@ export class AnchorControl extends Control {
             // 寻找默认吸附点
             result = this.designer.adsorb.adsorption(viewPos);
         }
-        this.designer.horizontalLineColor = result.y != null ? '#0000FF' : '#00FF00';
-        this.designer.verticalLineColor = result.x != null ? '#0000FF' : '#00FF00';
         this.setPosition(viewPos);
+
+        this.designer.cursor.update(this.position,result);
         this.updateNearby();
         this.designer.requestRender();
     }
 
     protected onEndDrag(e: ControlDragEvent) {
-        this.designer.virtualCursor = null;
+        this.designer.cursor.update(null);
         var anchor = this.designer._children.find(e => e instanceof AnchorControl && e.anchor.x === this.anchor.x && e.anchor.y === this.anchor.y) as AnchorControl;
         if (anchor != null && anchor != this) {
             this.merageTo(anchor);

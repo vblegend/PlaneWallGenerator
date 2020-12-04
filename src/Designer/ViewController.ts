@@ -137,7 +137,11 @@ export class ViewController {
         }
         if (this.hitObject instanceof PolygonControl) {
             var anchor = this.hitObject.split(this.position);
+            this._pressedObject = null;
             this.designer.selected = anchor;
+            this._hitObject = null;
+            this._hoverObject = null;
+            this.mouse_move(e);
             return;
         }
         if (this.designer.selected == null) {
@@ -166,10 +170,14 @@ export class ViewController {
             }
             if (e.button === 0) {
                 this.designer.connector.commit(this.hitObject, this.position);
+                this._pressedObject = null;
+                this._hitObject = null;
+                this._hoverObject = null;
+                this.mouse_move(e);
             }
             this.designer.connector = null;
             this._iscanceled = true;
-            this.designer.virtualCursor = null;
+            this.designer.cursor.update(null);
             this.designer.toolbar.visible = true;
             return;
         }

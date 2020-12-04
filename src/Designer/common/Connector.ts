@@ -18,7 +18,7 @@ export class Connector {
         var v = this.designer.mapPoint(this.designer.viewControl.position);
         this.newAnchor = this.designer.createAnchor(null, v.x, v.y);
         this.newSegment = this.designer.createPolygon(null, origin, this.newAnchor, 10);
-        this.designer.virtualCursor = this.newAnchor;
+        this.designer.cursor.update(v);
         this.update();
     }
 
@@ -37,14 +37,13 @@ export class Connector {
         }
         if (position) {
             this.newAnchor.setPosition(position);
+            this.designer.cursor.update(position,result);
         }
-        if (result) {
-            this.designer.horizontalLineColor = result.y != null ? '#0000FF' : '#00FF00';
-            this.designer.verticalLineColor = result.x != null ? '#0000FF' : '#00FF00';
-        }
+
         this.newAnchor.update();
         this.origin.update();
         this.designer.requestRender();
+        this.designer.onRender.dispatch();
     }
 
 

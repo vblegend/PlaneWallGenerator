@@ -27,6 +27,11 @@ export class ToolBar {
     private _dragPosition: Vector2;
     private positionDiv: HTMLDivElement;
 
+    private heightDiv: HTMLDivElement;
+    private heightInput: HTMLInputElement;
+
+
+
     public constructor(designer: VectorDesigner) {
         this.designer = designer;
         this._position = new Vector2();
@@ -67,7 +72,7 @@ export class ToolBar {
         this.thicknessDiv.className = 'designer-toolbar-block';
         var header = document.createElement('a');
         header.innerText = '厚度';
-       // header.style.float = 'left';
+        // header.style.float = 'left';
         this.thicknessInput = document.createElement('input');
         this.thicknessInput.type = 'number';
         this.thicknessInput.onchange = () => {
@@ -87,12 +92,58 @@ export class ToolBar {
         this.dom.appendChild(this.thicknessDiv);
 
 
+
+
+
+
+        this.addBreak(this.dom);
+
+
+
+
+
+        this.heightDiv = document.createElement('div');
+        this.heightDiv.className = 'designer-toolbar-block';
+        var header = document.createElement('a');
+        header.innerText = '高度';
+        // header.style.float = 'left';
+        this.heightInput = document.createElement('input');
+        this.heightInput.type = 'number';
+        this.heightInput.onchange = () => {
+            var value = this.heightInput.value;
+            if (value == null || value.length == 0) return;
+            if (this.designer.selected instanceof PolygonControl) {
+                this.designer.selected.height = Number.parseFloat(value);
+            }
+        }
+        var setThickness = document.createElement('button');
+        setThickness.textContent = '修改'
+
+        this.heightDiv.appendChild(header);
+        this.heightDiv.appendChild(this.heightInput);
+        this.heightDiv.appendChild(setThickness);
+        this.dom.appendChild(this.heightDiv);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         this.positionDiv = document.createElement('div');
         this.positionDiv.className = 'designer-toolbar-block';
 
         var header = document.createElement('a');
         header.innerText = 'x';
-       // header.style.float = 'left';
+        // header.style.float = 'left';
         this.positionDiv.appendChild(header);
 
 
@@ -198,9 +249,14 @@ export class ToolBar {
                 this.btnDelete.style.display = '';
                 this.btnSetting.style.display = '';
                 this.thicknessDiv.style.display = 'none';
+                this.heightDiv.style.display = 'none';
                 this.positionDiv.style.display = '';
                 this.xInput.value = this.designer.selected.anchor.x.toString();
                 this.yInput.value = this.designer.selected.anchor.y.toString();
+
+
+
+
 
             } else if (this.designer.selected instanceof PolygonControl) {
                 this.btnConnectTo.style.display = 'none';
@@ -209,6 +265,9 @@ export class ToolBar {
                 this.thicknessDiv.style.display = '';
                 this.positionDiv.style.display = 'none';
                 this.thicknessInput.value = this.designer.selected.thickness.toString();
+                this.heightDiv.style.display = '';
+                this.heightInput.value = this.designer.selected.height.toString();
+
             }
         }
     }
@@ -226,28 +285,30 @@ export class ToolBar {
     private createDragButton(): HTMLElement {
         var button = document.createElement('div');
         button.className = 'dragbutton';
-        button.innerHTML ='<svg xmlns="http://www.w3.org/2000/svg" width="10px" height="20px"  style="margin-top: 6px;" viewBox="0 0 5 14" ><path fill-rule="evenodd" d="M1 2a1 1 0 110-2 1 1 0 010 2zm3 0a1 1 0 110-2 1 1 0 010 2zM1 6a1 1 0 110-2 1 1 0 010 2zm3 0a1 1 0 110-2 1 1 0 010 2zm-3 4a1 1 0 110-2 1 1 0 010 2zm3 0a1 1 0 110-2 1 1 0 010 2zm-3 4a1 1 0 110-2 1 1 0 010 2zm3 0a1 1 0 110-2 1 1 0 010 2z"></path></svg>';
+        button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="10px" height="20px"  style="margin-top: 6px;cursor: move;" viewBox="0 0 5 14" ><path fill-rule="evenodd" d="M1 2a1 1 0 110-2 1 1 0 010 2zm3 0a1 1 0 110-2 1 1 0 010 2zM1 6a1 1 0 110-2 1 1 0 010 2zm3 0a1 1 0 110-2 1 1 0 010 2zm-3 4a1 1 0 110-2 1 1 0 010 2zm3 0a1 1 0 110-2 1 1 0 010 2zm-3 4a1 1 0 110-2 1 1 0 010 2zm3 0a1 1 0 110-2 1 1 0 010 2z"></path></svg>';
         return button;
     }
 
     private drag_start(e: MouseEvent) {
-        this._dragPosition = new Vector2(e.pageX, e.pageY);
+        var offset = new Vector2(this.designer.container.offsetLeft, this.designer.container.offsetTop);
+        this._dragPosition = new Vector2(e.pageX, e.pageY).sub(offset).sub(this._position);
         this._dragCapture.capture();
+        e.preventDefault();
     }
 
     private drag_move(e: MouseEvent) {
         if (this._dragPosition != null) {
-            var pos = new Vector2(e.pageX, e.pageY);
-            var vertor = pos.sub(this._dragPosition);
-            var v = this._position.add(vertor);
-            this.setPosition(v);
-            this._dragPosition = pos;
+            var offset = new Vector2(this.designer.container.offsetLeft, this.designer.container.offsetTop);
+            var pos = new Vector2(e.pageX, e.pageY).sub(offset).sub(this._dragPosition);
+            this.setPosition(pos);
+            e.preventDefault();
         }
     }
 
     private drag_end(e: MouseEvent) {
         this._dragPosition = null;
         this._dragCapture.release();
+        e.preventDefault();
     }
 
 

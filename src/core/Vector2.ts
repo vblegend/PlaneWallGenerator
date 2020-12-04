@@ -59,14 +59,16 @@ export class Vector2 {
         return new Vector2(this.x, this.y);
     }
 
-    public copy(v: Vector2) {
+    public copy(v: Vector2): this {
         this.x = v.x;
         this.y = v.y;
+        return this;
     }
 
-    public set(x: number, y: number) {
+    public set(x: number, y: number): this {
         this.x = x;
         this.y = y;
+        return this;
     }
 
     public equals(v: Vector2): boolean {

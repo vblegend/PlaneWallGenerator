@@ -127,7 +127,10 @@ export class Renderer {
     }
 
 
-
+    public measureTextWidth(text: string): number {
+        const measure = this.context.measureText(text);
+        return measure.width;
+    }
 
     /**
      * 
@@ -163,6 +166,27 @@ export class Renderer {
         }
         this.context.fillText(text, left + this._localOffset.x, top + this._localOffset.y);
     }
+
+
+
+    public rectangle(x: number, y: number, width: number, height: number, type: RenderType) {
+        this.context.beginPath();
+        this.context.rect(x, y, width, height);
+        if (type === RenderType.ALL || type === RenderType.FILL) {
+            this.context.fill();
+        }
+        if (type === RenderType.ALL || type === RenderType.STROKE) {
+            this.context.stroke();
+        }
+    }
+
+
+    public draw(renderer: Renderer, x: number, y: number) {
+        this.context.drawImage(renderer._canvas, x, y, renderer.width, renderer.height);
+    }
+
+
+
 
 
 
@@ -254,6 +278,10 @@ export class Renderer {
         // this.context.closePath();
         this.context.stroke();
     }
+
+
+
+
 
 
 

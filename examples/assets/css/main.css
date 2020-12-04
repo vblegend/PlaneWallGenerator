@@ -15,19 +15,19 @@
     fill: #585858;
     height: 32px;
     width: 16px;
-    background-color: #222222;
     cursor: move;
-    
+    background-color: #1E1E1E;
     align-content: center;
 }
 
 .designer-toolbar button,
 #shortcutPanel button {
-    height: 32px;
+    height: 28px;
     color: #dadada;
     background-color: #1b1b1b;
     border: 0px;
     margin: 0px;
+    margin-top: 2px;
     /* GNOME Web */
     padding: 5px 8px;
     text-transform: uppercase;
