@@ -1,7 +1,7 @@
 import { IVector2, Vector2 } from "../../Core/Vector2";
 import { VectorDesigner } from "../VectorDesigner";
 import { AnchorControl } from "../Views/AnchorControl";
-import { PolygonControl } from "../Views/PolygonControl";
+import { WallControl } from "../Views/WallControl";
 import { Control } from '../Views/Control';
 
 
@@ -10,7 +10,7 @@ export class Connector {
     designer: VectorDesigner;
     origin: AnchorControl;
     newAnchor: AnchorControl;
-    newSegment: PolygonControl;
+    newSegment: WallControl;
 
     public constructor(designer: VectorDesigner, origin: AnchorControl) {
         this.designer = designer;
@@ -27,19 +27,18 @@ export class Connector {
     public update(canvasPoint?: Vector2, control?: Control) {
         let position: Vector2;
         var result: IVector2;
-        if (control instanceof PolygonControl) {
-            position = control.getSubPoint(canvasPoint);
+        if (control instanceof WallControl) {
+            position = control.getSubPoint(canvasPoint).round(4);
             result = new Vector2(1, 1);
         }
         else if (canvasPoint != null) {
-            position = this.designer.mapPoint(canvasPoint);
+            position = this.designer.mapPoint(canvasPoint).round(4);
             result = this.designer.adsorb.adsorption(position);
         }
         if (position) {
             this.newAnchor.setPosition(position);
             this.designer.cursor.update(position,result);
         }
-
         this.newAnchor.update();
         this.origin.update();
         this.designer.requestRender();
@@ -59,7 +58,7 @@ export class Connector {
         if (hover instanceof AnchorControl) {
             anchor = hover;
         }
-        if (hover instanceof PolygonControl) {
+        if (hover instanceof WallControl) {
             this.newSegment.remove(false);
             this.newAnchor.remove();
             // split

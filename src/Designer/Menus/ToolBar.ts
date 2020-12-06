@@ -2,7 +2,7 @@ import { Vector2 } from '../../Core/Vector2';
 import { VectorDesigner } from '../VectorDesigner';
 import { Control } from '../Views/Control';
 import { AnchorControl } from '../Views/AnchorControl';
-import { PolygonControl } from '../Views/PolygonControl';
+import { WallControl } from '../Views/WallControl';
 import { Connector } from '../Common/Connector';
 import { MouseCapturer } from '../Utility/MouseCapturer';
 
@@ -78,7 +78,7 @@ export class ToolBar {
         this.thicknessInput.onchange = () => {
             var value = this.thicknessInput.value;
             if (value == null || value.length == 0) return;
-            if (this.designer.selected instanceof PolygonControl) {
+            if (this.designer.selected instanceof WallControl) {
                 this.designer.selected.updateThickness(Number.parseFloat(value));
                 this.designer.requestRender();
             }
@@ -112,7 +112,7 @@ export class ToolBar {
         this.heightInput.onchange = () => {
             var value = this.heightInput.value;
             if (value == null || value.length == 0) return;
-            if (this.designer.selected instanceof PolygonControl) {
+            if (this.designer.selected instanceof WallControl) {
                 this.designer.selected.height = Number.parseFloat(value);
             }
         }
@@ -258,7 +258,7 @@ export class ToolBar {
 
 
 
-            } else if (this.designer.selected instanceof PolygonControl) {
+            } else if (this.designer.selected instanceof WallControl) {
                 this.btnConnectTo.style.display = 'none';
                 this.btnDelete.style.display = '';
                 this.btnSetting.style.display = '';

@@ -1,3 +1,4 @@
+import { MathHelper } from "./MathHelper";
 import { Segment } from "./Segment";
 import { Vector2 } from "./Vector2";
 
@@ -33,7 +34,7 @@ export class Anchor {
     public setPosition(v: Vector2) {
         this._point.x = v.x;
         this._point.y = v.y;
-        this._point.round4();
+        this._point.round(4);
     }
 
     public dispose() {
@@ -87,7 +88,7 @@ export class Anchor {
         // console.log(this.id);
         if (this._targets.length > 1) {
             /* sort points by clockwise */
-            Vector2.clockwiseSortPoints(this._targets, this);
+            MathHelper.clockwiseSortPoints(this._targets, this);
             /* generate points */
             for (let i = 0; i < this._targets.length; i++) {
                 const cur = i;
@@ -98,12 +99,12 @@ export class Anchor {
                 const edge_path = this.generateEdgePoints(anchor, true);
                 const nextEdge_path = this.generateEdgePoints(nextanchor, false);
                 /* get edges intersection point*/
-                let intersectionPoint = Vector2.getIntersection(edge_path[0], edge_path[1], nextEdge_path[0], nextEdge_path[1]);
+                let intersectionPoint = MathHelper.getIntersection(edge_path[0], edge_path[1], nextEdge_path[0], nextEdge_path[1]);
                 if (intersectionPoint === null) {
                     /* get projective point */
-                    intersectionPoint = Vector2.getProjectivePoint(edge_path[0], edge_path[1], this.point);
+                    intersectionPoint = MathHelper.getProjectivePoint(edge_path[0], edge_path[1], this.point);
                 }
-                intersectionPoint.round4();
+                intersectionPoint.round(4);
                 let segment = this._map.get(anchor);
                 let points = segment.getPort(this);
                 points[1].update(this.point) && segment.needUpdate();
@@ -122,8 +123,8 @@ export class Anchor {
             const angle = Math.atan2((end.y - start.y), (end.x - start.x));
             const theta = angle * (180 / Math.PI);
             const ps = new Vector2(start.x + segment.thickness / 2, start.y);
-            const left_point = ps.rotatePoint(start, theta - 90).round4();
-            const right_point = ps.rotatePoint(start, theta + 90).round4();
+            const left_point = ps.around(start, theta - 90).round(4);
+            const right_point = ps.around(start, theta + 90).round(4);
             const points = segment.getPort(this);
             points[0].update(left_point) && segment.needUpdate();
             points[1].update(this.point) && segment.needUpdate();
@@ -147,8 +148,8 @@ export class Anchor {
         const theta = angle * (180 / Math.PI);
         const ps = new Vector2(start.x + off, start.y);
         const pe = new Vector2(end.x + off, end.y);
-        const left_point = ps.rotatePoint(start, theta - eulr);
-        const right_point = pe.rotatePoint(end, theta - eulr);
+        const left_point = ps.around(start, theta - eulr);
+        const right_point = pe.around(end, theta - eulr);
         return [left_point, right_point];
     }
 

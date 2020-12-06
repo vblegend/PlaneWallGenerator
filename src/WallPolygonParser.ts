@@ -1,18 +1,6 @@
-import { GroupWalls, WallPolygon } from "./Core/WallElement";
+import { GroupWalls, WallPolygon } from "./Core/Common";
 import { Anchor } from './Core/Anchor';
 import { Segment } from "./Core/Segment";
-import { Vector2 } from './Core/Vector2';
-
-export enum P {
-    ABSOLUTE,
-    RELATIVE
-}
-
-
-
-
-
-
 
 export class WallPolygonParser {
 
@@ -29,7 +17,7 @@ export class WallPolygonParser {
         var walls: { [key: number]: Segment } = {};
         var heights: { [key: number]: number } = {};
         try {
-            //parse anchors
+            // parse anchors
             for (let anchor of area.anchors) {
                 if (anchor && anchor.id && anchor.x && anchor.y && anchors[anchor.id] == null) {
                     anchors[anchor.id] = new Anchor(anchor.id, anchor.x, anchor.y);
@@ -57,22 +45,22 @@ export class WallPolygonParser {
                 }
             }
             for (let key in walls) {
-                var wall = walls[key];
-                var polygon = new WallPolygon();
-                polygon.id = wall.id;
-                polygon.height = heights[wall.id];
-                polygon.points = wall.points;
+                var config = walls[key];
+                var wall = new WallPolygon();
+                wall.id = config.id;
+                wall.height = heights[config.id];
+                wall.points = config.points;
                 if (relocation) {
-                    polygon.position = this.reLocation(polygon.points);
+                    wall.position = this.reLocation(wall.points);
                 } else {
-                    polygon.position = [0, 0];
+                    wall.position = [0, 0];
                 }
-                result.push(polygon);
+                result.push(wall);
             }
             return result;
         }
         catch (e) {
-            return null;
+            throw e;
         } finally {
             anchors = {};
             walls = {};
@@ -94,10 +82,10 @@ export class WallPolygonParser {
 
 
     private static getCenter(points: number[][]): number[] {
-        let left = point[0][0];
-        let right = point[0][0];
-        let top = point[0][1];
-        let bottom = point[0][1];
+        let left = points[0][0];
+        let right = points[0][0];
+        let top = points[0][1];
+        let bottom = points[0][1];
         for (let i = 1; i < points.length; i++) {
             var point = points[i];
             if (point[0] > right) right = point[0];

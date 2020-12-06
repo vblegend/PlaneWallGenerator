@@ -7,12 +7,13 @@ import { ViewController } from "./ViewController";
 import { Control } from "./Views/Control";
 import { ToolBar } from "./Menus/ToolBar";
 import { AnchorControl } from './Views/AnchorControl';
-import { PolygonControl } from './Views/PolygonControl';
+import { WallControl } from './Views/WallControl';
 import { Connector } from "./Common/Connector";
 import { AdsorbService } from "./Common/AdsorbService";
-import { GroupWalls, WallSegment } from "../Core/WallElement";
+import { GroupWalls, WallSegment } from "../Core/Common";
 import { ImageControl } from "./Views/ImageControl";
 import { Cursor } from "./Views/Cursor";
+import { HoleControl } from "./Views/HoleControl";
 
 
 export class VectorDesigner {
@@ -30,7 +31,7 @@ export class VectorDesigner {
     private _onZoom: signals.Signal;
     private _onCursor: signals.Signal;
 
-    private _cursor:Cursor;
+    private _cursor: Cursor;
 
     public _width: number;
     public _height: number;
@@ -125,9 +126,12 @@ export class VectorDesigner {
             var pt: Vector2 = null;
             if (this._selected instanceof AnchorControl) {
                 pt = this.convertPoint(this._selected.point).add(new Vector2(20, 10));
-            } else if (this._selected instanceof PolygonControl) {
+            } else if (this._selected instanceof WallControl) {
                 pt = this._selected.getSubPoint(this.viewControl.position);
                 pt = this.convertPoint(pt).add(new Vector2(20, 10));
+            }else if(this._selected instanceof HoleControl)
+            {
+                pt = this.convertPoint(this._selected.position).add(new Vector2(20, 10));
             }
             if (pt) {
                 this.toolbar.visible = true;
@@ -312,20 +316,22 @@ export class VectorDesigner {
         return anchor;
     }
 
-    public createPolygon(id: number, anchor1: AnchorControl, anchor2: AnchorControl, thickness?: number): PolygonControl {
+    public createPolygon(id: number, anchor1: AnchorControl, anchor2: AnchorControl, thickness?: number): WallControl {
         if (anchor1 == anchor2) return null;
         if (anchor1.anchor.targets.indexOf(anchor2.anchor) > -1) {
             return null;
         }
-        if (id && id >= this._maxSerialNumber) {
-            this._maxSerialNumber = id + 1;
+        if (id) {
+            if (id >= this._maxSerialNumber) {
+                this._maxSerialNumber = id + 1;
+            }
         } else {
             id = ++this._maxSerialNumber;
         }
         if (thickness == null) thickness = this.defaultthickness;
-        var polygon = new PolygonControl(this, id, anchor1, anchor2, thickness);
-        polygon.height = this.defaultHeight;
-        return polygon;
+        var wall = new WallControl(this, id, anchor1, anchor2, thickness);
+        wall.height = this.defaultHeight;
+        return wall;
     }
 
 
@@ -340,7 +346,9 @@ export class VectorDesigner {
                 if (index == -1) {
                     if (ctl instanceof AnchorControl) {
                         this.children.push(ctl);
-                    } else if (ctl instanceof PolygonControl) {
+                    } else if (ctl instanceof WallControl) {
+                        this.children.unshift(ctl);
+                    } else if (ctl instanceof HoleControl) {
                         this.children.unshift(ctl);
                     }
                 }
@@ -388,7 +396,7 @@ export class VectorDesigner {
     public toPolygon(): number[][][] {
         var result: number[][][] = [];
         for (var control of this._children) {
-            if (control instanceof PolygonControl) {
+            if (control instanceof WallControl) {
                 result.push(control.toPolygon());
             }
         }
@@ -402,10 +410,10 @@ export class VectorDesigner {
             walls: []
         };
         for (var control of this._children) {
-            if (control instanceof PolygonControl) {
-                area.walls.push(control.serialize());
+            if (control instanceof WallControl) {
+                area.walls.unshift(control.serialize());
             } else if (control instanceof AnchorControl) {
-                if (control.polygons.length > 0) {
+                if (control.walls.length > 0) {
                     area.anchors.push(control.serialize());
                 }
             }

@@ -4,7 +4,8 @@ import { VectorDesigner } from "./VectorDesigner";
 import { AnchorControl } from "./Views/AnchorControl";
 import { Control } from "./Views/Control";
 import { MouseCapturer } from './Utility/MouseCapturer';
-import { PolygonControl } from './Views/PolygonControl';
+import { WallControl } from './Views/WallControl';
+import { HoleControl } from "./Views/HoleControl";
 
 
 export class ViewController {
@@ -135,7 +136,7 @@ export class ViewController {
         if (this.hitObject instanceof AnchorControl) {
             return;
         }
-        if (this.hitObject instanceof PolygonControl) {
+        if (this.hitObject instanceof WallControl) {
             var anchor = this.hitObject.split(this.position);
             this._pressedObject = null;
             this.designer.selected = anchor;
@@ -145,7 +146,8 @@ export class ViewController {
             return;
         }
         if (this.designer.selected == null) {
-            let v = this.designer.mapPoint(this.position);
+            // dbclick insert anchor use 2 precision
+            let v = this.designer.mapPoint(this.position).round(2);
             var anchor = this.designer.createAnchor(null, v.x, v.y);
             this.designer.add(anchor);
             this.designer.selected = anchor;
@@ -205,12 +207,16 @@ export class ViewController {
     }
 
 
-    private testhitObject(v: Vector2, excluded?: Control[]): Control {
-        for (var i = this.designer.children.length - 1; i >= 0; i--) {
-            var control = this.designer.children[i];
+    private testhitObject(children: Control[], v: Vector2, excluded?: Control[]): Control {
+        for (var i = children.length - 1; i >= 0; i--) {
+            var control = children[i];
             if (control.hit(v)) {
                 if (excluded != null && excluded.length > 0) {
                     if (excluded.indexOf(control) > -1) continue;
+                }
+                let child = this.testhitObject(control.children, v, excluded);
+                if (child) {
+                    return child;
                 }
                 return control;
             }
@@ -225,14 +231,17 @@ export class ViewController {
 
         let v = this.designer.mapPoint(this.position);
         var excluded: Control[] = [];
-        if (this._pressedObject instanceof AnchorControl) {
+
+        if (this._pressedObject instanceof HoleControl) {
             excluded.push(this._pressedObject);
-            excluded = excluded.concat(this._pressedObject.polygons);
-        } else if (this._pressedObject instanceof PolygonControl) {
+        } else if (this._pressedObject instanceof AnchorControl) {
+            excluded.push(this._pressedObject);
+            excluded = excluded.concat(this._pressedObject.walls);
+        } else if (this._pressedObject instanceof WallControl) {
 
         }
 
-        this._hitObject = this.testhitObject(v, excluded);
+        this._hitObject = this.testhitObject(this.designer.children, v, excluded);
         this.position = new Vector2(e.pageX - this.designer.renderer.canvas.offsetLeft, e.pageY - this.designer.renderer.canvas.offsetTop);
         if (this.designer.connector != null) {
             this.designer.connector.update(this.position, this._hitObject);

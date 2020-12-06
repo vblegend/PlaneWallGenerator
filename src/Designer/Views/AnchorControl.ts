@@ -4,17 +4,17 @@ import { Control, ControlDragEvent } from './Control';
 import { VectorDesigner } from '../VectorDesigner';
 import { Anchor } from '../../Core/Anchor';
 import { RenderType } from '../Renderer';
-import { PolygonControl } from './PolygonControl';
+import { WallControl } from './WallControl';
 import * as signals from 'signals';
 import { Segment } from '../../Core/Segment';
 import { AdsorbResult } from '../Common/AdsorbService';
-import { AnchorPoint } from '../../Core/WallElement';
+import { AnchorPoint } from '../../Core/Common';
 
 
 export class AnchorControl extends Control {
     private _anchor: Anchor;
     private _onupdate: signals.Signal;
-    private _polygons: PolygonControl[];
+    private _walls: WallControl[];
 
     private _linked: AnchorControl[];
 
@@ -33,7 +33,7 @@ export class AnchorControl extends Control {
     public constructor(designer: VectorDesigner, x?: number, y?: number) {
         super(designer);
         this._onupdate = new signals.Signal();
-        this._polygons = [];
+        this._walls = [];
         this._linked = [];
         this.dragDelayTime = 50;
         this.position.set(x, y);
@@ -52,12 +52,12 @@ export class AnchorControl extends Control {
 
 
     protected onDraging(e: ControlDragEvent) {
-        var viewPos = e.viewPos.sub(e.offset);
+        var viewPos = e.viewPos.sub(e.offset).round(4);
         var result: IVector2;
         var hitObject = this.designer.viewControl.hitObject;
         // 如果鼠标在墙上  吸附到墙壁上
-        if (hitObject != this && hitObject instanceof PolygonControl) {
-            result = viewPos = hitObject.getSubPoint(e.position);
+        if (hitObject != this && hitObject instanceof WallControl) {
+            result = viewPos = hitObject.getSubPoint(e.position).round(4);
         }
         else {
             // 寻找默认吸附点
@@ -80,7 +80,7 @@ export class AnchorControl extends Control {
         }
 
         if (this.designer.viewControl.hitObject != this) {
-            if (this.designer.viewControl.hitObject instanceof PolygonControl) {
+            if (this.designer.viewControl.hitObject instanceof WallControl) {
                 // split
                 var targetAnchor = this.designer.viewControl.hitObject.split(this.designer.viewControl.position);
                 // merage
@@ -117,8 +117,8 @@ export class AnchorControl extends Control {
         //不支持合并到自己的另一端
         if (this.anchor.targets.indexOf(ANCHOR.anchor) > -1) return false;
         // look look 与自己相连的锚点
-        for (let polygon of this._polygons) {
-            var poly = this.designer.createPolygon(null, polygon.anchors[0] == this ? polygon.anchors[1] : polygon.anchors[0], ANCHOR, polygon.thickness);
+        for (let wall of this._walls) {
+            var poly = this.designer.createPolygon(null, wall.anchors[0] == this ? wall.anchors[1] : wall.anchors[0], ANCHOR, wall.thickness);
             if (poly != null) {
                 this.designer.add(poly);
             }
@@ -140,20 +140,20 @@ export class AnchorControl extends Control {
 
 
 
-    public addPolygon(p: PolygonControl, a: AnchorControl) {
-        this._polygons.push(p);
+    public addWall(p: WallControl, a: AnchorControl) {
+        this._walls.push(p);
         this._linked.push(a);
     }
 
-    public removePolygon(p: PolygonControl, a: AnchorControl) {
-        var index = this._polygons.indexOf(p);
-        if (index > -1) this._polygons.splice(index, 1);
+    public removeWall(p: WallControl, a: AnchorControl) {
+        var index = this._walls.indexOf(p);
+        if (index > -1) this._walls.splice(index, 1);
         index = this._linked.indexOf(a);
         if (index > -1) this._linked.splice(index, 1);
     }
 
-    public get polygons(): PolygonControl[] {
-        return this._polygons;
+    public get walls(): WallControl[] {
+        return this._walls;
     }
 
 
@@ -170,9 +170,9 @@ export class AnchorControl extends Control {
     public remove() {
         super.remove();
         this._linked = [];
-        while (this._polygons.length) {
-            var polygon = this._polygons.shift();
-            polygon.remove();
+        while (this._walls.length) {
+            var wall = this._walls.shift();
+            wall.remove();
         }
         this._anchor.remove();
         this._onupdate.removeAll();

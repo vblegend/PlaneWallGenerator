@@ -8,6 +8,9 @@ export class ControlDragEvent {
     private _viewPos: Vector2;
     private _offset: Vector2;
 
+
+
+
     public constructor() {
         this._button = null;
         this._position = new Vector2();
@@ -84,7 +87,7 @@ export class Control {
     protected dragDelayTime: number;
     private _ControlDragEvent: ControlDragEvent;
 
-
+    public children:Control[];
 
     public get position(): Vector2 {
         return this._position;
@@ -129,6 +132,7 @@ export class Control {
         this._position = new Vector2();
         this.dragDelayTime = 0;
         this._ControlDragEvent = new ControlDragEvent;
+        this.children = [];
     }
 
     public remove() {

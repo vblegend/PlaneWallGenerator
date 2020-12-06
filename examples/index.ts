@@ -3,10 +3,11 @@ import { VerticalRuler } from "../src/Designer/Plugins/VerticalRuler";
 import { VectorDesigner } from "../src/Designer/VectorDesigner";
 import { Vector2 } from '../src/Core/Vector2';
 import { AnchorControl } from "../src/Designer/Views/AnchorControl";
-import { PolygonControl } from "../src/Designer/Views/PolygonControl";
+import { WallControl } from "../src/Designer/Views/WallControl";
 import { Control } from "../src/Designer/Views/Control";
-import { GroupWalls } from "../src/Core/WallElement";
+import { GroupWalls } from "../src/Core/Common";
 import { WallPolygonParser } from "../src/WallPolygonParser";
+import { HoleControl } from "../src/Designer/Views/HoleControl";
 
 /**
  * this is example
@@ -58,9 +59,9 @@ export class Examples {
                 var output = document.getElementById("output") as HTMLTextAreaElement;
                 var group = JSON.parse(output.value) as GroupWalls;
                 console.time('to Polygon');
-                var polygon = WallPolygonParser.parse(group);
+                var wall = WallPolygonParser.parse(group,true);
                 console.timeEnd('to Polygon');
-                output.value = JSON.stringify(polygon);
+                output.value = JSON.stringify(wall);
             }
         }
 
@@ -78,6 +79,20 @@ export class Examples {
                 designer.viewControl.onmove.dispatch(100, new Vector2(), true);
             }
         }
+
+        var btnAddDoor = document.getElementById("btnAddDoor") as HTMLCanvasElement;
+        if (btnAddDoor) {
+            btnAddDoor.onclick = () => {
+                var door = new HoleControl(designer,0,0);
+                designer.add(door);
+            }
+        }
+
+        
+
+
+
+
 
 
         var btnBackground = document.getElementById("btnBackground") as HTMLCanvasElement;
@@ -107,7 +122,7 @@ export class Examples {
         if (btnRandom) {
             btnRandom.onclick = () => {
                 var anthors: AnchorControl[] = [];
-                var segments: PolygonControl[] = [];
+                var segments: WallControl[] = [];
                 var objects: Control[] = [];
                 for (let anchor of designer.children) {
                     if (anchor instanceof AnchorControl) {
@@ -131,7 +146,7 @@ export class Examples {
 
                 for (let object of anthors) {
                     if (object instanceof AnchorControl) {
-                        if (object.polygons.length == 0) {
+                        if (object.walls.length == 0) {
                             var index = objects.indexOf(object);
                             if (index > -1) {
                                 objects.splice(index, 1);
@@ -155,10 +170,38 @@ export class Examples {
 
 
 
-
+        for (let i = 0; i < 5; i++) {
+         //   this.unitTest(i.toString());
+        }
 
 
     }
+
+
+    public unitTest(key: string) {
+        console.time(key);
+        let s = 123.123456789;
+        let b = 123.987654321;
+        let v = new Vector2(123.123456789, 123.987654321);
+
+        for (let i = 0; i < 99999999; i++) {
+            v.round(1);
+            // s = Math.round(s * 100) / 100;
+            // b = Math.round(b * 100) / 100;
+
+
+        }
+        console.log(v);
+
+        console.timeEnd(key)
+    }
+
+
+
+
+
+
+
 
     /**
  * 从本地读取Json对象
