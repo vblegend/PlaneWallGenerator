@@ -156,6 +156,7 @@ export class ToolBar {
                 var position = this.designer.selected.position.clone();
                 position.x = Number.parseFloat(value);
                 this.designer.selected.setPosition(position);
+                this.designer.selected.update();
                 this.designer.requestRender();
             }
         }
@@ -169,6 +170,7 @@ export class ToolBar {
                 var position = this.designer.selected.position.clone();
                 position.y = Number.parseFloat(value);
                 this.designer.selected.setPosition(position);
+                this.designer.selected.update();
                 this.designer.requestRender();
             }
         }

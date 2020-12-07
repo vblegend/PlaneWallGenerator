@@ -53,7 +53,7 @@ export class Connector {
 
 
     public commit(hover: Control, position: Vector2) {
-        var point = this.newAnchor.point;
+        var point = this.newAnchor.position;
         var anchor = this.designer._children.find(e => e instanceof AnchorControl && e.anchor.x === point.x && e.anchor.y === point.y) as AnchorControl;
         if (hover instanceof AnchorControl) {
             anchor = hover;

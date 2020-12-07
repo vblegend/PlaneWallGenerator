@@ -125,12 +125,11 @@ export class VectorDesigner {
             this._selected = value;
             var pt: Vector2 = null;
             if (this._selected instanceof AnchorControl) {
-                pt = this.convertPoint(this._selected.point).add(new Vector2(20, 10));
+                pt = this.convertPoint(this._selected.position).add(new Vector2(20, 10));
             } else if (this._selected instanceof WallControl) {
                 pt = this._selected.getSubPoint(this.viewControl.position);
                 pt = this.convertPoint(pt).add(new Vector2(20, 10));
-            }else if(this._selected instanceof HoleControl)
-            {
+            } else if (this._selected instanceof HoleControl) {
                 pt = this.convertPoint(this._selected.position).add(new Vector2(20, 10));
             }
             if (pt) {
@@ -296,8 +295,8 @@ export class VectorDesigner {
      * @param points 
      */
     public createAnchor(id: number, x: number, y: number): AnchorControl {
-        var x = Number.parseFloat(x.toFixed(4));
-        var y = Number.parseFloat(y.toFixed(4));
+        x = Math.floor(x * 10000) / 10000;
+        y = Math.floor(y * 10000) / 10000;
         if (id == null) {
             for (let anchor of this.children) {
                 if (anchor instanceof AnchorControl) {
@@ -308,7 +307,7 @@ export class VectorDesigner {
             }
             id = ++this._maxSerialNumber;
         }
-        var anchor = new AnchorControl(this, x, y);
+        const anchor = new AnchorControl(this, x, y);
         anchor.id = id;
         if (id >= this._maxSerialNumber) {
             this._maxSerialNumber = id + 1;
@@ -319,6 +318,11 @@ export class VectorDesigner {
     public createPolygon(id: number, anchor1: AnchorControl, anchor2: AnchorControl, thickness?: number): WallControl {
         if (anchor1 == anchor2) return null;
         if (anchor1.anchor.targets.indexOf(anchor2.anchor) > -1) {
+            for (let wall of anchor1.walls) {
+                if (wall.anchors.indexOf(anchor1) > -1 && wall.anchors.indexOf(anchor2) > -1) {
+                    return wall;
+                }
+            }
             return null;
         }
         if (id) {
@@ -329,9 +333,27 @@ export class VectorDesigner {
             id = ++this._maxSerialNumber;
         }
         if (thickness == null) thickness = this.defaultthickness;
-        var wall = new WallControl(this, id, anchor1, anchor2, thickness);
+        const wall = new WallControl(this, id, anchor1, anchor2, thickness);
         wall.height = this.defaultHeight;
         return wall;
+    }
+
+
+
+
+
+    public createHole(id: number, x: number, y: number): HoleControl {
+        x = Math.floor(x * 10000) / 10000;
+        y = Math.floor(y * 10000) / 10000;
+        if (id == null) {
+            id = ++this._maxSerialNumber;
+        }
+        const hole = new HoleControl(this, 0, 0);
+        hole.id = id;
+        if (id >= this._maxSerialNumber) {
+            this._maxSerialNumber = id + 1;
+        }
+        return hole;
     }
 
 
@@ -339,7 +361,7 @@ export class VectorDesigner {
     public add(...ctls: Control[]) {
         for (let ctl of ctls) {
             if (ctl != null) {
-                var index = this.children.indexOf(ctl);
+                const index = this.children.indexOf(ctl);
                 if (ctl.id && ctl.id >= this._maxSerialNumber) {
                     this._maxSerialNumber = ctl.id + 1;
                 }
@@ -360,9 +382,9 @@ export class VectorDesigner {
 
 
     public remove(...ctls: Control[]): Control[] {
-        let result = [];
+        const result = [];
         for (let ctl of ctls) {
-            var index = this.children.indexOf(ctl);
+            let index = this.children.indexOf(ctl);
             if (index > -1) {
                 result.push(this.children[index]);
                 this.children.splice(index, 1);
@@ -385,7 +407,7 @@ export class VectorDesigner {
         this._adsorb.clear();
         this._adsorb.enabled = false;
         while (this.children.length > 0) {
-            var control = this.children.shift();
+            const control = this.children.shift();
             control.remove();
         }
         this._adsorb.enabled = true;
@@ -394,7 +416,7 @@ export class VectorDesigner {
 
 
     public toPolygon(): number[][][] {
-        var result: number[][][] = [];
+        const result: number[][][] = [];
         for (var control of this._children) {
             if (control instanceof WallControl) {
                 result.push(control.toPolygon());
@@ -405,7 +427,7 @@ export class VectorDesigner {
 
 
     public serialize(): GroupWalls {
-        var area: GroupWalls = {
+        const area: GroupWalls = {
             anchors: [],
             walls: []
         };
@@ -424,20 +446,30 @@ export class VectorDesigner {
 
     public from(area: GroupWalls) {
         this.clear();
-        var map: { [key: string]: AnchorControl } = {};
-        var objects: Control[] = [];
+        let map: { [key: string]: AnchorControl } = {};
+        const objects: Control[] = [];
         for (let anchor of area.anchors) {
             map[anchor.id] = this.createAnchor(anchor.id, anchor.x, anchor.y);
             objects.push(map[anchor.id]);
         }
-        for (let wall of area.walls) {
-            var from = map[wall.anchors[0]];
-            var to = map[wall.anchors[1]];
+        for (let wallConfig of area.walls) {
+            const from = map[wallConfig.anchors[0]];
+            const to = map[wallConfig.anchors[1]];
             if (from && to) {
-                var segment = this.createPolygon(wall.id, from, to, wall.thick);
-                if (segment) {
-                    segment.height = wall.height;
-                    objects.push(segment);
+                const wall = this.createPolygon(wallConfig.id, from, to, wallConfig.thick);
+                if (wall) {
+                    wall.height = wallConfig.height;
+                    objects.push(wall);
+                    if (wallConfig.holes && wallConfig.holes.length > 0) {
+                        for (let holeConfig of wallConfig.holes) {
+                            let hole = this.createHole(holeConfig.id, 0, 0);
+                            hole.width = holeConfig.width;
+                            hole.height = holeConfig.height;
+                            hole.ground = holeConfig.ground;
+                            hole.location = holeConfig.location;
+                            wall.addHole(hole);
+                        }
+                    }
                 }
             }
         }

@@ -6,7 +6,29 @@ export interface WallSegment {
     anchors: number[];
     thick: number;
     height: number;
+    holes: WallHole[],
 }
+
+
+export interface WallHole {
+    id:number;
+    /* 洞的宽度 */
+    width: number;
+
+    /* 洞的位置 */
+    location: number;
+
+    /* 墙的角度 */
+   // angle: number;
+
+    /* 离地高度 */
+    ground:number;
+    /* 洞的高度 3D属性 */
+    height: number;
+}
+
+
+
 
 /**
  * 锚点信息
@@ -33,4 +55,12 @@ export class WallPolygon {
     public height: number;
     public points: number[][];
     public position: number[];
+    public holes:HolePolygon[];
+}
+
+
+export class HolePolygon{
+    public id:number;
+    public position: number[];
+    public points: number[][];
 }

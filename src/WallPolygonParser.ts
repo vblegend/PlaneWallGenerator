@@ -1,6 +1,7 @@
-import { GroupWalls, WallPolygon } from "./Core/Common";
+import { GroupWalls, WallPolygon, HolePolygon } from './Core/Common';
 import { Anchor } from './Core/Anchor';
-import { Segment } from "./Core/Segment";
+import { Wall } from "./Core/Wall";
+import { Hole } from './Core/Hole';
 
 export class WallPolygonParser {
 
@@ -14,7 +15,7 @@ export class WallPolygonParser {
     public static parse(area: GroupWalls, relocation?: boolean): WallPolygon[] {
         var result: WallPolygon[] = [];
         var anchors: { [key: number]: Anchor } = {};
-        var walls: { [key: number]: Segment } = {};
+        var walls: { [key: number]: Wall } = {};
         var heights: { [key: number]: number } = {};
         try {
             // parse anchors
@@ -31,9 +32,24 @@ export class WallPolygonParser {
                         var from = anchors[wall.anchors[0]];
                         var to = anchors[wall.anchors[1]];
                         if (from && to) {
-                            object = new Segment(wall.id, from, to, wall.thick);
+                            object = new Wall(wall.id, from, to, wall.thick);
                             walls[wall.id] = object;
                             heights[wall.id] = wall.height;
+
+                            if (wall.holes && wall.holes.length > 0) {
+                                for (let holeConfig of wall.holes) {
+                                    let hole = new Hole();
+                                    hole.id = holeConfig.id;
+                                    hole.width = holeConfig.width;
+                                    hole.height = holeConfig.height;
+                                    hole.ground = holeConfig.ground;
+                                    hole.location = holeConfig.location;
+                                    // hole.thickness = holeConfig.thickness;
+                                    object.addHole(hole);
+                                }
+                            }
+
+
                         }
                     }
                 }
@@ -45,17 +61,32 @@ export class WallPolygonParser {
                 }
             }
             for (let key in walls) {
-                var config = walls[key];
-                var wall = new WallPolygon();
-                wall.id = config.id;
-                wall.height = heights[config.id];
-                wall.points = config.points;
+                var wall = walls[key];
+                wall.update();
+                var config = new WallPolygon();
+                config.id = wall.id;
+                config.height = heights[wall.id];
+                config.points = wall.points;
+                config.position = [0, 0];
+                config.holes = [];
                 if (relocation) {
-                    wall.position = this.reLocation(wall.points);
-                } else {
-                    wall.position = [0, 0];
+                    var center = this.getCenter(config.points);
+                    config.position = this.reLocation(config.points, center);
                 }
-                result.push(wall);
+                // holes
+                if (wall.holes.length > 0) {
+                    for (let hole of wall.holes) {
+                        let holepolygon = new HolePolygon();
+                        holepolygon.id = hole.id;
+                        holepolygon.position = [0, 0];
+                        holepolygon.points = hole.points;
+                        if (relocation) {
+                            config.position = this.reLocation(holepolygon.points, config.position);
+                        }
+                        config.holes.push(holepolygon);
+                    }
+                }
+                result.push(config);
             }
             return result;
         }
@@ -70,10 +101,9 @@ export class WallPolygonParser {
 
 
 
-    private static reLocation(points: number[][]): number[] {
-        var center = this.getCenter(points);
+    private static reLocation(points: number[][], center: number[]): number[] {
         for (let i = 0; i < points.length; i++) {
-            var point = points[i];
+            let point = points[i];
             point[0] += center[0];
             point[1] += center[1];
         }

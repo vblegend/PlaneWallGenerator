@@ -59,7 +59,7 @@ export class Examples {
                 var output = document.getElementById("output") as HTMLTextAreaElement;
                 var group = JSON.parse(output.value) as GroupWalls;
                 console.time('to Polygon');
-                var wall = WallPolygonParser.parse(group,true);
+                var wall = WallPolygonParser.parse(group, true);
                 console.timeEnd('to Polygon');
                 output.value = JSON.stringify(wall);
             }
@@ -83,12 +83,12 @@ export class Examples {
         var btnAddDoor = document.getElementById("btnAddDoor") as HTMLCanvasElement;
         if (btnAddDoor) {
             btnAddDoor.onclick = () => {
-                var door = new HoleControl(designer,0,0);
+                var door = designer.createHole(null, 0, 0);
                 designer.add(door);
             }
         }
 
-        
+
 
 
 
@@ -171,7 +171,7 @@ export class Examples {
 
 
         for (let i = 0; i < 5; i++) {
-         //   this.unitTest(i.toString());
+            //   this.unitTest(i.toString());
         }
 
 

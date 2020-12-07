@@ -2,7 +2,7 @@
 import { Vector2 } from '../../Core/Vector2';
 import { Control, ControlDragEvent } from './Control';
 import { VectorDesigner } from '../VectorDesigner';
-import { Segment } from '../../Core/Segment';
+import { Wall } from '../../Core/Wall';
 import { Anchor } from '../../Core/Anchor';
 import { AnchorControl } from './AnchorControl';
 import { RenderType, HorizontalAlign, VerticalAlign } from '../Renderer';
@@ -10,11 +10,12 @@ import { Bounds } from '../Common/Bounds';
 import { WallSegment } from '../../Core/Common';
 import { HoleControl } from './HoleControl';
 import { MathHelper } from '../../Core/MathHelper';
+import { format } from 'path';
 
 
 
 export class WallControl extends Control {
-    private _segment: Segment;
+    private _segment: Wall;
     private _points: Vector2[];
     private _bounds: Bounds;
     private _anchors: AnchorControl[];
@@ -34,7 +35,7 @@ export class WallControl extends Control {
 
         this.dragDelayTime = 200;
         this._bounds = new Bounds(0, 0, 0, 0);
-        this._segment = new Segment(id, anchor1.anchor, anchor2.anchor, thickness);
+        this._segment = new Wall(id, anchor1.anchor, anchor2.anchor, thickness);
         this._distance = anchor1.position.distanceTo(anchor2.position);
         this.strokeColor = '#FFFFFF';
         this.fillColor = '#888888';
@@ -50,6 +51,7 @@ export class WallControl extends Control {
             hole.install(this);
             this._holes.push(hole);
             this.children.push(hole);
+            this._segment.addHole(hole.hole);
         }
     }
     public removeHole(hole: HoleControl) {
@@ -58,12 +60,11 @@ export class WallControl extends Control {
             this._holes[index].unInstall();
             this._holes.splice(index, 1);
         }
+        this._segment.removeHole(hole.hole);
         index = this.children.indexOf(hole);
         if (index > -1) {
             this.children.splice(index, 1);
         }
-
-
     }
 
 
@@ -125,34 +126,62 @@ export class WallControl extends Control {
         return MathHelper.getProjectivePoint(this.anchors[0].position, this.anchors[1].position, mousePosition);
     }
 
-
+    /**
+     * 从指定位置分割墙，返回新的锚点。
+     * 分割后该对象处于被销毁状态，不可再次使用。
+     * @param point 
+     */
     public split(point: Vector2): AnchorControl {
-        var walls: WallControl[] = [];
-        var anchors: AnchorControl[] = [];
-        var anchor1 = this.anchors[0];
-        var anchor2 = this.anchors[1];
         var mousePosition = this.designer.mapPoint(point);
-        var target = MathHelper.getProjectivePoint(anchor1.position, anchor2.position, mousePosition);
+        //先在那旮旯创建个锚点
+        var target = MathHelper.getProjectivePoint(this.anchors[0].position, this.anchors[1].position, mousePosition);
         var targetAnchor = this.designer.createAnchor(null, target.x, target.y);
-        anchors.push(targetAnchor);
-        for (let anchor of this.anchors) {
-            var segment = this.designer.createPolygon(null, anchor, targetAnchor, this.thickness);
-            if (segment != null) walls.push(segment);
-            anchors.push(anchor);
-        }
-        for (let anchor of anchors) {
-            anchor.update();
-        }
+        //墙的两个锚点连到新的锚点
+        // left
+        var leftWall = this.designer.createPolygon(null, this.anchors[0], targetAnchor, this.thickness);
+        this.designer.add(leftWall);
+        // right
+        var rightWall = this.designer.createPolygon(null, targetAnchor, this.anchors[1], this.thickness);
+        this.designer.add(rightWall);
+        // move holes
+        this.moveHoles([leftWall, rightWall], targetAnchor);
         targetAnchor.update();
-        // update segments
-        for (let f of walls) {
-            f.update();
-            this.designer.add(f);
-        }
         this.remove();
         this.designer.add(targetAnchor);
         return targetAnchor;
     }
+
+    /**
+     * 移动墙上的洞到另外的墙上去
+     * @param walls [0,1]
+     * @param targetAnchor 中间锚点
+     */
+    private moveHoles(walls: WallControl[], targetAnchor: AnchorControl) {
+        let leftLength = targetAnchor.position.distanceTo(this.anchors[0].position);
+        let rightLength = this.distance - leftLength;
+        let position = leftLength / this.distance;
+        while (this.holes.length > 0) {
+            let hole = this.holes.shift();
+            if (hole.location < position) {
+                hole.remove();
+                let holeposition = this.distance * hole.location;
+                hole.location = holeposition / leftLength;
+                walls[0].addHole(hole);
+            }
+            else {
+                hole.remove();
+                let holedistance = this.distance * hole.location - leftLength;
+                hole.location = holedistance / rightLength;
+                walls[1].addHole(hole);
+            }
+        }
+    }
+
+
+
+
+
+
 
 
     protected onBeginDrag(e: ControlDragEvent) {
@@ -185,7 +214,8 @@ export class WallControl extends Control {
 
 
     public update() {
-        if (this._segment != null && this._segment.pointsUpdated) {
+        if (this._segment != null && this._segment.needUpdated) {
+            this._segment.update();
             this._points = [];
             this._bounds = new Bounds(0, 0, 0, 0);
             var points = this._segment.points;
@@ -256,17 +286,31 @@ export class WallControl extends Control {
     }
 
 
+    public get holes(): HoleControl[] {
+        return this._holes;
+    }
+
     public toPolygon(): number[][] {
+        if (this._segment.needUpdated) {
+            this._segment.update();
+        }
         return this._segment.points;
     }
 
     public serialize(): WallSegment {
-        return {
+        let wall: WallSegment = {
             id: this.id,
             anchors: [this.anchors[0].id, this.anchors[1].id],
             thick: this.thickness,
             height: this.height,
+            holes: []
         };
+        for (let hole of this._holes) {
+            if (hole.installed) {
+                wall.holes.push(hole.serialize());
+            }
+        }
+        return wall;
     }
 
 

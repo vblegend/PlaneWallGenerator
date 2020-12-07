@@ -55,8 +55,8 @@ export class AdsorbService {
         this.verticalTraces.length = 0;
         for (let object of this.designer.children) {
             if (object instanceof AnchorControl) {
-                this.horizontalTraces.push(object.point.x);
-                this.verticalTraces.push(object.point.y);
+                this.horizontalTraces.push(object.position.x);
+                this.verticalTraces.push(object.position.y);
             }
         }
         this.horizontalTraces = Array.from(new Set(this.horizontalTraces)).sort((a, b) => a - b);

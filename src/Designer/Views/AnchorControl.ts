@@ -6,7 +6,7 @@ import { Anchor } from '../../Core/Anchor';
 import { RenderType } from '../Renderer';
 import { WallControl } from './WallControl';
 import * as signals from 'signals';
-import { Segment } from '../../Core/Segment';
+import { Wall } from '../../Core/Wall';
 import { AdsorbResult } from '../Common/AdsorbService';
 import { AnchorPoint } from '../../Core/Common';
 
@@ -65,7 +65,7 @@ export class AnchorControl extends Control {
         }
         this.setPosition(viewPos);
 
-        this.designer.cursor.update(this.position,result);
+        this.designer.cursor.update(this.position, result);
         this.updateNearby();
         this.designer.requestRender();
     }
@@ -118,8 +118,15 @@ export class AnchorControl extends Control {
         if (this.anchor.targets.indexOf(ANCHOR.anchor) > -1) return false;
         // look look 与自己相连的锚点
         for (let wall of this._walls) {
-            var poly = this.designer.createPolygon(null, wall.anchors[0] == this ? wall.anchors[1] : wall.anchors[0], ANCHOR, wall.thickness);
+            let otherside = wall.anchors[0] == this ? wall.anchors[1] : wall.anchors[0];
+            // 调整前后顺序
+            let anchors = wall.anchors[0] == this ? [ANCHOR, otherside] : [otherside, ANCHOR];
+            var poly = this.designer.createPolygon(null, anchors[0], anchors[1], wall.thickness);
             if (poly != null) {
+                for (let hole of wall.holes) {
+                    hole.remove();
+                    poly.addHole(hole);
+                }
                 this.designer.add(poly);
             }
         }

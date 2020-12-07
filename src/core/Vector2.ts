@@ -11,10 +11,13 @@ export class Vector2 implements IVector2 {
 
     private static divisors: number[] = [1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000];
 
+    public static null: Vector2 = new Vector2().null();
+
+
     public constructor(_x?: number, _y?: number) {
         this.x = _x ? _x : 0;
         this.y = _y ? _y : 0;
-        
+
     }
 
     public round(precision?: number): this {
@@ -185,6 +188,6 @@ export class Vector2 implements IVector2 {
         return point.around(this, angle);
     }
 
-    
+
 
 }

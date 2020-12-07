@@ -1,12 +1,15 @@
 import { MathHelper } from "./MathHelper";
-import { Segment } from "./Segment";
+import { Wall } from "./Wall";
 import { Vector2 } from "./Vector2";
 
 export class Anchor {
     public id: number;
     private _point: Vector2;
     private _targets: Anchor[];
-    private _map: Map<Anchor, Segment>;
+    private _map: Map<Anchor, Wall>;
+
+
+
 
     public constructor(id: number, x: number, y: number) {
         this._point = new Vector2(x, y);//.round();
@@ -22,7 +25,7 @@ export class Anchor {
         return this._point.y;
     }
 
-    private get point(): Vector2 {
+    public get position(): Vector2 {
         return this._point;
     }
 
@@ -61,7 +64,7 @@ export class Anchor {
      * @param object  target
      * @param segment  segment obejct
      */
-    public addTarget(object: Anchor, segment: Segment) {
+    public addTarget(object: Anchor, segment: Wall) {
         if (!this._map.has(object)) {
             this._targets.push(object);
             this._map.set(object, segment);
@@ -102,24 +105,24 @@ export class Anchor {
                 let intersectionPoint = MathHelper.getIntersection(edge_path[0], edge_path[1], nextEdge_path[0], nextEdge_path[1]);
                 if (intersectionPoint === null) {
                     /* get projective point */
-                    intersectionPoint = MathHelper.getProjectivePoint(edge_path[0], edge_path[1], this.point);
+                    intersectionPoint = MathHelper.getProjectivePoint(edge_path[0], edge_path[1], this.position);
                 }
                 intersectionPoint.round(4);
                 let segment = this._map.get(anchor);
                 let points = segment.getPort(this);
-                points[1].update(this.point) && segment.needUpdate();
+                points[1].update(this.position) && segment.needUpdate();
                 points[0].update(intersectionPoint) && segment.needUpdate();
                 segment = this._map.get(nextanchor);
                 points = segment.getPort(this);
                 points[2].update(intersectionPoint) && segment.needUpdate();
-                points[1].update(this.point) && segment.needUpdate();
+                points[1].update(this.position) && segment.needUpdate();
             }
         }
         else if (this._targets.length === 1) {
             const anchor = this._targets[0];
             const segment = this._map.get(anchor);
-            const start = this.point;
-            const end = anchor.point;
+            const start = this.position;
+            const end = anchor.position;
             const angle = Math.atan2((end.y - start.y), (end.x - start.x));
             const theta = angle * (180 / Math.PI);
             const ps = new Vector2(start.x + segment.thickness / 2, start.y);
@@ -127,7 +130,7 @@ export class Anchor {
             const right_point = ps.around(start, theta + 90).round(4);
             const points = segment.getPort(this);
             points[0].update(left_point) && segment.needUpdate();
-            points[1].update(this.point) && segment.needUpdate();
+            points[1].update(this.position) && segment.needUpdate();
             points[2].update(right_point) && segment.needUpdate();
         }
 
@@ -141,8 +144,8 @@ export class Anchor {
     private generateEdgePoints(target: Anchor, right: boolean = true): Vector2[] {
         const eulr = right ? 90 : -90;;
         const segment = this._map.get(target);
-        const start = this.point;
-        const end = target.point;
+        const start = this.position;
+        const end = target.position;
         const off = segment.thickness / 2;
         const angle = Math.atan2((end.y - start.y), (end.x - start.x));
         const theta = angle * (180 / Math.PI);
