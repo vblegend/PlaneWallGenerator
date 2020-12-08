@@ -79,8 +79,10 @@ export class ToolBar {
             var value = this.thicknessInput.value;
             if (value == null || value.length == 0) return;
             if (this.designer.selected instanceof WallControl) {
+                this.designer.clearEvents();
                 this.designer.selected.updateThickness(Number.parseFloat(value));
                 this.designer.requestRender();
+                this.designer.dispatchEvents();
             }
         }
         var setThickness = document.createElement('button');
@@ -110,11 +112,13 @@ export class ToolBar {
         this.heightInput = document.createElement('input');
         this.heightInput.type = 'number';
         this.heightInput.onchange = () => {
+            this.designer.clearEvents();
             var value = this.heightInput.value;
             if (value == null || value.length == 0) return;
             if (this.designer.selected instanceof WallControl) {
                 this.designer.selected.height = Number.parseFloat(value);
             }
+            this.designer.dispatchEvents();
         }
         var setThickness = document.createElement('button');
         setThickness.textContent = '修改'
@@ -151,14 +155,20 @@ export class ToolBar {
         this.xInput.type = 'number';
         this.xInput.onchange = () => {
             var value = this.xInput.value;
+
+
+
             if (value == null || value.length == 0) return;
             if (this.designer.selected instanceof AnchorControl) {
+                this.designer.clearEvents();
                 var position = this.designer.selected.position.clone();
                 position.x = Number.parseFloat(value);
                 this.designer.selected.setPosition(position);
                 this.designer.selected.update();
                 this.designer.requestRender();
+                this.designer.dispatchEvents();
             }
+
         }
         this.positionDiv.appendChild(this.xInput);
         this.yInput = document.createElement('input');
@@ -167,11 +177,13 @@ export class ToolBar {
             var value = this.yInput.value;
             if (value == null || value.length == 0) return;
             if (this.designer.selected instanceof AnchorControl) {
+                this.designer.clearEvents();
                 var position = this.designer.selected.position.clone();
                 position.y = Number.parseFloat(value);
                 this.designer.selected.setPosition(position);
                 this.designer.selected.update();
                 this.designer.requestRender();
+                this.designer.dispatchEvents();
             }
         }
         this.positionDiv.appendChild(this.yInput);
@@ -206,9 +218,11 @@ export class ToolBar {
 
 
     private deleteObject() {
+        this.designer.clearEvents();
         this.visible = false;
         var origin = this.designer.selected;
         origin.remove();
+        this.designer.dispatchEvents();
     }
 
     private settingObject() {

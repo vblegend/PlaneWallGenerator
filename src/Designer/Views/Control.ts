@@ -1,5 +1,6 @@
 import { Vector2 } from '../../Core/Vector2';
 import { VectorDesigner } from '../VectorDesigner';
+import { WallControl } from './WallControl';
 
 export class ControlDragEvent {
 
@@ -71,7 +72,6 @@ export class ControlDragEvent {
 
 
 export class Control {
-
     protected strokeColor: string;
     protected fillColor: string;
     protected hoverColor: string;
@@ -86,8 +86,8 @@ export class Control {
     private _draging: boolean;
     protected dragDelayTime: number;
     private _ControlDragEvent: ControlDragEvent;
-
-    public children:Control[];
+    private _actived: boolean;
+    public children: Control[];
 
     public get position(): Vector2 {
         return this._position;
@@ -112,6 +112,10 @@ export class Control {
 
 
 
+
+
+
+
     /**
      * 按下到当前的tick
      */
@@ -127,12 +131,25 @@ export class Control {
         this._isHover = false;
         this._pressedTime = null;
         this.hoverColor = '#ff8888';
+        this._actived = false;
         this.opacity = 0.5;
         this._isSelected = false;
         this._position = new Vector2();
         this.dragDelayTime = 0;
         this._ControlDragEvent = new ControlDragEvent;
         this.children = [];
+    }
+
+    public onLoad() {
+        this._actived = true;
+    }
+
+    public onUnLoad() {
+        this._actived = false;
+    }
+
+    public get loaded():boolean{
+        return this._actived;
     }
 
     public remove() {

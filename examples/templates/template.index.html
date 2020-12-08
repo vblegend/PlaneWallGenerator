@@ -10,18 +10,16 @@
 
 
     <style>
-        .VerticalRulerCanvas {
+        html,
+        body {
             height: 100%;
-            width: 50px;
-            background-color: #B9C77A;
-            float: left;
-        }
-
-        .HorizontalRulerCanvas {
-            height: 50px;
             width: 100%;
-            background-color: #F7704C;
-            margin-bottom: -4px;
+            margin: 0;
+            padding: 0;
+        }
+        .wall-designer-controller *{           
+             margin: 0;
+            padding: 0;
         }
 
         .canvas {
@@ -30,7 +28,21 @@
             background-color: #333333;
         }
 
-        .scale {
+        .wall-designer-vertical-ruler {
+            height: 100%;
+            width: 50px;
+            background-color: #B9C77A;
+            float: left;
+        }
+
+        .wall-designer-horizontal-ruler {
+            height: 50px;
+            width: 100%;
+            background-color: #F7704C;
+            margin-bottom: -4px;
+        }
+
+        .wall-designer-scale {
             background-color: #0072f5;
             color: #ffffff;
             width: 50px;
@@ -41,7 +53,11 @@
             justify-content: center;
         }
 
- 
+        .wall-designer-controller {
+            width: 100%;
+            height: 80%;
+            display: flex;
+        }
     </style>
 
 
@@ -49,23 +65,24 @@
 </head>
 
 <body style='margin: 0px;'>
-    <div id='com' style="width: 1600px; height: 800px; display: flex;">
-
+    <div id='com' class='wall-designer-controller'>
         <div>
-            <div id="scale" class='scale'>100%</div>
-            <canvas id="VerticalRulerCanvas" class='VerticalRulerCanvas'>
-            </canvas>
+            <div id="scale" class='wall-designer-scale'>100%</div>
+            <div id="VerticalRuler" class='wall-designer-vertical-ruler'>
+            </div>
         </div>
-
-
-
-        <div style="width:100%; height:100%;float:left;">
-            <canvas id='HorizontalRulerCanvas' class='HorizontalRulerCanvas'>
-            </canvas>
-            <div id="example" class='canvas'>
+        <div style="width:100%; height:100%;float:left;margin: 0;  padding: 0;">
+            <div style="width:100%; height:100%;margin: 0;  padding: 0;">
+                <div id='HorizontalRuler' class='wall-designer-horizontal-ruler'>
+                </div>
+                <div id="example" class='canvas'>
+                </div>
             </div>
         </div>
     </div>
+
+
+
 
 
     <div style="margin-top: 50px; margin-left: 50px;width: 1550px;">
@@ -82,7 +99,7 @@
         <button id='btnBackground' style='float: right;'>加载底图</button>
 
         <button id='btnAddDoor' style='float: right;'>增加一个门</button>
-        
+
     </div>
 
     <textarea id='output' style="width: 1595px; height: 100px; "></textarea>

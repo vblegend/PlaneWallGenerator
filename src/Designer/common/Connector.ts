@@ -75,11 +75,11 @@ export class Connector {
             /* use old anchor create new anchor */
             this.newSegment = this.designer.createPolygon(null, this.origin, this.newAnchor, 10);
             this.update();
-            /* add objects to designer */
-            this.designer.add(this.newAnchor, this.newSegment);
         }
+        /* add objects to designer */
         this.designer.add(this.newAnchor, this.newSegment);
         this.designer.selected = this.newAnchor;
+        this.designer.dispatchEvents();
     }
 
     public render() {
@@ -92,14 +92,13 @@ export class Connector {
     }
 
 
-
-
     public cancel() {
         this.newSegment.remove(false);
         this.newAnchor.remove();
         this.newSegment = null;
         this.newAnchor = null;
         this.origin.update();
+        this.designer.clearEvents();
     }
 
 

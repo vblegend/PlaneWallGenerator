@@ -97,6 +97,7 @@ export class HoleControl extends Control {
 
 
     protected onBeginDrag(e: ControlDragEvent) {
+        this.designer.clearEvents();
         this.designer.grabObjects([this]);
         this.designer.cursor.update(this.position);
         this._pressedOffset = e.viewPos.sub(this.position);
@@ -154,24 +155,29 @@ export class HoleControl extends Control {
         var hitObject = this.designer.viewControl.hitObject;
         if (hitObject != this) {
 
-            if (hitObject instanceof WallControl) {
+            if (this._parent) {
+                let parent = this._parent;
                 this.remove();
+                this.designer.updateEvents(parent);
+            }
+            if (hitObject instanceof WallControl) {
                 this.designer.cursor.update(null);
                 this.designer.discardGrabObjects();
                 hitObject.addHole(this);
                 this.update();
+                this.designer.updateEvents(hitObject);
+                this.designer.dispatchEvents();
                 return;
             }
             else {
-                this.remove();
                 this.designer.add(this);
             }
-
         }
         this.designer.cursor.update(null);
         this.designer.releaseGrabObjects();
         this.designer.updateElementPoints();
         this.designer.requestRender();
+        this.designer.dispatchEvents();
     }
 
 

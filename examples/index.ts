@@ -8,6 +8,7 @@ import { Control } from "../src/Designer/Views/Control";
 import { GroupWalls } from "../src/Core/Common";
 import { WallPolygonParser } from "../src/WallPolygonParser";
 import { HoleControl } from "../src/Designer/Views/HoleControl";
+import { ElementResizer } from "../src/Designer/Plugins/ElementResizer";
 
 /**
  * this is example
@@ -19,11 +20,19 @@ export class Examples {
     public async main() {
         var div = <HTMLDivElement>document.getElementById("example");
         var designer = new VectorDesigner(div);
-        var hrulercanvas = document.getElementById("HorizontalRulerCanvas") as HTMLCanvasElement;
-        var vrulercanvas = document.getElementById("VerticalRulerCanvas") as HTMLCanvasElement;
+        var hrulercanvas = document.getElementById("HorizontalRuler") as HTMLDivElement;
+        var vrulercanvas = document.getElementById("VerticalRuler") as HTMLDivElement;
         var hRuler = new HorizontalRuler(designer, hrulercanvas);
         var vRuler = new VerticalRuler(designer, vrulercanvas);
         designer.run();
+
+        var resize = new ElementResizer(div);
+        resize.onResize.add(()=>{
+            vRuler.resize();
+            hRuler.resize();
+            designer.resize();
+        });
+
 
         // 
         designer.onZoom.add(e => {

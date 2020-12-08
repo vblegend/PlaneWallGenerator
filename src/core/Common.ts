@@ -59,8 +59,11 @@ export class WallPolygon {
 }
 
 
-export class HolePolygon{
-    public id:number;
+export class HolePolygon {
+    public id: number;
     public position: number[];
     public points: number[][];
+    public height: number;
+    /* 离地高度 */
+    public ground: number;
 }

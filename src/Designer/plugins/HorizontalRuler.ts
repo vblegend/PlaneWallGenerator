@@ -7,21 +7,19 @@ export class HorizontalRuler {
     private _canvas: HTMLCanvasElement;
     private designer: VectorDesigner;
     private _renderer: Renderer;
-
     private _cursorRenderer: Renderer;
-
-
     private _needUpdate: boolean;
     private _width: number;
     private _height: number;
-    public constructor(designer: VectorDesigner, canvas: HTMLCanvasElement) {
+    private _div: HTMLDivElement
+    public constructor(designer: VectorDesigner, div: HTMLDivElement) {
+        this._div = div;
         this.designer = designer;
-        this._canvas = canvas;
+        this._canvas = document.createElement('canvas');
+        this._div.appendChild(this._canvas);
         this._needUpdate = true;
-        this._renderer = new Renderer(canvas);
-
+        this._renderer = new Renderer(this._canvas);
         this._cursorRenderer = new Renderer();
-
         this.designer.onRender.add(this.render, this);
         this.designer.viewControl.onmove.add(() => {
             this._needUpdate = true;
@@ -42,11 +40,13 @@ export class HorizontalRuler {
 
 
 
-    private resize() {
-        this._width = this._canvas.clientWidth;
-        this._height = this._canvas.clientHeight;
+    public resize() {
+        this._width = this._div.clientWidth;
+        this._height = this._div.clientHeight;
         this._renderer.resize(this.width, this.height);
         this._cursorRenderer.resize(this.width, this.height);
+        this._needUpdate = true;
+        this.renderCursor();
     }
 
 

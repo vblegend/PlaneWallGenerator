@@ -10,7 +10,7 @@ import { AnchorControl } from './Views/AnchorControl';
 import { WallControl } from './Views/WallControl';
 import { Connector } from "./Common/Connector";
 import { AdsorbService } from "./Common/AdsorbService";
-import { GroupWalls, WallSegment } from "../Core/Common";
+import { GroupWalls, WallSegment, WallPolygon } from '../Core/Common';
 import { ImageControl } from "./Views/ImageControl";
 import { Cursor } from "./Views/Cursor";
 import { HoleControl } from "./Views/HoleControl";
@@ -30,6 +30,7 @@ export class VectorDesigner {
     private _onRender: signals.Signal;
     private _onZoom: signals.Signal;
     private _onCursor: signals.Signal;
+    private _onUpdate: signals.Signal;
 
     private _cursor: Cursor;
 
@@ -148,6 +149,7 @@ export class VectorDesigner {
     public constructor(div: HTMLDivElement) {
         this._div = div;
         this._zoom = 100;
+        this._events = {};
         this._children = [];
         this._mouseGrabObjects = [];
         this._cursor = new Cursor(this);
@@ -155,6 +157,7 @@ export class VectorDesigner {
         this._onRender = new signals.Signal();
         this._onZoom = new signals.Signal();
         this._onCursor = new signals.Signal();
+        this._onUpdate = new signals.Signal();
         this._renderer = new Renderer();
         this._viewControl = new ViewController(this);
         this._runState = false;
@@ -179,6 +182,7 @@ export class VectorDesigner {
         this._center = this._bounds.getCenter();
         this._res = 1 / (this._zoom / 100);
         this.moveTo(this._zoom, this._center);
+        this.requestRender();
     }
 
 
@@ -366,6 +370,7 @@ export class VectorDesigner {
                     this._maxSerialNumber = ctl.id + 1;
                 }
                 if (index == -1) {
+                    ctl.onLoad();
                     if (ctl instanceof AnchorControl) {
                         this.children.push(ctl);
                     } else if (ctl instanceof WallControl) {
@@ -373,6 +378,7 @@ export class VectorDesigner {
                     } else if (ctl instanceof HoleControl) {
                         this.children.unshift(ctl);
                     }
+                    
                 }
             }
         }
@@ -381,11 +387,34 @@ export class VectorDesigner {
     }
 
 
+    private _events: { [id: string]: WallPolygon }
+
+    public updateEvents(wall: WallControl) {
+        this._events[wall.id] = wall.toPolygon();
+    }
+
+    public clearEvents() {
+        this._events = {};
+    }
+
+
+    public dispatchEvents() {
+        for (let key in this._events) {
+            let value = this._events[key];
+            console.log(value);
+        }
+        this._events = {};
+    }
+
+
+
+
     public remove(...ctls: Control[]): Control[] {
         const result = [];
         for (let ctl of ctls) {
             let index = this.children.indexOf(ctl);
             if (index > -1) {
+                ctl.onUnLoad();
                 result.push(this.children[index]);
                 this.children.splice(index, 1);
             }
@@ -415,11 +444,11 @@ export class VectorDesigner {
     }
 
 
-    public toPolygon(): number[][][] {
-        const result: number[][][] = [];
+    public toPolygon(relocation?: boolean): WallPolygon[] {
+        const result: WallPolygon[] = [];
         for (var control of this._children) {
             if (control instanceof WallControl) {
-                result.push(control.toPolygon());
+                result.push(control.toPolygon(relocation));
             }
         }
         return result;
@@ -529,7 +558,9 @@ export class VectorDesigner {
         return this._onCursor;
     }
 
-
+    public get onUpdate(): signals.Signal {
+        return this._onUpdate;
+    }
 
     public get onZoom(): signals.Signal {
         return this._onZoom;

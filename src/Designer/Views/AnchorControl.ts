@@ -48,6 +48,7 @@ export class AnchorControl extends Control {
         this.designer.grabObjects([this]);
         this.designer.updateElementPoints();
         this.designer.cursor.update(this.position);
+        this.designer.clearEvents();
     }
 
 
@@ -64,11 +65,13 @@ export class AnchorControl extends Control {
             result = this.designer.adsorb.adsorption(viewPos);
         }
         this.setPosition(viewPos);
-
         this.designer.cursor.update(this.position, result);
         this.updateNearby();
         this.designer.requestRender();
     }
+
+
+
 
     protected onEndDrag(e: ControlDragEvent) {
         this.designer.cursor.update(null);
@@ -92,6 +95,7 @@ export class AnchorControl extends Control {
         }
         this.designer.releaseGrabObjects();
         this.designer.updateElementPoints();
+        this.designer.dispatchEvents();
     }
 
 

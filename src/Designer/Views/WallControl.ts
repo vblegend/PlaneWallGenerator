@@ -7,10 +7,9 @@ import { Anchor } from '../../Core/Anchor';
 import { AnchorControl } from './AnchorControl';
 import { RenderType, HorizontalAlign, VerticalAlign } from '../Renderer';
 import { Bounds } from '../Common/Bounds';
-import { WallSegment } from '../../Core/Common';
+import { HolePolygon, WallPolygon, WallSegment } from '../../Core/Common';
 import { HoleControl } from './HoleControl';
 import { MathHelper } from '../../Core/MathHelper';
-import { format } from 'path';
 
 
 
@@ -32,7 +31,6 @@ export class WallControl extends Control {
         this._points = [];
         this._holes = [];
         this._angle = 0;
-
         this.dragDelayTime = 200;
         this._bounds = new Bounds(0, 0, 0, 0);
         this._segment = new Wall(id, anchor1.anchor, anchor2.anchor, thickness);
@@ -91,7 +89,6 @@ export class WallControl extends Control {
         for (let anchor of this._anchors) {
             anchor.update();
         }
-        this.update();
     }
 
 
@@ -110,6 +107,7 @@ export class WallControl extends Control {
         this._anchors[1].onUpdate.remove(this.update, this);
         this._anchors[0].removeWall(this, this._anchors[1]);
         this._anchors[1].removeWall(this, this._anchors[0]);
+        this._points = [];
         while (this._anchors.length > 0 && removeanchor) {
             let anchorControl = this._anchors.shift();
             if (anchorControl.anchor.targets.length === 0) {
@@ -185,11 +183,10 @@ export class WallControl extends Control {
 
 
     protected onBeginDrag(e: ControlDragEvent) {
+        this.designer.clearEvents();
         this.designer.renderer.canvas.style.cursor = 'move';
         this._anchorPositions = [e.viewPos.sub(this.anchors[0].position), e.viewPos.sub(this.anchors[1].position)];
     }
-
-
 
     protected onDraging(e: ControlDragEvent) {
         // var pos1 = viewPos.sub(this._anchorPositions[0]);
@@ -198,8 +195,6 @@ export class WallControl extends Control {
         // var result2 = this.designer.adsorb.adsorption(pos2);
         // var minx = Math.min(result1.x ? result1.x : pos1.x, result2.x ? result2.x : pos2.x);
         // var miny = Math.min(result1.y ? result1.y : pos1.y, result2.y ? result2.y : pos2.y);
-
-
         this.anchors[0].setPosition(e.viewPos.sub(this._anchorPositions[0]).round(4));
         this.anchors[1].setPosition(e.viewPos.sub(this._anchorPositions[1]).round(4));
         this.anchors[0].updateNearby();
@@ -210,6 +205,7 @@ export class WallControl extends Control {
 
     protected onEndDrag(e: ControlDragEvent) {
         this.designer.renderer.canvas.style.cursor = 'default';
+        this.designer.dispatchEvents();
     }
 
 
@@ -229,6 +225,7 @@ export class WallControl extends Control {
             for (let hole of this._holes) {
                 hole.update();
             }
+            this.designer.updateEvents(this);
         }
     }
 
@@ -276,10 +273,23 @@ export class WallControl extends Control {
         for (let hole of this._holes) {
             hole.render();
         }
-
-
-
     }
+
+
+
+    public onLoad() {
+        super.onLoad();
+        this.designer.updateEvents(this);
+    }
+
+    public onUnLoad() {
+        super.onUnLoad();
+        this.designer.updateEvents(this);
+    }
+
+
+
+
 
     public get anchors(): AnchorControl[] {
         return this._anchors;
@@ -290,11 +300,39 @@ export class WallControl extends Control {
         return this._holes;
     }
 
-    public toPolygon(): number[][] {
+    public toPolygon(relocation?: boolean): WallPolygon {
+        var config = new WallPolygon();
+        config.id = this.id;
+
+        if (this._segment == null || !this.loaded) return config;
         if (this._segment.needUpdated) {
             this._segment.update();
         }
-        return this._segment.points;
+        config.height = this.height;
+        config.points = this._segment.points;
+        config.position = [0, 0];
+        config.holes = [];
+        if (relocation) {
+            config.position = MathHelper.getCenter(config.points);
+            MathHelper.reLocation(config.points, config.position);
+        }
+        // holes
+        if (this.holes.length > 0) {
+            for (let hole of this.holes) {
+                let holepolygon = new HolePolygon();
+                holepolygon.id = hole.id;
+                holepolygon.height = hole.height;
+                holepolygon.ground = hole.ground;
+                holepolygon.position = [0, 0];
+                holepolygon.points = hole._hole.points;
+                if (relocation) {
+                    holepolygon.position = config.position;
+                    MathHelper.reLocation(holepolygon.points, config.position);
+                }
+                config.holes.push(holepolygon);
+            }
+        }
+        return config;
     }
 
     public serialize(): WallSegment {
