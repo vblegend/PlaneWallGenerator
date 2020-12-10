@@ -203,6 +203,7 @@ export class HoleControl extends Control {
     }
 
     public update() {
+        this._hole.update();
         if (this.installed && !this.isDraging) {
             this.angle = this._parent.angle;
             this.thickness = this._parent.thickness;
