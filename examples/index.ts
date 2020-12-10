@@ -85,7 +85,7 @@ export class Examples {
         var btnGoCenter = document.getElementById("btnGoCenter") as HTMLCanvasElement;
         if (btnGoCenter) {
             btnGoCenter.onclick = () => {
-                designer.viewControl.onmove.dispatch(100, new Vector2(), true);
+                designer.moveTo(100, new Vector2());
             }
         }
 

@@ -74,9 +74,26 @@ export class Vector2 implements IVector2 {
         return new Vector2(this.x - v.x, this.y - v.y);
     }
 
+
     public add(v: Vector2): Vector2 {
         return new Vector2(this.x + v.x, this.y + v.y);
     }
+
+    public increase(x?: number, y?: number): this {
+        if (x != null) this.x += x;
+        if (y != null) this.y += y;
+        return this;
+    }
+
+    public reduce(x: number, y: number): this {
+        if (x != null) this.x -= x;
+        if (y != null) this.y -= y;
+        return this;
+    }
+
+
+
+
 
     public clone(): Vector2 {
         return new Vector2(this.x, this.y);

@@ -6,8 +6,6 @@ import { Anchor } from '../../Core/Anchor';
 import { RenderType } from '../Renderer';
 import { WallControl } from './WallControl';
 import * as signals from 'signals';
-import { Wall } from '../../Core/Wall';
-import { AdsorbResult } from '../Common/AdsorbService';
 import { AnchorPoint } from '../../Core/Common';
 
 

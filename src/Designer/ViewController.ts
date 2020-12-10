@@ -13,12 +13,11 @@ import { DragService } from "./Plugins/DragService";
 export class ViewController {
     private designer: VectorDesigner;
     private _dragging: boolean;
-    private _onmove: signals.Signal;
     public position: Vector2;
     private _press_position: Vector2;
     private _hoverObject: Control;
     private _hitObject: Control;
-    private pressed_state: boolean;
+    // private pressed_state: boolean;
     private _pressedObject: Control;
     private _iscanceled: boolean;
     private capturer: MouseCapturer;
@@ -33,21 +32,15 @@ export class ViewController {
     public get button(): number {
         return this._button;
     }
-    public get onmove(): signals.Signal {
-        return this._onmove;
-    }
-
     public constructor(designer: VectorDesigner) {
         this.designer = designer;
         this._iscanceled = false;
         this._button = null;
-        this._onmove = new signals.Signal();
         this.position = new Vector2(-1, -1);
         this.capturer = new MouseCapturer(this.designer.renderer.canvas);
         this.capturer.onMouseDown.add(this.mouse_down, this);
         this.capturer.onMouseMove.add(this.mouse_move, this);
         this.capturer.onMouseUp.add(this.mouse_up, this);
-        this.designer.renderer.canvas.ondblclick = this.mouse_dblclick.bind(this);
         this.designer.renderer.canvas.onwheel = this.wheelChange.bind(this);
         this.designer.renderer.canvas.onscroll = this.wheelChange.bind(this);
         this.designer.renderer.canvas.onkeydown = this.key_down.bind(this);
@@ -66,7 +59,6 @@ export class ViewController {
 
     private addedObject: Control;
     private control_dragEnter(e: DragEvent) {
-
         this.position = new Vector2(e.pageX - this.designer.renderer.canvas.offsetLeft, e.pageY - this.designer.renderer.canvas.offsetTop);
         let viewPosition = this.designer.mapPoint(this.position);
         if (e.dataTransfer.types.indexOf('text/create-anchor') >= 0) {
@@ -80,6 +72,7 @@ export class ViewController {
             this.designer.add(this.addedObject);
             this._pressedObject = this._hitObject = this.addedObject;
             // mouse down
+            this.designer.toolbar.visible = false;
             this._pressedObject.dispatchEvents('onMouseDown', e.button, this.position);
             this.designer.requestRender();
         }
@@ -91,6 +84,7 @@ export class ViewController {
             this.addedObject = null;
             this._pressedObject = null;
             this.designer.cursor.update(null);
+            this.designer.toolbar.visible = this.designer.selected != null && this.designer.connector == null;
             this.designer.requestRender();
         }
     }
@@ -139,6 +133,18 @@ export class ViewController {
                 e.preventDefault();
             }
         }
+
+        let moveValue = e.shiftKey ? 10 : 1;
+        let center: Vector2;
+        const keycode = e.key.toLowerCase();
+        if (keycode === 's') center = this.designer.center.clone().reduce(null, -moveValue);
+        if (keycode === 'w') center = this.designer.center.clone().reduce(null, +moveValue);
+        if (keycode === 'd') center = this.designer.center.clone().reduce(-moveValue, null);
+        if (keycode === 'a') center = this.designer.center.clone().reduce(+moveValue, null);
+        if (center) {
+            this.designer.moveTo(null, center);
+            this.designer.onMoved.dispatch();
+        }
     }
 
     private key_up(e: KeyboardEvent) {
@@ -154,13 +160,11 @@ export class ViewController {
 
 
     private wheelChange(e: WheelEvent) {
-        //  var delta = (-e.deltaY / 1000) * 50;
         var deltalX = this.designer.width / 2 - e.offsetX;
         var deltalY = this.designer.height / 2 - e.offsetY;
         var px = new Vector2(e.offsetX, e.offsetY);
         //计算缩放的中心点
         var zoomPoint = new Vector2((px.x + this.designer.bounds.left / this.designer.res) * this.designer.res, (px.y + this.designer.bounds.top / this.designer.res) * this.designer.res);
-        //  var zoom =  this.designer.zoom + delta;
         var zoom = 0;
         {
             var scales = [5, 10, 20, 25, 40, 50, 80, 100, 200, 250, 400, 500, 800, 1000, 1250, 2000, 2500, 3000, 4000];
@@ -178,7 +182,7 @@ export class ViewController {
         }
         var newRes = 1 / (zoom / 100);
         var center = new Vector2(zoomPoint.x + deltalX * newRes, zoomPoint.y + deltalY * newRes);
-        this.onmove.dispatch(zoom, center, false);
+        this.designer.moveTo(zoom, center);
         this.stopEventBubble(e);
     }
 
@@ -195,62 +199,28 @@ export class ViewController {
             window.event.cancelBubble = true;
     }
 
-    private mouse_dblclick(e: MouseEvent) {
-        if (this.hitObject instanceof AnchorControl) {
-            return;
-        }
-        if (this.hitObject instanceof WallControl) {
-            var anchor = this.hitObject.split(this.position);
-            this._pressedObject = null;
-            this.designer.selected = anchor;
-            this._hitObject = null;
-            this._hoverObject = null;
-            this.mouse_move(e);
-            return;
-        }
-        if (this.designer.selected == null) {
-            // dbclick insert anchor use 2 precision
-            let v = this.designer.mapPoint(this.position).round(2);
-            var anchor = this.designer.createAnchor(null, v.x, v.y);
-            this.designer.add(anchor);
-            this.designer.selected = anchor;
-        }
-
-    }
-
-
-
-
     private mouse_down(e: MouseEvent) {
         this.capturer.capture();
         this.capturer.focus();
         this._button = e.button;
-        this.pressed_state = this.designer.toolbar.visible;
-        if (this.pressed_state) {
-            this.designer.toolbar.visible = false;
-        }
         if (this.designer.connector != null) {
             if (e.button === 2) {
                 this.designer.connector.cancel();
-            }
-            if (e.button === 0) {
-                this.designer.connector.commit(this.hitObject, this.position);
-                var newAnchor = this.designer.connector.newAnchor;
-                this.designer.connector = new Connector(this.designer, newAnchor);
+                this.designer.connector = null;
+                this._iscanceled = true;
+                this.designer.cursor.update(null);
                 this.designer.toolbar.visible = true;
-                // this._pressedObject = null;
-                // this._hitObject = null;
-                // this._hoverObject = null;
-                this.mouse_move(e);
-                return;
+            } else if (e.button === 0) {
+                if (this.designer.connector.commit(this.hitObject, this.position)) {
+                    var newAnchor = this.designer.connector.newAnchor;
+                    this.designer.connector = new Connector(this.designer, newAnchor);
+                    this.designer.toolbar.visible = false;
+                    this.mouse_move(e);
+                }
             }
-            this.designer.connector = null;
-            this._iscanceled = true;
-            this.designer.cursor.update(null);
-            this.designer.toolbar.visible = true;
             return;
         }
-
+        this.designer.toolbar.visible = false;
         this._iscanceled = false;
         if (e.button === 2) {
             if (this.designer.selected != null) {
@@ -323,7 +293,7 @@ export class ViewController {
             var pos = this.position.sub(this._press_position);
             this._press_position = this.position;
             var center = new Vector2(this.designer.center.x - pos.x * this.designer.res, this.designer.center.y - pos.y * this.designer.res);
-            this.onmove.dispatch(this.designer.zoom, center, true);
+            this.designer.moveTo(this.designer.zoom, center);
             this.stopEventBubble(e);
         }
 
@@ -356,16 +326,18 @@ export class ViewController {
 
 
     private mouse_up(e: MouseEvent) {
+        this.capturer.focus();
         this._button = null;
-        if (this.designer.selected == null) {
-            this.designer.toolbar.visible = false;
-        }
+        // if (this.designer.selected == null) {
+
+        // }
+        this.designer.toolbar.visible = this.designer.selected != null && this.designer.connector == null;
         this.capturer.release();
         if (this._iscanceled) {
             this._iscanceled = false;
             return;
         }
-        this.designer.toolbar.visible = this.pressed_state;
+        //  this.designer.toolbar.visible = this.pressed_state;
         if (this._pressedObject) {
             // mouse down
             this._pressedObject.dispatchEvents('onMouseUp', e.button, this.position);
@@ -374,6 +346,7 @@ export class ViewController {
                 this._hoverObject.dispatchEvents('onClick');
             }
             this._pressedObject = null;
+
             return;
         }
         if (this._dragging) {
@@ -383,9 +356,6 @@ export class ViewController {
             this.designer.renderer.canvas.style.cursor = "default";
         }
 
-
-
-        this.capturer.focus();
     }
 
 

@@ -21,7 +21,7 @@ export class HorizontalRuler {
         this._renderer = new Renderer(this._canvas);
         this._cursorRenderer = new Renderer();
         this.designer.onRender.add(this.render, this);
-        this.designer.viewControl.onmove.add(() => {
+        this.designer.onMoved.add(() => {
             this._needUpdate = true;
         }, this);
 

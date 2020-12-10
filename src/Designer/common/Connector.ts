@@ -24,7 +24,7 @@ export class Connector {
 
         this.newSegment = this.designer.createPolygon(null, origin, this.newAnchor, thickness);
         this.designer.cursor.update(v);
-        this.update();
+        this.update(this.designer.viewControl.position);
     }
 
 
@@ -57,9 +57,12 @@ export class Connector {
 
 
 
-    public commit(hover: Control, position: Vector2) {
+    public commit(hover: Control, position: Vector2): boolean {
         var point = this.newAnchor.position;
         var anchor = this.designer._children.find(e => e instanceof AnchorControl && e.anchor.x === point.x && e.anchor.y === point.y) as AnchorControl;
+        if (this.origin === anchor || this.designer.connector.origin === hover) {
+            return false;
+        }
         if (hover instanceof AnchorControl) {
             anchor = hover;
         }
@@ -83,12 +86,13 @@ export class Connector {
             /* use old anchor create new anchor */
             this.newSegment = this.designer.createPolygon(null, this.origin, this.newAnchor, thickness);
             this.newSegment.height = height;
-            this.update();
+            this.update(position);
         }
         /* add objects to designer */
         this.designer.add(this.newAnchor, this.newSegment);
         this.designer.selected = this.newAnchor;
         this.designer.dispatchEvents();
+        return true;
     }
 
     public render() {

@@ -23,7 +23,7 @@ export class VerticalRuler {
         this._cursorRenderer = new Renderer();
         this._renderer = new Renderer(this._canvas);
         this.designer.onRender.add(this.render, this);
-        this.designer.viewControl.onmove.add(() => {
+        this.designer.onMoved.add(() => {
             this._needUpdate = true;
         }, this);
 

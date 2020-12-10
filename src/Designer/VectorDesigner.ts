@@ -29,6 +29,7 @@ export class VectorDesigner {
     private _center: Vector2;
     private _res: number;
     private _runState: boolean;
+    private _onMoved: signals.Signal;
     private _onRender: signals.Signal;
     private _onZoom: signals.Signal;
     private _onCursor: signals.Signal;
@@ -157,6 +158,7 @@ export class VectorDesigner {
         this._mouseGrabObjects = [];
         this._cursor = new Cursor(this);
         this._adsorb = new AdsorbService(this);
+        this._onMoved = new signals.Signal();
         this._onRender = new signals.Signal();
         this._onZoom = new signals.Signal();
         this._onCursor = new signals.Signal();
@@ -167,21 +169,15 @@ export class VectorDesigner {
         this._renderer.apply(div);
         this.resize();
         this._background = new ImageControl(this);
-        this._viewControl.onmove.add(this.moveTo, this);
         this._toolbar = new ToolBar(this);
         this._div.appendChild(this._toolbar.dom);
         this._toolbox = new ToolBox(this);
         this._div.appendChild(this._toolbox.dom);
         this._requestRender = true;
-        this.defaultHeight = 100;
+        this.defaultHeight = 250;
         this.defaultthickness = 10;
         this._maxSerialNumber = 0;
     }
-
-
-
-
-
 
 
     public resize() {
@@ -195,24 +191,33 @@ export class VectorDesigner {
         this.requestRender();
     }
 
-
-    private moveTo(zoom: number, center: Vector2, trans: boolean = false) {
-        if (zoom <= 0) {
-            return;
+    /**
+     * 移动图的某个位置到设计区中心
+     * @param zoom  缩放倍数  100 为 100%
+     * @param center 设计区的中心
+     */
+    public moveTo(zoom?: number, center?: Vector2) {
+        if (zoom != null) {
+            if (zoom <= 0) {
+                return;
+            }
+            if (this._zoom != zoom) {
+                this._zoom = zoom;
+                this.onZoom.dispatch(zoom);
+            }
         }
-        if (this._zoom != zoom) {
-            this._zoom = zoom;
-            this.onZoom.dispatch(zoom);
+        if (center != null) {
+            if (this._center != center) {
+                this._center = center;
+            }
+            this._res = 1 / (this._zoom / 100);
+            var width = this.width * this._res;
+            var height = this.height * this._res;
+            //获取新的视图范围。
+            this._bounds = new Bounds(center.x - width / 2, center.y - height / 2, center.x + width / 2, center.y + height / 2);
         }
-        //console.log(center);
-        if ((this._center != center) || trans) {
-            this._center = center;
-        }
-        this._res = 1 / (this._zoom / 100);
-        var width = this.width * this._res;
-        var height = this.height * this._res;
-        //获取新的视图范围。
-        this._bounds = new Bounds(center.x - width / 2, center.y - height / 2, center.x + width / 2, center.y + height / 2);
+        //
+        this.onMoved.dispatch();
         //redraw
         this.requestRender();
     }
@@ -370,6 +375,7 @@ export class VectorDesigner {
             id = ++this._maxSerialNumber;
         }
         const hole = new HoleControl(this, x, y);
+        hole.height = this.defaultHeight;
         hole.id = id;
         if (id >= this._maxSerialNumber) {
             this._maxSerialNumber = id + 1;
@@ -582,6 +588,13 @@ export class VectorDesigner {
     public get onZoom(): signals.Signal {
         return this._onZoom;
     }
+
+
+    public get onMoved(): signals.Signal {
+        return this._onMoved;
+    }
+
+
 
 
 

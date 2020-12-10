@@ -110,7 +110,7 @@ export class AdsorbService {
      * 吸附一个近似值
      * @param in_out_Point  要查找的坐标，最后返回
      * @param lessValue     小于范围
-     * @param return        Vector2 (x,y) 返回 x,y轴坐标是否有修正
+     * @param return        Vector2 (x,y) 返回 x,y轴修正的范围 当坐标值为null时 未吸附到值
      */
     public adsorption(in_out_Point: Vector2, lessValue: number = 15): IVector2 {
         var result: IVector2 = { x: null, y: null };

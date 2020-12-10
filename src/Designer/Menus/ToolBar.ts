@@ -73,9 +73,6 @@ export class ToolBar {
         this.btnSetting.onclick = this.settingObject.bind(this);
         this.dom.appendChild(this.btnSetting);
         this.visible = false;
-        this.designer.viewControl.onmove.add(() => {
-        });
-
         this.addBreak(this.dom);
 
         this.thicknessDiv = document.createElement('div');
@@ -185,7 +182,6 @@ export class ToolBar {
 
         var header = document.createElement('a');
         header.innerText = 'x';
-        // header.style.float = 'left';
         this.positionDiv.appendChild(header);
 
 
@@ -260,10 +256,6 @@ export class ToolBar {
     private addBreak(parent: HTMLElement) {
         var hr = document.createElement('hr');
         hr.className = 'break';
-        // hr.style.border = '0';
-        // hr.style.borderLeft = '1px solid #585858';
-        // hr.style.marginLeft = '2px';
-        // hr.style.marginRight = '2px';
         parent.appendChild(hr);
     }
 
