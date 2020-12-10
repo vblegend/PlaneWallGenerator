@@ -136,15 +136,14 @@ export class HoleControl extends Control {
             // this.width
         }
         else {
-
             viewPos = e.viewPos.sub(this._pressedOffset).round(4);
             result = Vector2.null;
             this.angle = 0;
             this.thickness = 10;
         }
-        this.update();
         this.position.copy(viewPos);
         this.designer.cursor.update(this.position, result);
+        this.update();
         this.designer.requestRender();
     }
 
@@ -173,6 +172,7 @@ export class HoleControl extends Control {
                 this.designer.add(this);
             }
         }
+        this.update();
         this.designer.cursor.update(null);
         this.designer.releaseGrabObjects();
         this.designer.updateElementPoints();
@@ -232,6 +232,9 @@ export class HoleControl extends Control {
     public remove() {
         if (this._parent) {
             this._parent.removeHole(this);
+        }
+        else{
+            this.designer.remove(this);
         }
     }
 

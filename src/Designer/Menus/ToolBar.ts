@@ -5,6 +5,7 @@ import { AnchorControl } from '../Views/AnchorControl';
 import { WallControl } from '../Views/WallControl';
 import { Connector } from '../Common/Connector';
 import { MouseCapturer } from '../Utility/MouseCapturer';
+import { HoleControl } from '../Views/HoleControl';
 
 
 
@@ -29,6 +30,15 @@ export class ToolBar {
 
     private heightDiv: HTMLDivElement;
     private heightInput: HTMLInputElement;
+
+
+
+    private holeWidthDiv: HTMLDivElement;
+    private holeWidthInput: HTMLInputElement;
+
+
+    private holeGroundDiv: HTMLDivElement;
+    private holeGroundInput: HTMLInputElement;
 
 
 
@@ -80,17 +90,14 @@ export class ToolBar {
             if (value == null || value.length == 0) return;
             if (this.designer.selected instanceof WallControl) {
                 this.designer.clearEvents();
-                this.designer.selected.updateThickness(Number.parseFloat(value));
+                this.designer.selected.updateThickness(Number.parseFloat(value) * 100);
                 this.designer.requestRender();
                 this.designer.dispatchEvents();
             }
         }
-        var setThickness = document.createElement('button');
-        setThickness.textContent = '修改'
 
         this.thicknessDiv.appendChild(header);
         this.thicknessDiv.appendChild(this.thicknessInput);
-        this.thicknessDiv.appendChild(setThickness);
         this.dom.appendChild(this.thicknessDiv);
 
 
@@ -98,11 +105,39 @@ export class ToolBar {
 
 
 
+        this.holeWidthDiv = document.createElement('div');
+        this.holeWidthDiv.className = 'designer-toolbar-block';
+        var header = document.createElement('a');
+        header.innerText = '宽度';
+        // header.style.float = 'left';
+        this.holeWidthInput = document.createElement('input');
+        this.holeWidthInput.type = 'number';
+        this.holeWidthInput.onchange = () => {
+            this.designer.clearEvents();
+            var value = this.holeWidthInput.value;
+            if (value == null || value.length == 0) return;
+            if (this.designer.selected instanceof HoleControl) {
+                this.designer.selected.width = Number.parseFloat(value) * 100;
+                this.designer.selected.update();
+                this.designer.requestRender();
+                if (this.designer.selected.parent) {
+                    this.designer.updateEvents(this.designer.selected.parent);
+                }
+            }
+            this.designer.dispatchEvents();
+        }
+        this.holeWidthDiv.appendChild(header);
+        this.holeWidthDiv.appendChild(this.holeWidthInput);
+        this.dom.appendChild(this.holeWidthDiv);
+
+
+
+
+
+
+
+
         this.addBreak(this.dom);
-
-
-
-
 
         this.heightDiv = document.createElement('div');
         this.heightDiv.className = 'designer-toolbar-block';
@@ -116,16 +151,19 @@ export class ToolBar {
             var value = this.heightInput.value;
             if (value == null || value.length == 0) return;
             if (this.designer.selected instanceof WallControl) {
-                this.designer.selected.height = Number.parseFloat(value);
+                this.designer.selected.height = Number.parseFloat(value) * 100;
+                this.designer.updateEvents(this.designer.selected);
+            } else if (this.designer.selected instanceof HoleControl) {
+                this.designer.selected.height = Number.parseFloat(value) * 100;
+                if (this.designer.selected.parent) {
+                    this.designer.updateEvents(this.designer.selected.parent);
+                }
             }
             this.designer.dispatchEvents();
         }
-        var setThickness = document.createElement('button');
-        setThickness.textContent = '修改'
 
         this.heightDiv.appendChild(header);
         this.heightDiv.appendChild(this.heightInput);
-        this.heightDiv.appendChild(setThickness);
         this.dom.appendChild(this.heightDiv);
 
 
@@ -155,14 +193,11 @@ export class ToolBar {
         this.xInput.type = 'number';
         this.xInput.onchange = () => {
             var value = this.xInput.value;
-
-
-
             if (value == null || value.length == 0) return;
             if (this.designer.selected instanceof AnchorControl) {
                 this.designer.clearEvents();
                 var position = this.designer.selected.position.clone();
-                position.x = Number.parseFloat(value);
+                position.x = Number.parseFloat(value) * 100;
                 this.designer.selected.setPosition(position);
                 this.designer.selected.update();
                 this.designer.requestRender();
@@ -179,7 +214,7 @@ export class ToolBar {
             if (this.designer.selected instanceof AnchorControl) {
                 this.designer.clearEvents();
                 var position = this.designer.selected.position.clone();
-                position.y = Number.parseFloat(value);
+                position.y = Number.parseFloat(value) * 100;
                 this.designer.selected.setPosition(position);
                 this.designer.selected.update();
                 this.designer.requestRender();
@@ -187,13 +222,36 @@ export class ToolBar {
             }
         }
         this.positionDiv.appendChild(this.yInput);
-        var setPosition = document.createElement('button');
-        setPosition.textContent = '修改'
 
-        this.positionDiv.appendChild(setPosition);
+
         this.dom.appendChild(this.positionDiv);
         this.addBreak(this.dom);
 
+
+
+        this.holeGroundDiv = document.createElement('div');
+        this.holeGroundDiv.className = 'designer-toolbar-block';
+        var header = document.createElement('a');
+        header.innerText = '离地高度';
+        // header.style.float = 'left';
+        this.holeGroundInput = document.createElement('input');
+        this.holeGroundInput.type = 'number';
+        this.holeGroundInput.onchange = () => {
+            this.designer.clearEvents();
+            var value = this.holeGroundInput.value;
+            if (value == null || value.length == 0) return;
+            if (this.designer.selected instanceof HoleControl) {
+                this.designer.selected.ground = Number.parseFloat(value) * 100;
+                if (this.designer.selected.parent) {
+                    this.designer.updateEvents(this.designer.selected.parent);
+                }
+            }
+            this.designer.dispatchEvents();
+        }
+
+        this.holeGroundDiv.appendChild(header);
+        this.holeGroundDiv.appendChild(this.holeGroundInput);
+        this.dom.appendChild(this.holeGroundDiv);
 
 
 
@@ -201,10 +259,11 @@ export class ToolBar {
 
     private addBreak(parent: HTMLElement) {
         var hr = document.createElement('hr');
-        hr.style.border = '0';
-        hr.style.borderLeft = '1px solid #585858';
-        hr.style.marginLeft = '2px';
-        hr.style.marginRight = '2px';
+        hr.className = 'break';
+        // hr.style.border = '0';
+        // hr.style.borderLeft = '1px solid #585858';
+        // hr.style.marginLeft = '2px';
+        // hr.style.marginRight = '2px';
         parent.appendChild(hr);
     }
 
@@ -222,6 +281,7 @@ export class ToolBar {
         this.visible = false;
         var origin = this.designer.selected;
         origin.remove();
+        this.designer.selected = null;
         this.designer.dispatchEvents();
     }
 
@@ -267,23 +327,35 @@ export class ToolBar {
                 this.thicknessDiv.style.display = 'none';
                 this.heightDiv.style.display = 'none';
                 this.positionDiv.style.display = '';
-                this.xInput.value = this.designer.selected.anchor.x.toString();
-                this.yInput.value = this.designer.selected.anchor.y.toString();
-
-
-
-
-
+                this.holeWidthDiv.style.display = 'none';
+                this.holeGroundDiv.style.display = 'none';
+                this.xInput.value = (this.designer.selected.anchor.x / 100).toFixed(2);
+                this.yInput.value = (this.designer.selected.anchor.y / 100).toFixed(2);
             } else if (this.designer.selected instanceof WallControl) {
                 this.btnConnectTo.style.display = 'none';
                 this.btnDelete.style.display = '';
                 this.btnSetting.style.display = '';
                 this.thicknessDiv.style.display = '';
                 this.positionDiv.style.display = 'none';
-                this.thicknessInput.value = this.designer.selected.thickness.toString();
+                this.holeWidthDiv.style.display = 'none';
+                this.holeGroundDiv.style.display = 'none';
+                this.thicknessInput.value = (this.designer.selected.thickness / 100).toFixed(2);
                 this.heightDiv.style.display = '';
-                this.heightInput.value = this.designer.selected.height.toString();
+                this.heightInput.value = (this.designer.selected.height / 100).toFixed(2);
 
+            } else if (this.designer.selected instanceof HoleControl) {
+                this.btnConnectTo.style.display = 'none';
+                this.btnDelete.style.display = '';
+                this.btnSetting.style.display = '';
+                this.thicknessDiv.style.display = 'none';
+                this.heightDiv.style.display = '';
+                this.positionDiv.style.display = 'none';
+                this.holeGroundDiv.style.display = '';
+                this.heightInput.value = (this.designer.selected.height / 100).toFixed(2);
+                this.holeWidthDiv.style.display = '';
+
+                this.holeWidthInput.value = (this.designer.selected.width / 100).toFixed(2);
+                this.holeGroundInput.value = (this.designer.selected.ground / 100).toFixed(2);
             }
         }
     }

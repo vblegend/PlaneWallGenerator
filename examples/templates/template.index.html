@@ -17,29 +17,31 @@
             margin: 0;
             padding: 0;
         }
-        .wall-designer-controller *{           
-             margin: 0;
+
+        .wall-designer-controller * {
+            margin: 0;
             padding: 0;
         }
 
         .canvas {
             width: 100%;
             height: 100%;
-            background-color: #333333;
+
         }
 
         .wall-designer-vertical-ruler {
             height: 100%;
             width: 50px;
-            background-color: #B9C77A;
+            background-color: #111111;
             float: left;
         }
 
         .wall-designer-horizontal-ruler {
             height: 50px;
             width: 100%;
-            background-color: #F7704C;
+            background-color: #111111;
             margin-bottom: -4px;
+ 
         }
 
         .wall-designer-scale {
@@ -58,6 +60,28 @@
             height: 80%;
             display: flex;
         }
+
+        .wall-designer-canvas-controller {
+            width: 100%;
+ 
+            min-height: 100%;
+            margin-top: 0;
+            margin-left: 0;
+            margin-right: 0;
+            margin-bottom: 0;
+            padding-top: 0;
+            padding-left: 0;
+            padding-right: 0;
+            padding-bottom: 0;
+            background-color: #333333;
+        }
+
+        .wall-designer-row {
+            width: 100%;
+            height: 100%;
+    
+
+        }
     </style>
 
 
@@ -71,13 +95,13 @@
             <div id="VerticalRuler" class='wall-designer-vertical-ruler'>
             </div>
         </div>
-        <div style="width:100%; height:100%;float:left;margin: 0;  padding: 0;">
-            <div style="width:100%; height:100%;margin: 0;  padding: 0;">
-                <div id='HorizontalRuler' class='wall-designer-horizontal-ruler'>
-                </div>
-                <div id="example" class='canvas'>
-                </div>
+        <div class='wall-designer-row' >
+
+            <div id='HorizontalRuler' class='wall-designer-horizontal-ruler'>
             </div>
+            <div id="example" class='wall-designer-canvas-controller'>
+            </div>
+
         </div>
     </div>
 
@@ -86,7 +110,7 @@
 
 
     <div style="margin-top: 50px; margin-left: 50px;width: 1550px;">
-        <i style="background-color: #B9C77A; color: rgb(255, 255, 255);">双击添加新锚点</i>
+        <i  draggable="true"   style="background-color: #B9C77A; color: rgb(255, 255, 255);">双击添加新锚点</i>
         <i style="background-color:#F7704C; color: rgb(255, 255, 255);">左键按住拖动画板</i>
         <i style="background-color: #06a028; color: rgb(255, 255, 255);">左键单击选中对象</i>
         <i style="background-color: #0072f5; color: rgb(255, 255, 255);">右键单击取消选中</i>

@@ -142,11 +142,11 @@ export class Renderer {
      */
     public fillText(text: string, x: number, y: number, width?: number, align?: HorizontalAlign, vertical?: VerticalAlign) {
         var left = x;
-        var top = y + this.fontSize - 1;
+        var top = y + this.fontSize * 0.95;
         if (vertical === VerticalAlign.CENTER) {
             top = top - this.fontSize / 2;
         } else if (vertical === VerticalAlign.BOTTOM) {
-            top = y + this.fontSize * 2;
+            top = top - this.fontSize;
         }
         top -= this.fontSize * 0.1;
         if (align === HorizontalAlign.RIGHT) {

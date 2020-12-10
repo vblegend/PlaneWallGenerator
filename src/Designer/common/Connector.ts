@@ -16,8 +16,13 @@ export class Connector {
         this.designer = designer;
         this.origin = origin;
         var v = this.designer.mapPoint(this.designer.viewControl.position);
-        this.newAnchor = this.designer.createAnchor(null, v.x, v.y);
-        this.newSegment = this.designer.createPolygon(null, origin, this.newAnchor, 10);
+        this.newAnchor = this.designer.createAnchor(null, v.x, v.y, true);
+        let values = origin.walls.map(e => e.thickness);
+        values.push(this.designer.defaultthickness);
+        let thickness = Math.max.apply(this, values);
+
+
+        this.newSegment = this.designer.createPolygon(null, origin, this.newAnchor, thickness);
         this.designer.cursor.update(v);
         this.update();
     }
@@ -37,7 +42,7 @@ export class Connector {
         }
         if (position) {
             this.newAnchor.setPosition(position);
-            this.designer.cursor.update(position,result);
+            this.designer.cursor.update(position, result);
         }
         this.newAnchor.update();
         this.origin.update();
@@ -58,13 +63,16 @@ export class Connector {
         if (hover instanceof AnchorControl) {
             anchor = hover;
         }
+        let thickness = this.newSegment.thickness;
+        let height = this.newSegment.height;
         if (hover instanceof WallControl) {
             this.newSegment.remove(false);
             this.newAnchor.remove();
             // split
             this.newAnchor = hover.split(this.designer.viewControl.position);
             // merage
-            this.newSegment = this.designer.createPolygon(null, this.origin, this.newAnchor, 10);
+            this.newSegment = this.designer.createPolygon(null, this.origin, this.newAnchor, thickness);
+            this.newSegment.height = height;
             this.newAnchor.update();
             this.origin.update();
         } else if (anchor != null) {
@@ -73,7 +81,8 @@ export class Connector {
             this.newAnchor.remove();
             this.newAnchor = anchor;
             /* use old anchor create new anchor */
-            this.newSegment = this.designer.createPolygon(null, this.origin, this.newAnchor, 10);
+            this.newSegment = this.designer.createPolygon(null, this.origin, this.newAnchor, thickness);
+            this.newSegment.height = height;
             this.update();
         }
         /* add objects to designer */

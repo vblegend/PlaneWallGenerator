@@ -92,7 +92,11 @@ export class Examples {
         var btnAddDoor = document.getElementById("btnAddDoor") as HTMLCanvasElement;
         if (btnAddDoor) {
             btnAddDoor.onclick = () => {
-                var door = designer.createHole(null, 0, 0);
+
+
+                
+
+                var door = designer.createHole(null, designer.center.x, designer.center.y);
                 designer.add(door);
             }
         }
@@ -112,7 +116,7 @@ export class Examples {
                 input.onchange = async (event: InputEvent) => {
                     var file = event.target['files'][0];
                     var image = await this.readImage(file);
-                    designer.background.setImage(image);
+                    designer.background.setImage(image,12000,5700);
                 }
                 input.click();
             }

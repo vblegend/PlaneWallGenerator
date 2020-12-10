@@ -253,7 +253,7 @@ export class WallControl extends Control {
             //取 最长边的距离 而不是取锚点的距离
             let d1 = this._points[2].distanceTo(this._points[3]);
             let d2 = this._points[0].distanceTo(this._points[5]);
-            var distance = Math.max(d1, d2).toFixed(2) + 'mm';
+            var distance = (Math.max(d1, d2) / 100).toFixed(2) + '米';
             let pointa = this.anchors[0].position;
             let pointb = this.anchors[1].position;
             if (pointa.x < pointb.x) {
@@ -261,7 +261,7 @@ export class WallControl extends Control {
                 pointa = pointb;
                 pointb = m;
             }
-            this.designer.renderer.fontSize = 10 / this.designer.res;
+            this.designer.renderer.fontSize = this.thickness / this.designer.res;
             let pos = this.designer.convertPoint(pointa.center(pointb));
             let angle = pointa.angle(pointb);
             this.designer.renderer.fillColor = this.isSelected ? '#FFFFFF' : '#ABABAB';

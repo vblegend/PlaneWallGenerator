@@ -27,10 +27,11 @@ export class Hole {
             const pos = this._parent.anchors[0].position.moveTo(this._parent.anchors[1].position, offsetDistance);
             this.position.copy(pos);
             // 计算 门对象的矩形区域，用于鼠标检测
-            const l1 = new Vector2(this.position.x - this.width / 2, this.position.y - this._parent.thickness / 2);
-            const l2 = new Vector2(this.position.x - this.width / 2, this.position.y + this._parent.thickness / 2);
-            const r1 = new Vector2(this.position.x + this.width / 2, this.position.y - this._parent.thickness / 2);
-            const r2 = new Vector2(this.position.x + this.width / 2, this.position.y + this._parent.thickness / 2);
+            let thickness = this._parent.thickness / 2 + 1;
+            const l1 = new Vector2(this.position.x - this.width / 2, this.position.y - thickness);
+            const l2 = new Vector2(this.position.x - this.width / 2, this.position.y + thickness);
+            const r1 = new Vector2(this.position.x + this.width / 2, this.position.y - thickness);
+            const r2 = new Vector2(this.position.x + this.width / 2, this.position.y + thickness);
             this.angle = this._parent.angle;
             this._points[0].copy(l1.around(this.position, this.angle));
             this._points[1].copy(r1.around(this.position, this.angle));

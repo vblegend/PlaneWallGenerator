@@ -10,6 +10,11 @@ export class MouseCapturer {
     private _onmousemove: signals.Signal;
     private _onmouseup: signals.Signal;
 
+
+
+
+
+
     private _element: HTMLElement;
 
 
@@ -22,14 +27,22 @@ export class MouseCapturer {
         this._documentdownhandle = this.element_mouse_down.bind(this);
         this._documentmovehandle = this.document_mouse_move.bind(this);
         this._documentuphandle = this.document_mouse_up.bind(this);
-        // document.addEventListener('mousemove', this._documentmovehandle);
-        // document.addEventListener('mouseup', this._documentuphandle);
         if (this._element != null) {
             this._element.addEventListener('mousedown', this._documentdownhandle);
             this._element.addEventListener('mousemove', this._documentmovehandle);
             this._element.addEventListener('mouseup', this._documentuphandle);
         }
     }
+
+
+
+
+
+
+
+
+
+
 
     public dispose() {
         this.release();
@@ -85,11 +98,21 @@ export class MouseCapturer {
         return this._onmouseup;
     }
 
+
+
+
+
+
+
+
+
+
+
     public get isCaptured(): boolean {
         return this._captureing;
     }
 
-    public focus(){
+    public focus() {
         this._element.focus();
     }
 

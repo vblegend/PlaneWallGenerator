@@ -14,6 +14,8 @@ import { GroupWalls, WallSegment, WallPolygon } from '../Core/Common';
 import { ImageControl } from "./Views/ImageControl";
 import { Cursor } from "./Views/Cursor";
 import { HoleControl } from "./Views/HoleControl";
+import { ToolBox } from "./Menus/ToolBox";
+import { DragService } from "./Plugins/DragService";
 
 
 export class VectorDesigner {
@@ -38,6 +40,7 @@ export class VectorDesigner {
     public _height: number;
     public _children: Control[];
     private _toolbar: ToolBar;
+    private _toolbox: ToolBox;
     private _selected: Control;
 
     public connector: Connector;
@@ -167,11 +170,18 @@ export class VectorDesigner {
         this._viewControl.onmove.add(this.moveTo, this);
         this._toolbar = new ToolBar(this);
         this._div.appendChild(this._toolbar.dom);
+        this._toolbox = new ToolBox(this);
+        this._div.appendChild(this._toolbox.dom);
         this._requestRender = true;
         this.defaultHeight = 100;
         this.defaultthickness = 10;
         this._maxSerialNumber = 0;
     }
+
+
+
+
+
 
 
     public resize() {
@@ -227,6 +237,11 @@ export class VectorDesigner {
     public dispose() {
         this.clear();
         this._isdisposed = true;
+        if (this._toolbox) {
+            this._toolbox.dispose();
+            this._toolbox = null;
+        }
+
     }
 
 
@@ -298,14 +313,16 @@ export class VectorDesigner {
      * 批量将视图坐标转换为canvas坐标
      * @param points 
      */
-    public createAnchor(id: number, x: number, y: number): AnchorControl {
+    public createAnchor(id: number, x: number, y: number, Forced?: boolean): AnchorControl {
         x = Math.floor(x * 10000) / 10000;
         y = Math.floor(y * 10000) / 10000;
         if (id == null) {
-            for (let anchor of this.children) {
-                if (anchor instanceof AnchorControl) {
-                    if (anchor.anchor.x === x && anchor.anchor.y === y) {
-                        return anchor;
+            if (!Forced) {
+                for (let anchor of this.children) {
+                    if (anchor instanceof AnchorControl) {
+                        if (anchor.anchor.x === x && anchor.anchor.y === y) {
+                            return anchor;
+                        }
                     }
                 }
             }
@@ -352,7 +369,7 @@ export class VectorDesigner {
         if (id == null) {
             id = ++this._maxSerialNumber;
         }
-        const hole = new HoleControl(this, 0, 0);
+        const hole = new HoleControl(this, x, y);
         hole.id = id;
         if (id >= this._maxSerialNumber) {
             this._maxSerialNumber = id + 1;
@@ -378,7 +395,7 @@ export class VectorDesigner {
                     } else if (ctl instanceof HoleControl) {
                         this.children.unshift(ctl);
                     }
-                    
+
                 }
             }
         }
@@ -401,7 +418,7 @@ export class VectorDesigner {
     public dispatchEvents() {
         for (let key in this._events) {
             let value = this._events[key];
-            console.log(value);
+            this._onUpdate.dispatch(value);
         }
         this._events = {};
     }

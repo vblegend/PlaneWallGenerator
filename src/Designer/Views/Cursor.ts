@@ -46,6 +46,7 @@ export class Cursor {
 
     public render() {
         if (this._visible) {
+            this.designer.renderer.opacity = 1;
             var position = this.designer.convertPoint(this.position);
             this.designer.renderer.strokeColor = this.horizontalLineColor;
             this.designer.renderer.line(0, position.y, this.designer.width, position.y, 1);

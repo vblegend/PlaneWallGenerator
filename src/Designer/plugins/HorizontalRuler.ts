@@ -92,8 +92,8 @@ export class HorizontalRuler {
         this._needUpdate = false;
         var designerlength = this.designer.bounds.right - this.designer.bounds.left;
         var offset = this.designer.center.x % (designerlength / this.width * 100);
-        this._renderer.strokeColor = '#ffffff';
-        this._renderer.fillColor = '#ffffff';
+        this._renderer.strokeColor = '#666666';
+        this._renderer.fillColor = '#666666';
         this._renderer.fontSize = 10;
         var center = this.width / 2;
         var offsetCenter = this.designer.center.x / this.designer.res;

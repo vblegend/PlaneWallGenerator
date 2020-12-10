@@ -92,8 +92,8 @@ export class VerticalRuler {
         this._needUpdate = false;
         var designerlength = this.designer.bounds.bottom - this.designer.bounds.top;
         var offset = this.designer.center.y % (designerlength / this.height * 100);
-        this._renderer.strokeColor = '#000000';
-        this._renderer.fillColor = '#000000';
+        this._renderer.strokeColor = '#666666';
+        this._renderer.fillColor = '#666666';
         this._renderer.fontSize = 10;
         var center = this.height / 2;
         var offsetCenter = this.designer.center.y / this.designer.res;
