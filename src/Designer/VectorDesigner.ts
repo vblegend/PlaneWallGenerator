@@ -33,7 +33,7 @@ export class VectorDesigner {
     private _onRender: signals.Signal;
     private _onZoom: signals.Signal;
     private _onCursor: signals.Signal;
-    private _onUpdate: signals.Signal;
+    private _onWallChange: signals.Signal;
 
     private _cursor: Cursor;
 
@@ -162,7 +162,7 @@ export class VectorDesigner {
         this._onRender = new signals.Signal();
         this._onZoom = new signals.Signal();
         this._onCursor = new signals.Signal();
-        this._onUpdate = new signals.Signal();
+        this._onWallChange = new signals.Signal();
         this._renderer = new Renderer();
         this._viewControl = new ViewController(this);
         this._runState = false;
@@ -424,7 +424,7 @@ export class VectorDesigner {
     public dispatchEvents() {
         for (let key in this._events) {
             let value = this._events[key];
-            this._onUpdate.dispatch(value);
+            this._onWallChange.dispatch(value);
         }
         this._events = {};
     }
@@ -581,8 +581,8 @@ export class VectorDesigner {
         return this._onCursor;
     }
 
-    public get onUpdate(): signals.Signal {
-        return this._onUpdate;
+    public get onWallChange(): signals.Signal {
+        return this._onWallChange;
     }
 
     public get onZoom(): signals.Signal {
@@ -593,10 +593,6 @@ export class VectorDesigner {
     public get onMoved(): signals.Signal {
         return this._onMoved;
     }
-
-
-
-
 
     public get container(): HTMLDivElement {
         return this._div;
