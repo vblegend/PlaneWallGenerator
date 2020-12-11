@@ -6,7 +6,7 @@ import { Anchor } from '../../Core/Anchor';
 import { RenderType } from '../Renderer';
 import { WallControl } from './WallControl';
 import * as signals from 'signals';
-import { AnchorPoint } from '../../Core/Common';
+import { ElementAnchor } from '../../Core/Common';
 
 
 export class AnchorControl extends Control {
@@ -90,6 +90,16 @@ export class AnchorControl extends Control {
                 // merage
                 this.merageTo(this.designer.viewControl.hitObject);
             }
+            else{
+                var viewPos = e.viewPos.sub(e.offset).round(4);
+                this.designer.adsorb.adsorption(viewPos);
+                this.setPosition(viewPos);
+            }
+        }
+        else{
+            console.log();
+            
+        //    
         }
         this.designer.releaseGrabObjects();
         this.designer.updateElementPoints();
@@ -247,7 +257,7 @@ export class AnchorControl extends Control {
     }
 
 
-    public serialize(): AnchorPoint {
+    public serialize(): ElementAnchor {
         return {
             id: this.id,
             x: this.position.x,

@@ -1,8 +1,10 @@
-import { GroupWalls, WallPolygon, HolePolygon } from './Core/Common';
+import { GraphicDocument, WallPolygon, HolePolygon, ObjectPolygon, CylinderPolygon, CubePolygon } from './Core/Common';
 import { Anchor } from './Core/Anchor';
 import { Wall } from "./Core/Wall";
 import { Hole } from './Core/Hole';
 import { MathHelper } from './Core/MathHelper';
+import { Cylinder } from './Core/Cylinder';
+import { Cube } from './Core/Cube';
 
 export class WallPolygonParser {
 
@@ -13,10 +15,11 @@ export class WallPolygonParser {
      * @param area 
      * @param relocation 是否重定位墙的初始坐标位置为墙中心，如果为否 强的 position始终为0
      */
-    public static parse(area: GroupWalls, relocation?: boolean): WallPolygon[] {
-        var result: WallPolygon[] = [];
+    public static parse(area: GraphicDocument, relocation?: boolean): ObjectPolygon[] {
+        var result: ObjectPolygon[] = [];
         var anchors: { [key: number]: Anchor } = {};
         var walls: { [key: number]: Wall } = {};
+        var cylinders: Cylinder[] = [];
         var heights: { [key: number]: number } = {};
         try {
             // parse anchors
@@ -66,31 +69,54 @@ export class WallPolygonParser {
                 wall.update();
                 var config = new WallPolygon();
                 config.id = wall.id;
-                config.height = heights[wall.id];
+                config.h = heights[wall.id];
                 config.points = wall.points;
-                config.position = [0, 0];
+                config.p = [0, 0];
                 config.holes = [];
                 if (relocation) {
-                    config.position = MathHelper.getCenter(config.points);
-                    MathHelper.reLocation(config.points, config.position);
+                    config.p = MathHelper.getCenter(config.points);
+                    MathHelper.reLocation(config.points, config.p);
                 }
                 // holes
                 if (wall.holes.length > 0) {
                     for (let hole of wall.holes) {
                         let holepolygon = new HolePolygon();
                         holepolygon.id = hole.id;
-                        holepolygon.height = hole.height;
-                        holepolygon.ground = hole.ground;
-                        holepolygon.position = [0, 0];
+                        holepolygon.h = hole.height;
+                        holepolygon.g = hole.ground;
+                        holepolygon.p = [0, 0];
                         holepolygon.points = hole.points;
                         if (relocation) {
-                            holepolygon.position = config.position;
-                            MathHelper.reLocation(holepolygon.points, config.position);
+                            holepolygon.p = config.p;
+                            MathHelper.reLocation(holepolygon.points, config.p);
                         }
                         config.holes.push(holepolygon);
                     }
                 }
                 result.push(config);
+            }
+
+            for (let cylinder of area.cylinders) {
+                let cy = new CylinderPolygon();
+                cy.id = cylinder.id;
+                cy.p = cylinder.p;
+                cy.r = cylinder.r;
+                cy.h = cylinder.h;
+                result.push(cy);
+            }
+
+            for (let cylinder of area.cubes) {
+                let cube = new Cube(cylinder.id, cylinder.p[0], cylinder.p[1], cylinder.x, cylinder.z, cylinder.y);
+                cube.update();
+                const cubepolygon = new CubePolygon();
+                cubepolygon.id = cylinder.id;
+                cubepolygon.points = cube.vertices;
+                cubepolygon.p = [0, 0];
+                if (relocation) {
+                    cubepolygon.p = MathHelper.getCenter(cubepolygon.points);
+                    MathHelper.reLocation(cubepolygon.points, cubepolygon.p);
+                }
+                result.push(cubepolygon);
             }
             return result;
         }

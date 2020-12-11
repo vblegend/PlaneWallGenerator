@@ -19,6 +19,12 @@ export class ToolBox {
         doagBox.appendChild(this.createDragIcon('icon-ATS', "拖拽创建锚点", 'text/create-anchor'));
         this.addBreak(doagBox);
         doagBox.appendChild(this.createDragIcon('icon-menci', '拖拽创建门', 'text/create-door'));
+        this.addBreak(doagBox);
+        doagBox.appendChild(this.createDragIcon('icon-qidongzhong', '拖拽创建圆柱', 'text/create-clinder'));
+        this.addBreak(doagBox);
+        doagBox.appendChild(this.createDragIcon('icon-3D', '拖拽创建立方体', 'text/create-cube'));
+
+
 
         let toolBox = document.createElement('div');
         toolBox.oncontextmenu = (e: MouseEvent) => {

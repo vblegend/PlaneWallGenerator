@@ -6,7 +6,7 @@ import { Anchor } from '../../Core/Anchor';
 import { RenderType } from '../Renderer';
 import { WallControl } from './WallControl';
 import * as signals from 'signals';
-import { AnchorPoint, WallHole } from '../../Core/Common';
+import { ElementAnchor, ElementHole } from '../../Core/Common';
 import { Hole } from '../../Core/Hole';
 
 
@@ -192,9 +192,9 @@ export class HoleControl extends Control {
         const pt = this.designer.convertPoint(left);
         const center = this.designer.convertPoint(this.position);
 
-        this.designer.renderer.translateRotate(center.x, center.y, this.angle);
-        this.designer.renderer.rectangle(pt.x, pt.y, this.width / this.designer.res, this.thickness / this.designer.res, RenderType.ALL /* / this.designer.res */);
-        this.designer.renderer.translateRotate(center.x, center.y, -this.angle);
+        this.designer.renderer.rotate(center.x, center.y, this.angle,()=>{
+            this.designer.renderer.rectangle(pt.x, pt.y, this.width / this.designer.res, this.thickness / this.designer.res, RenderType.ALL /* / this.designer.res */);
+        });
 
         for (let point of this._points) {
             const pt = this.designer.convertPoint(point);
@@ -248,7 +248,7 @@ export class HoleControl extends Control {
         return point.inPolygon(this._points);
     }
 
-    public serialize(): WallHole {
+    public serialize(): ElementHole {
         return {
             id: this.id,
             location: this.location,

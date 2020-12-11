@@ -1,6 +1,8 @@
 import { IVector2, Vector2 } from "../../Core/Vector2";
 import { VectorDesigner } from "../VectorDesigner";
 import { AnchorControl } from "../Views/AnchorControl";
+import { CylinderControl } from "../Views/ClinderControl";
+import { CubeControl } from "../Views/CubeControl";
 
 
 export interface AdsorbResult {
@@ -57,7 +59,17 @@ export class AdsorbService {
             if (object instanceof AnchorControl) {
                 this.horizontalTraces.push(object.position.x);
                 this.verticalTraces.push(object.position.y);
+            } else if (object instanceof CylinderControl) {
+                this.horizontalTraces.push(object.position.x);
+                this.verticalTraces.push(object.position.y);
+            } else if (object instanceof CubeControl) {
+                this.horizontalTraces.push(object.position.x);
+                this.verticalTraces.push(object.position.y);
             }
+
+
+
+
         }
         this.horizontalTraces = Array.from(new Set(this.horizontalTraces)).sort((a, b) => a - b);
         this.verticalTraces = Array.from(new Set(this.verticalTraces)).sort((a, b) => a - b);

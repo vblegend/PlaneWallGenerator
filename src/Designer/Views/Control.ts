@@ -92,6 +92,9 @@ export class Control {
     public get position(): Vector2 {
         return this._position;
     }
+    public set position(value: Vector2) {
+        this._position = value;
+    }
 
     public get id(): number {
         return this._id;
@@ -148,7 +151,7 @@ export class Control {
         this._actived = false;
     }
 
-    public get loaded():boolean{
+    public get loaded(): boolean {
         return this._actived;
     }
 

@@ -10,12 +10,14 @@ import { AnchorControl } from './Views/AnchorControl';
 import { WallControl } from './Views/WallControl';
 import { Connector } from "./Common/Connector";
 import { AdsorbService } from "./Common/AdsorbService";
-import { GroupWalls, WallSegment, WallPolygon } from '../Core/Common';
+import { GraphicDocument, ElementWall, WallPolygon, ObjectPolygon } from '../Core/Common';
 import { ImageControl } from "./Views/ImageControl";
 import { Cursor } from "./Views/Cursor";
 import { HoleControl } from "./Views/HoleControl";
 import { ToolBox } from "./Menus/ToolBox";
 import { DragService } from "./Plugins/DragService";
+import { CylinderControl } from "./Views/ClinderControl";
+import { CubeControl } from "./Views/CubeControl";
 
 
 export class VectorDesigner {
@@ -136,7 +138,15 @@ export class VectorDesigner {
                 pt = this.convertPoint(pt).add(new Vector2(20, 10));
             } else if (this._selected instanceof HoleControl) {
                 pt = this.convertPoint(this._selected.position).add(new Vector2(20, 10));
+            } else if (this._selected instanceof CylinderControl) {
+                pt = this.convertPoint(this._selected.position).add(new Vector2(20, 10));
+            } else if (this._selected instanceof CubeControl) {
+                pt = this.convertPoint(this._selected.position).add(new Vector2(20, 10));
             }
+
+
+
+
             if (pt) {
                 this.toolbar.visible = true;
                 this._selected.selectedUpdate(true);
@@ -314,6 +324,15 @@ export class VectorDesigner {
         return result;
     }
 
+    public convertArrayPoints(points: number[][]): Vector2[] {
+        var result = [];
+        for (let point of points) {
+            result.push(this.convertPoint(new Vector2(point[0], point[1])));
+        }
+        return result;
+    }
+
+
     /**
      * 批量将视图坐标转换为canvas坐标
      * @param points 
@@ -365,6 +384,32 @@ export class VectorDesigner {
     }
 
 
+    public createCube(id: number, x: number, y: number): CubeControl {
+        x = Math.floor(x * 10000) / 10000;
+        y = Math.floor(y * 10000) / 10000;
+        if (id == null) {
+            id = ++this._maxSerialNumber;
+        }
+        const cube = new CubeControl(this, id, x, y, 30, 30, this.defaultHeight);
+        if (id >= this._maxSerialNumber) {
+            this._maxSerialNumber = id + 1;
+        }
+        return cube;
+    }
+
+
+    public createCylinder(id: number, x: number, y: number): CylinderControl {
+        x = Math.floor(x * 10000) / 10000;
+        y = Math.floor(y * 10000) / 10000;
+        if (id == null) {
+            id = ++this._maxSerialNumber;
+        }
+        const clinder = new CylinderControl(this, id, x, y, 30, this.defaultHeight);
+        if (id >= this._maxSerialNumber) {
+            this._maxSerialNumber = id + 1;
+        }
+        return clinder;
+    }
 
 
 
@@ -400,6 +445,10 @@ export class VectorDesigner {
                         this.children.unshift(ctl);
                     } else if (ctl instanceof HoleControl) {
                         this.children.unshift(ctl);
+                    } else if (ctl instanceof CylinderControl) {
+                        this.children.unshift(ctl);
+                    } else if (ctl instanceof CubeControl) {
+                        this.children.unshift(ctl);
                     }
 
                 }
@@ -410,9 +459,9 @@ export class VectorDesigner {
     }
 
 
-    private _events: { [id: string]: WallPolygon }
+    private _events: { [id: string]: ObjectPolygon }
 
-    public updateEvents(wall: WallControl) {
+    public updateEvents(wall: WallControl | CubeControl | CylinderControl) {
         this._events[wall.id] = wall.toPolygon();
     }
 
@@ -467,10 +516,14 @@ export class VectorDesigner {
     }
 
 
-    public toPolygon(relocation?: boolean): WallPolygon[] {
-        const result: WallPolygon[] = [];
+    public toPolygon(relocation?: boolean): ObjectPolygon[] {
+        const result: ObjectPolygon[] = [];
         for (var control of this._children) {
             if (control instanceof WallControl) {
+                result.push(control.toPolygon(relocation));
+            } else if (control instanceof CylinderControl) {
+                result.push(control.toPolygon(relocation));
+            } else if (control instanceof CubeControl) {
                 result.push(control.toPolygon(relocation));
             }
         }
@@ -478,10 +531,12 @@ export class VectorDesigner {
     }
 
 
-    public serialize(): GroupWalls {
-        const area: GroupWalls = {
+    public serialize(): GraphicDocument {
+        const area: GraphicDocument = {
             anchors: [],
-            walls: []
+            walls: [],
+            cylinders: [],
+            cubes: []
         };
         for (var control of this._children) {
             if (control instanceof WallControl) {
@@ -490,13 +545,17 @@ export class VectorDesigner {
                 if (control.walls.length > 0) {
                     area.anchors.push(control.serialize());
                 }
+            } else if (control instanceof CylinderControl) {
+                area.cylinders.push(control.serialize());
+            } else if (control instanceof CubeControl) {
+                area.cubes.push(control.serialize());
             }
         }
         return area;
     }
 
 
-    public from(area: GroupWalls) {
+    public from(area: GraphicDocument) {
         this.clear();
         let map: { [key: string]: AnchorControl } = {};
         const objects: Control[] = [];
@@ -525,6 +584,25 @@ export class VectorDesigner {
                 }
             }
         }
+
+        for (let cylinder of area.cylinders) {
+            let cylider = this.createCylinder(cylinder.id, cylinder.p[0], cylinder.p[1]);
+            cylider.radius = cylinder.r;
+            cylider.height = cylinder.h;
+            cylider.update();
+            objects.push(cylider);
+        }
+
+        for (let cylinder of area.cubes) {
+            let cube = this.createCube(cylinder.id, cylinder.p[0], cylinder.p[1]);
+            cube.length = cylinder.x;
+            cube.width = cylinder.z;
+            cube.height = cylinder.y;
+            cube.update();
+            objects.push(cube);
+        }
+
+
         for (let key in map) {
             map[key].update();
         }
@@ -550,6 +628,10 @@ export class VectorDesigner {
 
     public get renderer(): Renderer {
         return this._renderer;
+    }
+
+    public get canvas(): HTMLCanvasElement {
+        return this._renderer.canvas;
     }
 
     public get width(): number {

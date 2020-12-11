@@ -7,7 +7,7 @@ import { Anchor } from '../../Core/Anchor';
 import { AnchorControl } from './AnchorControl';
 import { RenderType, HorizontalAlign, VerticalAlign } from '../Renderer';
 import { Bounds } from '../Common/Bounds';
-import { HolePolygon, WallPolygon, WallSegment } from '../../Core/Common';
+import { HolePolygon, WallPolygon, ElementWall } from '../../Core/Common';
 import { HoleControl } from './HoleControl';
 import { MathHelper } from '../../Core/MathHelper';
 
@@ -265,9 +265,9 @@ export class WallControl extends Control {
             let pos = this.designer.convertPoint(pointa.center(pointb));
             let angle = pointa.angle(pointb);
             this.designer.renderer.fillColor = this.isSelected ? '#FFFFFF' : '#ABABAB';
-            this.designer.renderer.translateRotate(pos.x, pos.y, angle);
-            this.designer.renderer.fillText(distance, pos.x, pos.y, null, HorizontalAlign.CENTER, VerticalAlign.CENTER);
-            this.designer.renderer.translateRotate(pos.x, pos.y, -angle);
+            this.designer.renderer.rotate(pos.x, pos.y, angle, () => {
+                this.designer.renderer.fillText(distance, pos.x, pos.y, null, HorizontalAlign.CENTER, VerticalAlign.CENTER);
+            });
         }
 
         for (let hole of this._holes) {
@@ -308,26 +308,26 @@ export class WallControl extends Control {
         if (this._segment.needUpdated) {
             this._segment.update();
         }
-        config.height = this.height;
+        config.h = this.height;
         config.points = this._segment.points;
-        config.position = [0, 0];
+        config.p = [0, 0];
         config.holes = [];
         if (relocation) {
-            config.position = MathHelper.getCenter(config.points);
-            MathHelper.reLocation(config.points, config.position);
+            config.p = MathHelper.getCenter(config.points);
+            MathHelper.reLocation(config.points, config.p);
         }
         // holes
         if (this.holes.length > 0) {
             for (let hole of this.holes) {
                 let holepolygon = new HolePolygon();
                 holepolygon.id = hole.id;
-                holepolygon.height = hole.height;
-                holepolygon.ground = hole.ground;
-                holepolygon.position = [0, 0];
+                holepolygon.h = hole.height;
+                holepolygon.g = hole.ground;
+                holepolygon.p = [0, 0];
                 holepolygon.points = hole._hole.points;
                 if (relocation) {
-                    holepolygon.position = config.position;
-                    MathHelper.reLocation(holepolygon.points, config.position);
+                    holepolygon.p = config.p;
+                    MathHelper.reLocation(holepolygon.points, config.p);
                 }
                 config.holes.push(holepolygon);
             }
@@ -335,8 +335,8 @@ export class WallControl extends Control {
         return config;
     }
 
-    public serialize(): WallSegment {
-        let wall: WallSegment = {
+    public serialize(): ElementWall {
+        let wall: ElementWall = {
             id: this.id,
             anchors: [this.anchors[0].id, this.anchors[1].id],
             thick: this.thickness,

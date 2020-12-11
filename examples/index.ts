@@ -5,7 +5,7 @@ import { Vector2 } from '../src/Core/Vector2';
 import { AnchorControl } from "../src/Designer/Views/AnchorControl";
 import { WallControl } from "../src/Designer/Views/WallControl";
 import { Control } from "../src/Designer/Views/Control";
-import { GroupWalls } from "../src/Core/Common";
+import { GraphicDocument } from "../src/Core/Common";
 import { WallPolygonParser } from "../src/WallPolygonParser";
 import { HoleControl } from "../src/Designer/Views/HoleControl";
 import { ElementResizer } from "../src/Designer/Plugins/ElementResizer";
@@ -52,7 +52,7 @@ export class Examples {
         if (btnParse) {
             btnParse.onclick = () => {
                 var output = document.getElementById("output") as HTMLTextAreaElement;
-                var arrays = JSON.parse(output.value) as GroupWalls;
+                var arrays = JSON.parse(output.value) as GraphicDocument;
                 console.time('Parse');
                 // console.profile('Parse')
                 designer.from(arrays);
@@ -66,7 +66,7 @@ export class Examples {
         if (btnPolygon) {
             btnPolygon.onclick = () => {
                 var output = document.getElementById("output") as HTMLTextAreaElement;
-                var group = JSON.parse(output.value) as GroupWalls;
+                var group = JSON.parse(output.value) as GraphicDocument;
                 console.time('to Polygon');
                 var wall = WallPolygonParser.parse(group, true);
                 console.timeEnd('to Polygon');

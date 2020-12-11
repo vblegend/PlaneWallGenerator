@@ -71,10 +71,10 @@ export class VerticalRuler {
                 bottom = this.height;
             }
             this._cursorRenderer.rectangle(this.width - 7 - this._cursorRenderer.fontSize, top, this._cursorRenderer.fontSize, bottom - top, RenderType.ALL);
-            this._cursorRenderer.translateRotate(this.width - 7 - this._cursorRenderer.fontSize, top + height / 2, 270);
-            this._cursorRenderer.fillColor = '#ffffff';
-            this._cursorRenderer.fillText(text, this.width - 7 - this._cursorRenderer.fontSize, top + height / 2, null, HorizontalAlign.CENTER);
-            this._cursorRenderer.translateRotate(this.width - 7 - this._cursorRenderer.fontSize, top + height / 2, -270);
+            this._cursorRenderer.rotate(this.width - 7 - this._cursorRenderer.fontSize, top + height / 2, 270, () => {
+                this._cursorRenderer.fillColor = '#ffffff';
+                this._cursorRenderer.fillText(text, this.width - 7 - this._cursorRenderer.fontSize, top + height / 2, null, HorizontalAlign.CENTER);
+            });
             var paths: Vector2[] = [];
             paths.push(new Vector2(this.width - 1, posy));
             paths.push(new Vector2(this.width - 7, posy - 5 < 0 ? 0 : posy - 5));
@@ -142,9 +142,9 @@ export class VerticalRuler {
     private drawCalibration(y: number, value?: number) {
         var calibration = this.width / 3;
         if (value != null) {
-            this._renderer.translateRotate(this.width * 0.65, y, 270);
-            this._renderer.fillText(value.toString(), this.width * 0.65, y, null, HorizontalAlign.CENTER);
-            this._renderer.translateRotate(this.width * 0.65, y, -270);
+            this._renderer.rotate(this.width * 0.65, y, 270, () => {
+                this._renderer.fillText(value.toString(), this.width * 0.65, y, null, HorizontalAlign.CENTER);
+            });
             calibration = this.width / 2;
         }
         this._renderer.line(0, y, calibration, y, 1);

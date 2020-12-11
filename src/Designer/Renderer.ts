@@ -241,20 +241,24 @@ export class Renderer {
 
 
 
-
-
-
     /**
-     * Rotate
-     * @param x 
-     * @param y 
-     * @param radian 
+     * 旋转画布，调用回调函数 callback 完成恢复旋转
+     * @param x  旋转中心坐标x
+     * @param y  旋转中心坐标y
+     * @param r  旋转角度
+     * @param callback 
      */
-    public translateRotate(x: number, y: number, r: number) {
+    public rotate(x: number, y: number, r: number, callback: () => void) {
         this.context.translate(x, y);
         this.context.rotate(r / 180 * Math.PI);
         this.context.translate(-x, -y);
+        callback();
+        this.context.translate(x, y);
+        this.context.rotate(-r / 180 * Math.PI);
+        this.context.translate(-x, -y);
     }
+
+
 
 
 

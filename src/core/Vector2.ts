@@ -55,6 +55,20 @@ export class Vector2 implements IVector2 {
 
 
 
+
+    // public inRectangle(center: Vector2, width: number,height:number): boolean {
+
+
+
+
+
+
+    //     var distance = this.distanceTo(center);
+    //     return distance < radius;
+    // }
+
+
+
     public inCircle(center: Vector2, radius: number): boolean {
         var distance = this.distanceTo(center);
         return distance < radius;
@@ -138,6 +152,31 @@ export class Vector2 implements IVector2 {
             const sy = polygon[i].y;
             const tx = polygon[j].x;
             const ty = polygon[j].y;
+            // 点与多边形顶点重合或在多边形的边上
+            if ((sx - this.x) * (this.x - tx) >= 0 && (sy - this.y) * (this.y - ty) >= 0 && (this.x - sx) * (ty - sy) === (this.y - sy) * (tx - sx)) {
+                return true;
+            }
+            // 点与相邻顶点连线的夹角
+            var angle = Math.atan2(sy - this.y, sx - this.x) - Math.atan2(ty - this.y, tx - this.x);
+            // 确保夹角不超出取值范围（-π 到 π）
+            if (angle >= Math.PI) {
+                angle = angle - Math.PI * 2;
+            } else if (angle <= -Math.PI) {
+                angle = angle + Math.PI * 2;
+            }
+            sum += angle;
+        }
+        // 计算回转数并判断点和多边形的几何关系
+        return Math.round(sum / Math.PI) === 0 ? false : true;
+    }
+
+    public inPolygon2(polygon: number[][]): boolean {
+        let sum = 0;
+        for (var i = 0, l = polygon.length, j = l - 1; i < l; j = i, i++) {
+            const sx = polygon[i][0];
+            const sy = polygon[i][1];
+            const tx = polygon[j][0];
+            const ty = polygon[j][1];
             // 点与多边形顶点重合或在多边形的边上
             if ((sx - this.x) * (this.x - tx) >= 0 && (sy - this.y) * (this.y - ty) >= 0 && (this.x - sx) * (ty - sy) === (this.y - sy) * (tx - sx)) {
                 return true;

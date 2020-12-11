@@ -67,7 +67,17 @@ export class ViewController {
         } else if (e.dataTransfer.types.indexOf('text/create-door') >= 0) {
             this.dragService.allowedPutDown = true;
             this.addedObject = this.designer.createHole(null, viewPosition.x, viewPosition.y);
+        } else if (e.dataTransfer.types.indexOf('text/create-clinder') >= 0) {
+            this.dragService.allowedPutDown = true;
+            this.addedObject = this.designer.createCylinder(null, viewPosition.x, viewPosition.y);
+        } else if (e.dataTransfer.types.indexOf('text/create-cube') >= 0) {
+            this.dragService.allowedPutDown = true;
+            this.addedObject = this.designer.createCube(null, viewPosition.x, viewPosition.y);
         }
+
+
+
+
         if (this.addedObject) {
             this.designer.add(this.addedObject);
             this._pressedObject = this._hitObject = this.addedObject;
