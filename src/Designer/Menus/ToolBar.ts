@@ -6,6 +6,7 @@ import { WallControl } from '../Views/WallControl';
 import { Connector } from '../Common/Connector';
 import { MouseCapturer } from '../Utility/MouseCapturer';
 import { HoleControl } from '../Views/HoleControl';
+import { CylinderControl } from '../Views/ClinderControl';
 
 
 
@@ -190,16 +191,17 @@ export class ToolBar {
         this.xInput.onchange = () => {
             var value = this.xInput.value;
             if (value == null || value.length == 0) return;
+            this.designer.clearEvents();
+            var position = this.designer.selected.position.clone();
+            position.x = Number.parseFloat(value) * 100;
             if (this.designer.selected instanceof AnchorControl) {
-                this.designer.clearEvents();
-                var position = this.designer.selected.position.clone();
-                position.x = Number.parseFloat(value) * 100;
                 this.designer.selected.setPosition(position);
-                this.designer.selected.update();
-                this.designer.requestRender();
-                this.designer.dispatchEvents();
+            } else if (this.designer.selected instanceof CylinderControl) {
+                this.designer.selected.position = position;
             }
-
+            this.designer.selected.update();
+            this.designer.requestRender();
+            this.designer.dispatchEvents();
         }
         this.positionDiv.appendChild(this.xInput);
         this.yInput = document.createElement('input');
@@ -207,15 +209,17 @@ export class ToolBar {
         this.yInput.onchange = () => {
             var value = this.yInput.value;
             if (value == null || value.length == 0) return;
+            this.designer.clearEvents();
+            var position = this.designer.selected.position.clone();
+            position.y = Number.parseFloat(value) * 100;
             if (this.designer.selected instanceof AnchorControl) {
-                this.designer.clearEvents();
-                var position = this.designer.selected.position.clone();
-                position.y = Number.parseFloat(value) * 100;
                 this.designer.selected.setPosition(position);
-                this.designer.selected.update();
-                this.designer.requestRender();
-                this.designer.dispatchEvents();
+            } else if (this.designer.selected instanceof CylinderControl) {
+                this.designer.selected.position = position;
             }
+            this.designer.selected.update();
+            this.designer.requestRender();
+            this.designer.dispatchEvents();
         }
         this.positionDiv.appendChild(this.yInput);
 
@@ -334,7 +338,6 @@ export class ToolBar {
                 this.thicknessInput.value = (this.designer.selected.thickness / 100).toFixed(2);
                 this.heightDiv.style.display = '';
                 this.heightInput.value = (this.designer.selected.height / 100).toFixed(2);
-
             } else if (this.designer.selected instanceof HoleControl) {
                 this.btnConnectTo.style.display = 'none';
                 this.btnDelete.style.display = '';
@@ -345,9 +348,20 @@ export class ToolBar {
                 this.holeGroundDiv.style.display = '';
                 this.heightInput.value = (this.designer.selected.height / 100).toFixed(2);
                 this.holeWidthDiv.style.display = '';
-
                 this.holeWidthInput.value = (this.designer.selected.width / 100).toFixed(2);
                 this.holeGroundInput.value = (this.designer.selected.ground / 100).toFixed(2);
+            } else if (this.designer.selected instanceof CylinderControl) {
+                this.btnConnectTo.style.display = '';
+                this.btnDelete.style.display = '';
+                this.btnSetting.style.display = '';
+                this.thicknessDiv.style.display = 'none';
+                this.heightDiv.style.display = 'none';
+                this.positionDiv.style.display = '';
+                this.holeWidthDiv.style.display = 'none';
+                this.holeGroundDiv.style.display = 'none';
+                this.xInput.value = (this.designer.selected.position.x / 100).toFixed(2);
+                this.yInput.value = (this.designer.selected.position.y / 100).toFixed(2);
+
             }
         }
     }

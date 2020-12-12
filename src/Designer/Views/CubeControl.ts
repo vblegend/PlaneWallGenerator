@@ -157,8 +157,11 @@ export class CubeControl extends Control {
         config.id = this.id;
         config.p = [0, 0];
         config.points = [];
-        this.copyVertices(config.points, this._cube.vertices);
-        if (relocation) {
+        config.h = this.height;
+        if (this.loaded) {
+            this.copyVertices(config.points, this._cube.vertices);
+        }
+        if (relocation && config.points.length > 0) {
             config.p = MathHelper.getCenter(config.points);
             MathHelper.reLocation(config.points, config.p);
         }

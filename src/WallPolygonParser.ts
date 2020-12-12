@@ -19,7 +19,7 @@ export class WallPolygonParser {
         var result: ObjectPolygon[] = [];
         var anchors: { [key: number]: Anchor } = {};
         var walls: { [key: number]: Wall } = {};
-        var cylinders: Cylinder[] = [];
+
         var heights: { [key: number]: number } = {};
         try {
             // parse anchors
@@ -95,28 +95,32 @@ export class WallPolygonParser {
                 }
                 result.push(config);
             }
-
-            for (let cylinder of area.cylinders) {
-                let cy = new CylinderPolygon();
-                cy.id = cylinder.id;
-                cy.p = cylinder.p;
-                cy.r = cylinder.r;
-                cy.h = cylinder.h;
-                result.push(cy);
+            if (area.cylinders) {
+                for (let cylinder of area.cylinders) {
+                    let cy = new CylinderPolygon();
+                    cy.id = cylinder.id;
+                    cy.p = cylinder.p;
+                    cy.r = cylinder.r;
+                    cy.h = cylinder.h;
+                    result.push(cy);
+                }
             }
 
-            for (let cylinder of area.cubes) {
-                let cube = new Cube(cylinder.id, cylinder.p[0], cylinder.p[1], cylinder.x, cylinder.z, cylinder.y);
-                cube.update();
-                const cubepolygon = new CubePolygon();
-                cubepolygon.id = cylinder.id;
-                cubepolygon.points = cube.vertices;
-                cubepolygon.p = [0, 0];
-                if (relocation) {
-                    cubepolygon.p = MathHelper.getCenter(cubepolygon.points);
-                    MathHelper.reLocation(cubepolygon.points, cubepolygon.p);
+            if (area.cubes) {
+                for (let cylinder of area.cubes) {
+                    let cube = new Cube(cylinder.id, cylinder.p[0], cylinder.p[1], cylinder.x, cylinder.z, cylinder.y);
+                    cube.update();
+                    const cubepolygon = new CubePolygon();
+                    cubepolygon.id = cylinder.id;
+                    cubepolygon.points = cube.vertices;
+                    cubepolygon.h = cube.height;
+                    cubepolygon.p = [0, 0];
+                    if (relocation) {
+                        cubepolygon.p = MathHelper.getCenter(cubepolygon.points);
+                        MathHelper.reLocation(cubepolygon.points, cubepolygon.p);
+                    }
+                    result.push(cubepolygon);
                 }
-                result.push(cubepolygon);
             }
             return result;
         }

@@ -462,7 +462,7 @@ export class VectorDesigner {
     private _events: { [id: string]: ObjectPolygon }
 
     public updateEvents(wall: WallControl | CubeControl | CylinderControl) {
-        this._events[wall.id] = wall.toPolygon();
+        this._events[wall.id] = wall.toPolygon(true);
     }
 
     public clearEvents() {
@@ -532,7 +532,7 @@ export class VectorDesigner {
 
 
     public serialize(): GraphicDocument {
-        const area: GraphicDocument = {
+        const graphic: GraphicDocument = {
             anchors: [],
             walls: [],
             cylinders: [],
@@ -540,30 +540,30 @@ export class VectorDesigner {
         };
         for (var control of this._children) {
             if (control instanceof WallControl) {
-                area.walls.unshift(control.serialize());
+                graphic.walls.unshift(control.serialize());
             } else if (control instanceof AnchorControl) {
                 if (control.walls.length > 0) {
-                    area.anchors.push(control.serialize());
+                    graphic.anchors.push(control.serialize());
                 }
             } else if (control instanceof CylinderControl) {
-                area.cylinders.push(control.serialize());
+                graphic.cylinders.push(control.serialize());
             } else if (control instanceof CubeControl) {
-                area.cubes.push(control.serialize());
+                graphic.cubes.push(control.serialize());
             }
         }
-        return area;
+        return graphic;
     }
 
 
-    public from(area: GraphicDocument) {
+    public from(graphic: GraphicDocument) {
         this.clear();
         let map: { [key: string]: AnchorControl } = {};
         const objects: Control[] = [];
-        for (let anchor of area.anchors) {
+        for (let anchor of graphic.anchors) {
             map[anchor.id] = this.createAnchor(anchor.id, anchor.x, anchor.y);
             objects.push(map[anchor.id]);
         }
-        for (let wallConfig of area.walls) {
+        for (let wallConfig of graphic.walls) {
             const from = map[wallConfig.anchors[0]];
             const to = map[wallConfig.anchors[1]];
             if (from && to) {
@@ -584,23 +584,27 @@ export class VectorDesigner {
                 }
             }
         }
-
-        for (let cylinder of area.cylinders) {
-            let cylider = this.createCylinder(cylinder.id, cylinder.p[0], cylinder.p[1]);
-            cylider.radius = cylinder.r;
-            cylider.height = cylinder.h;
-            cylider.update();
-            objects.push(cylider);
+        if (graphic.cylinders) {
+            for (let cylinder of graphic.cylinders) {
+                let cylider = this.createCylinder(cylinder.id, cylinder.p[0], cylinder.p[1]);
+                cylider.radius = cylinder.r;
+                cylider.height = cylinder.h;
+                cylider.update();
+                objects.push(cylider);
+            }
         }
 
-        for (let cylinder of area.cubes) {
-            let cube = this.createCube(cylinder.id, cylinder.p[0], cylinder.p[1]);
-            cube.length = cylinder.x;
-            cube.width = cylinder.z;
-            cube.height = cylinder.y;
-            cube.update();
-            objects.push(cube);
+        if (graphic.cubes) {
+            for (let cylinder of graphic.cubes) {
+                let cube = this.createCube(cylinder.id, cylinder.p[0], cylinder.p[1]);
+                cube.length = cylinder.x;
+                cube.width = cylinder.z;
+                cube.height = cylinder.y;
+                cube.update();
+                objects.push(cube);
+            }
         }
+
 
 
         for (let key in map) {

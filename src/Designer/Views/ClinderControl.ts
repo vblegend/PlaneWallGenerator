@@ -202,7 +202,7 @@ export class CylinderControl extends Control {
         config.id = this.id;
         config.h = this.height;
         config.p = this.position.toArray();
-        config.r = this.radius;
+        config.r = this.loaded ? this.radius : 0;
         return config;
     }
 

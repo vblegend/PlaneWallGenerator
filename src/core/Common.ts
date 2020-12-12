@@ -125,6 +125,9 @@ export class CylinderPolygon extends ObjectPolygon {
 export class CubePolygon extends ObjectPolygon {
     /* 立方体的点集合 */
     public points: number[][];
+
+    /* 立方体的高度 */
+    public h: number;
 }
 
 /**
