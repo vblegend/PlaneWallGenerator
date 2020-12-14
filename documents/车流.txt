@@ -1,0 +1,41 @@
+
+//车流
+var curve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(-150, 2, -280),
+        new THREE.Vector3(-110, 2, -50),
+        new THREE.Vector3(-10, 2, 0),
+        new THREE.Vector3(100, 2, 100),
+        new THREE.Vector3(140, 2, 200)
+    ], false/*是否闭合*/);
+
+function traffic() {
+    //一条
+    var tubeGeometry2 = new THREE.TubeGeometry(curve, 100, 2, 50, false);
+    var tubeMaterial2 = new THREE.MeshPhongMaterial({
+        color: "rgb(45,245,216)",
+        transparent: true,
+        opacity: 1,
+    });
+    var tube2 = new THREE.Mesh(tubeGeometry2, tubeMaterial2);
+    scene.add(tube2);
+    //物体
+    geometryP = new THREE.BoxGeometry(5, 5, 5);
+    var materialP = new THREE.MeshBasicMaterial({ color: 'rgb(165,244,7)' });
+    circleP = new THREE.Mesh(geometryP, materialP);
+    scene.add(circleP);
+    geometryP.rotateY(Math.PI / 2);
+    //circleP.position.set(-80, -40, 0);
+}
+
+if (progress > 1.0) {
+    circleP.position.set(-150, 2, -280);
+    progress = 0
+    //return;    //停留在管道末端,否则会一直跑到起点 循环再跑
+}
+progress += 0.001; //0.0009;
+if (curve) {
+    let point = curve.getPoint(progress);
+    if (point && point.x) {
+        circleP.position.set(point.x, point.y, point.z);
+    }
+}
