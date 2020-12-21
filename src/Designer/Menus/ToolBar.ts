@@ -1,6 +1,5 @@
 import { Vector2 } from '../../Core/Vector2';
 import { VectorDesigner } from '../VectorDesigner';
-import { Control } from '../Views/Control';
 import { AnchorControl } from '../Views/AnchorControl';
 import { WallControl } from '../Views/WallControl';
 import { Connector } from '../Common/Connector';

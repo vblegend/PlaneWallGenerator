@@ -320,4 +320,23 @@ export class MathHelper {
         return [left + (right - left) / 2, top + (bottom - top) / 2];
     }
 
+
+    /**
+     * clone array
+     * @param points 
+     */
+    public static clone2Array(points:number[][]): number[][] {
+        const result: number[][] = [];
+        for (let x = 0; x < points.length; x++) {
+            result[x] = [];
+            for (let y = 0; y < points[x].length; y++) {
+                result[x][y] = points[x][y];
+            }
+        }
+        return result;
+    }
+
+
+
+
 }

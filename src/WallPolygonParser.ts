@@ -3,7 +3,6 @@ import { Anchor } from './Core/Anchor';
 import { Wall } from "./Core/Wall";
 import { Hole } from './Core/Hole';
 import { MathHelper } from './Core/MathHelper';
-import { Cylinder } from './Core/Cylinder';
 import { Cube } from './Core/Cube';
 
 export class WallPolygonParser {
@@ -70,7 +69,7 @@ export class WallPolygonParser {
                 var config = new WallPolygon();
                 config.id = wall.id;
                 config.h = heights[wall.id];
-                config.points = wall.points;
+                config.points = MathHelper.clone2Array(wall.points);
                 config.p = [0, 0];
                 config.holes = [];
                 if (relocation) {
@@ -85,7 +84,7 @@ export class WallPolygonParser {
                         holepolygon.h = hole.height;
                         holepolygon.g = hole.ground;
                         holepolygon.p = [0, 0];
-                        holepolygon.points = hole.points;
+                        holepolygon.points = MathHelper.clone2Array(hole.points);
                         if (relocation) {
                             holepolygon.p = config.p;
                             MathHelper.reLocation(holepolygon.points, config.p);
@@ -112,7 +111,7 @@ export class WallPolygonParser {
                     cube.update();
                     const cubepolygon = new CubePolygon();
                     cubepolygon.id = cylinder.id;
-                    cubepolygon.points = cube.vertices;
+                    cubepolygon.points = MathHelper.clone2Array(cube.vertices);
                     cubepolygon.h = cube.height;
                     cubepolygon.p = [0, 0];
                     if (relocation) {

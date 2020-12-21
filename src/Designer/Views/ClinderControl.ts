@@ -2,14 +2,8 @@
 import { IVector2, Vector2 } from '../../Core/Vector2';
 import { Control, ControlDragEvent } from './Control';
 import { VectorDesigner } from '../VectorDesigner';
-import { Wall } from '../../Core/Wall';
-import { Anchor } from '../../Core/Anchor';
-import { AnchorControl } from './AnchorControl';
 import { RenderType, HorizontalAlign, VerticalAlign } from '../Renderer';
-import { Bounds } from '../Common/Bounds';
-import { CylinderPolygon as CylinderPolygon, ElementClinder as ElementCylinder, HolePolygon, WallPolygon, ElementWall } from '../../Core/Common';
-import { HoleControl } from './HoleControl';
-import { MathHelper } from '../../Core/MathHelper';
+import { CylinderPolygon as CylinderPolygon, ElementClinder as ElementCylinder } from '../../Core/Common';
 import { Cylinder } from '../../Core/Cylinder';
 
 

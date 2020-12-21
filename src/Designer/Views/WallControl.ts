@@ -3,7 +3,6 @@ import { Vector2 } from '../../Core/Vector2';
 import { Control, ControlDragEvent } from './Control';
 import { VectorDesigner } from '../VectorDesigner';
 import { Wall } from '../../Core/Wall';
-import { Anchor } from '../../Core/Anchor';
 import { AnchorControl } from './AnchorControl';
 import { RenderType, HorizontalAlign, VerticalAlign } from '../Renderer';
 import { Bounds } from '../Common/Bounds';
@@ -300,16 +299,20 @@ export class WallControl extends Control {
         return this._holes;
     }
 
+
+
+
+
+
     public toPolygon(relocation?: boolean): WallPolygon {
         var config = new WallPolygon();
         config.id = this.id;
-
         if (this._segment == null || !this.loaded) return config;
         if (this._segment.needUpdated) {
             this._segment.update();
         }
         config.h = this.height;
-        config.points = this._segment.points;
+        config.points = MathHelper.clone2Array(this._segment.points);
         config.p = [0, 0];
         config.holes = [];
         if (relocation) {
@@ -324,7 +327,7 @@ export class WallControl extends Control {
                 holepolygon.h = hole.height;
                 holepolygon.g = hole.ground;
                 holepolygon.p = [0, 0];
-                holepolygon.points = hole._hole.points;
+                holepolygon.points = MathHelper.clone2Array(hole._hole.points);
                 if (relocation) {
                     holepolygon.p = config.p;
                     MathHelper.reLocation(holepolygon.points, config.p);

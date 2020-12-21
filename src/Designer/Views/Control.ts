@@ -1,6 +1,5 @@
 import { Vector2 } from '../../Core/Vector2';
 import { VectorDesigner } from '../VectorDesigner';
-import { WallControl } from './WallControl';
 
 export class ControlDragEvent {
 

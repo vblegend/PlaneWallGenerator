@@ -2,13 +2,8 @@
 import { IVector2, Vector2 } from '../../Core/Vector2';
 import { Control, ControlDragEvent } from './Control';
 import { VectorDesigner } from '../VectorDesigner';
-import { Wall } from '../../Core/Wall';
-import { Anchor } from '../../Core/Anchor';
-import { AnchorControl } from './AnchorControl';
-import { RenderType, HorizontalAlign, VerticalAlign } from '../Renderer';
-import { Bounds } from '../Common/Bounds';
-import { CylinderPolygon, CubePolygon, ElementClinder, ElementCube, HolePolygon, WallPolygon, ElementWall } from '../../Core/Common';
-import { HoleControl } from './HoleControl';
+import { RenderType } from '../Renderer';
+import { CubePolygon, ElementCube } from '../../Core/Common';
 import { MathHelper } from '../../Core/MathHelper';
 import { Cube } from '../../Core/Cube';
 
@@ -143,24 +138,14 @@ export class CubeControl extends Control {
     }
 
 
-    private copyVertices(v: number[][], t: number[][]) {
-        for (let a = 0; a < t.length; a++) {
-            v[a] = [];
-            for (let b = 0; b < t[a].length; b++) {
-                v[a][b] = t[a][b];
-            }
-        }
-    }
+
 
     public toPolygon(relocation?: boolean): CubePolygon {
         var config = new CubePolygon();
         config.id = this.id;
         config.p = [0, 0];
-        config.points = [];
+        config.points = MathHelper.clone2Array(this._cube.vertices);
         config.h = this.height;
-        if (this.loaded) {
-            this.copyVertices(config.points, this._cube.vertices);
-        }
         if (relocation && config.points.length > 0) {
             config.p = MathHelper.getCenter(config.points);
             MathHelper.reLocation(config.points, config.p);

@@ -1,5 +1,4 @@
 import { Vector2 } from '../../Core/Vector2';
-import { DragService } from '../Plugins/DragService';
 import { VectorDesigner } from '../VectorDesigner';
 
 

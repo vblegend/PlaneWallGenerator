@@ -1,12 +1,10 @@
 
-import { Vector2, IVector2 } from '../../Core/Vector2';
+import { Vector2 } from '../../Core/Vector2';
 import { Control, ControlDragEvent } from './Control';
 import { VectorDesigner } from '../VectorDesigner';
-import { Anchor } from '../../Core/Anchor';
 import { RenderType } from '../Renderer';
 import { WallControl } from './WallControl';
-import * as signals from 'signals';
-import { ElementAnchor, ElementHole } from '../../Core/Common';
+import { ElementHole } from '../../Core/Common';
 import { Hole } from '../../Core/Hole';
 
 
