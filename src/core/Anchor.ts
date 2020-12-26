@@ -1,6 +1,6 @@
-import { MathHelper } from "./MathHelper";
-import { Wall } from "./Wall";
-import { Vector2 } from "./Vector2";
+import { MathHelper } from './MathHelper';
+import { Wall } from './Wall';
+import { Vector2 } from './Vector2';
 
 export class Anchor {
     public id: number;
@@ -12,7 +12,7 @@ export class Anchor {
 
 
     public constructor(id: number, x: number, y: number) {
-        this._point = new Vector2(x, y);//.round();
+        this._point = new Vector2(x, y);// .round();
         this._targets = [];
         this._map = new Map();
     }

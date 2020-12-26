@@ -49,10 +49,10 @@ export class ToolBar {
 
         this.dom.oncontextmenu = (e: MouseEvent) => {
             e.preventDefault();
-        }
+        };
 
         this.dom.className = 'designer-toolbar';
-        var btnDrag = this.createDragButton();
+        const btnDrag = this.createDragButton();
         this._dragCapture = new MouseCapturer(btnDrag);
         this._dragCapture.onMouseDown.add(this.drag_start, this);
         this._dragCapture.onMouseMove.add(this.drag_move, this);
@@ -77,13 +77,13 @@ export class ToolBar {
 
         this.thicknessDiv = document.createElement('div');
         this.thicknessDiv.className = 'designer-toolbar-block';
-        var header = document.createElement('a');
-        header.innerText = '厚度';
+        const header1 = document.createElement('a');
+        header1.innerText = '厚度';
         // header.style.float = 'left';
         this.thicknessInput = document.createElement('input');
         this.thicknessInput.type = 'number';
         this.thicknessInput.onchange = () => {
-            var value = this.thicknessInput.value;
+            const value = this.thicknessInput.value;
             if (value == null || value.length == 0) return;
             if (this.designer.selected instanceof WallControl) {
                 this.designer.clearEvents();
@@ -91,9 +91,9 @@ export class ToolBar {
                 this.designer.requestRender();
                 this.designer.dispatchEvents();
             }
-        }
+        };
 
-        this.thicknessDiv.appendChild(header);
+        this.thicknessDiv.appendChild(header1);
         this.thicknessDiv.appendChild(this.thicknessInput);
         this.dom.appendChild(this.thicknessDiv);
 
@@ -104,14 +104,14 @@ export class ToolBar {
 
         this.holeWidthDiv = document.createElement('div');
         this.holeWidthDiv.className = 'designer-toolbar-block';
-        var header = document.createElement('a');
-        header.innerText = '宽度';
+        const header2 = document.createElement('a');
+        header2.innerText = '宽度';
         // header.style.float = 'left';
         this.holeWidthInput = document.createElement('input');
         this.holeWidthInput.type = 'number';
         this.holeWidthInput.onchange = () => {
             this.designer.clearEvents();
-            var value = this.holeWidthInput.value;
+            const value = this.holeWidthInput.value;
             if (value == null || value.length == 0) return;
             if (this.designer.selected instanceof HoleControl) {
                 this.designer.selected.width = Number.parseFloat(value) * 100;
@@ -122,8 +122,8 @@ export class ToolBar {
                 }
             }
             this.designer.dispatchEvents();
-        }
-        this.holeWidthDiv.appendChild(header);
+        };
+        this.holeWidthDiv.appendChild(header2);
         this.holeWidthDiv.appendChild(this.holeWidthInput);
         this.dom.appendChild(this.holeWidthDiv);
 
@@ -138,14 +138,14 @@ export class ToolBar {
 
         this.heightDiv = document.createElement('div');
         this.heightDiv.className = 'designer-toolbar-block';
-        var header = document.createElement('a');
-        header.innerText = '高度';
+        const header3 = document.createElement('a');
+        header3.innerText = '高度';
         // header.style.float = 'left';
         this.heightInput = document.createElement('input');
         this.heightInput.type = 'number';
         this.heightInput.onchange = () => {
             this.designer.clearEvents();
-            var value = this.heightInput.value;
+            const value = this.heightInput.value;
             if (value == null || value.length == 0) return;
             if (this.designer.selected instanceof WallControl) {
                 this.designer.selected.height = Number.parseFloat(value) * 100;
@@ -157,9 +157,9 @@ export class ToolBar {
                 }
             }
             this.designer.dispatchEvents();
-        }
+        };
 
-        this.heightDiv.appendChild(header);
+        this.heightDiv.appendChild(header3);
         this.heightDiv.appendChild(this.heightInput);
         this.dom.appendChild(this.heightDiv);
 
@@ -180,18 +180,18 @@ export class ToolBar {
         this.positionDiv = document.createElement('div');
         this.positionDiv.className = 'designer-toolbar-block';
 
-        var header = document.createElement('a');
-        header.innerText = 'x';
-        this.positionDiv.appendChild(header);
+        const header4 = document.createElement('a');
+        header4.innerText = 'x';
+        this.positionDiv.appendChild(header4);
 
 
         this.xInput = document.createElement('input');
         this.xInput.type = 'number';
         this.xInput.onchange = () => {
-            var value = this.xInput.value;
+            const value = this.xInput.value;
             if (value == null || value.length == 0) return;
             this.designer.clearEvents();
-            var position = this.designer.selected.position.clone();
+            const position = this.designer.selected.position.clone();
             position.x = Number.parseFloat(value) * 100;
             if (this.designer.selected instanceof AnchorControl) {
                 this.designer.selected.setPosition(position);
@@ -201,15 +201,15 @@ export class ToolBar {
             this.designer.selected.update();
             this.designer.requestRender();
             this.designer.dispatchEvents();
-        }
+        };
         this.positionDiv.appendChild(this.xInput);
         this.yInput = document.createElement('input');
         this.yInput.type = 'number';
         this.yInput.onchange = () => {
-            var value = this.yInput.value;
+            const value = this.yInput.value;
             if (value == null || value.length == 0) return;
             this.designer.clearEvents();
-            var position = this.designer.selected.position.clone();
+            const position = this.designer.selected.position.clone();
             position.y = Number.parseFloat(value) * 100;
             if (this.designer.selected instanceof AnchorControl) {
                 this.designer.selected.setPosition(position);
@@ -219,7 +219,7 @@ export class ToolBar {
             this.designer.selected.update();
             this.designer.requestRender();
             this.designer.dispatchEvents();
-        }
+        };
         this.positionDiv.appendChild(this.yInput);
 
 
@@ -230,14 +230,14 @@ export class ToolBar {
 
         this.holeGroundDiv = document.createElement('div');
         this.holeGroundDiv.className = 'designer-toolbar-block';
-        var header = document.createElement('a');
-        header.innerText = '离地高度';
+        const header5 = document.createElement('a');
+        header5.innerText = '离地高度';
         // header.style.float = 'left';
         this.holeGroundInput = document.createElement('input');
         this.holeGroundInput.type = 'number';
         this.holeGroundInput.onchange = () => {
             this.designer.clearEvents();
-            var value = this.holeGroundInput.value;
+            const value = this.holeGroundInput.value;
             if (value == null || value.length == 0) return;
             if (this.designer.selected instanceof HoleControl) {
                 this.designer.selected.ground = Number.parseFloat(value) * 100;
@@ -246,9 +246,9 @@ export class ToolBar {
                 }
             }
             this.designer.dispatchEvents();
-        }
+        };
 
-        this.holeGroundDiv.appendChild(header);
+        this.holeGroundDiv.appendChild(header5);
         this.holeGroundDiv.appendChild(this.holeGroundInput);
         this.dom.appendChild(this.holeGroundDiv);
 
@@ -257,13 +257,13 @@ export class ToolBar {
     }
 
     private addBreak(parent: HTMLElement) {
-        var hr = document.createElement('hr');
+        const hr = document.createElement('hr');
         hr.className = 'break';
         parent.appendChild(hr);
     }
 
     private createObject() {
-        var origin = this.designer.selected;
+        const origin = this.designer.selected;
         if (origin instanceof AnchorControl) {
             this.visible = false;
             this.designer.connector = new Connector(this.designer, origin);
@@ -274,14 +274,14 @@ export class ToolBar {
     private deleteObject() {
         this.designer.clearEvents();
         this.visible = false;
-        var origin = this.designer.selected;
+        const origin = this.designer.selected;
         origin.remove();
         this.designer.selected = null;
         this.designer.dispatchEvents();
     }
 
     private settingObject() {
-        //this.visible = false;
+        // this.visible = false;
     }
 
 
@@ -298,11 +298,11 @@ export class ToolBar {
         if (v.y < 0) v.y = 0;
         if (v.x + this.width > this.designer.width) v.x = this.designer.width - this.width;
         if (v.y + this.height > this.designer.height) v.y = this.designer.height - this.height;
-        var offset = new Vector2(this.designer.container.offsetLeft, this.designer.container.offsetTop);
+        const offset = new Vector2(this.designer.container.offsetLeft, this.designer.container.offsetTop);
         this._position = v.clone();
         v = v.sub(offset);
         this.dom.style.marginLeft = v.x + 'px';
-        this.dom.style.marginTop = v.y + 'px'
+        this.dom.style.marginTop = v.y + 'px';
     }
 
 
@@ -312,7 +312,7 @@ export class ToolBar {
 
     public set visible(value: boolean) {
         this._visible = value;
-        this.dom.style.display = value ? "" : "none";
+        this.dom.style.display = value ? '' : 'none';
         if (value) {
             if (this.designer.selected == null) return;
             if (this.designer.selected instanceof AnchorControl) {
@@ -376,14 +376,14 @@ export class ToolBar {
      */
 
     private createDragButton(): HTMLElement {
-        var button = document.createElement('div');
+        const button = document.createElement('div');
         button.className = 'dragbutton';
         button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="10px" height="20px"  style="margin-top: 6px;cursor: move;" viewBox="0 0 5 14" ><path fill-rule="evenodd" d="M1 2a1 1 0 110-2 1 1 0 010 2zm3 0a1 1 0 110-2 1 1 0 010 2zM1 6a1 1 0 110-2 1 1 0 010 2zm3 0a1 1 0 110-2 1 1 0 010 2zm-3 4a1 1 0 110-2 1 1 0 010 2zm3 0a1 1 0 110-2 1 1 0 010 2zm-3 4a1 1 0 110-2 1 1 0 010 2zm3 0a1 1 0 110-2 1 1 0 010 2z"></path></svg>';
         return button;
     }
 
     private drag_start(e: MouseEvent) {
-        var offset = new Vector2(this.designer.container.offsetLeft, this.designer.container.offsetTop);
+        const offset = new Vector2(this.designer.container.offsetLeft, this.designer.container.offsetTop);
         this._dragPosition = new Vector2(e.pageX, e.pageY).sub(offset).sub(this._position);
         this._dragCapture.capture();
         e.preventDefault();
@@ -391,8 +391,8 @@ export class ToolBar {
 
     private drag_move(e: MouseEvent) {
         if (this._dragPosition != null) {
-            var offset = new Vector2(this.designer.container.offsetLeft, this.designer.container.offsetTop);
-            var pos = new Vector2(e.pageX, e.pageY).sub(offset).sub(this._dragPosition);
+            const offset = new Vector2(this.designer.container.offsetLeft, this.designer.container.offsetTop);
+            const pos = new Vector2(e.pageX, e.pageY).sub(offset).sub(this._dragPosition);
             this.setPosition(pos);
             e.preventDefault();
         }
@@ -410,7 +410,7 @@ export class ToolBar {
         icon.classList.add('icon');
         icon.classList.add('iconfont');
         icon.classList.add(iconName);
-        var button = document.createElement('button');
+        const button = document.createElement('button');
         button.className = 'Button';
         button.appendChild(icon);
         return button;

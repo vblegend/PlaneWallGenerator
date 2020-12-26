@@ -113,8 +113,8 @@ export class HoleControl extends Control {
             // 与第一个锚点的距离
             const dis = viewPos.distanceTo(hitObject.anchors[0].position);
             this.location = dis / hitObject.distance;
-            //洞宽的一半占墙长度的百分比
-            var wd = this.width / 2 / hitObject.distance;
+            // 洞宽的一半占墙长度的百分比
+            const wd = this.width / 2 / hitObject.distance;
 
             if (this.location - wd < 0) {
                 this.location = wd;
@@ -129,7 +129,7 @@ export class HoleControl extends Control {
             // 角度
             this.angle = hitObject.angle;
             // 厚度
-            this.thickness = hitObject.thickness
+            this.thickness = hitObject.thickness;
             // 宽度
             // this.width
         }
@@ -149,11 +149,11 @@ export class HoleControl extends Control {
 
 
     protected onEndDrag(e: ControlDragEvent) {
-        var hitObject = this.designer.viewControl.hitObject;
+        const hitObject = this.designer.viewControl.hitObject;
         if (hitObject != this) {
 
             if (this._parent) {
-                let parent = this._parent;
+                const parent = this._parent;
                 this.remove();
                 this.designer.updateEvents(parent);
             }
@@ -190,11 +190,11 @@ export class HoleControl extends Control {
         const pt = this.designer.convertPoint(left);
         const center = this.designer.convertPoint(this.position);
 
-        this.designer.renderer.rotate(center.x, center.y, this.angle,()=>{
+        this.designer.renderer.rotate(center.x, center.y, this.angle, () => {
             this.designer.renderer.rectangle(pt.x, pt.y, this.width / this.designer.res, this.thickness / this.designer.res, RenderType.ALL /* / this.designer.res */);
         });
 
-        for (let point of this._points) {
+        for (const point of this._points) {
             const pt = this.designer.convertPoint(point);
             this.designer.renderer.circle(pt.x, pt.y, 1 / this.designer.res, RenderType.ALL);
         }
@@ -232,7 +232,7 @@ export class HoleControl extends Control {
         if (this._parent) {
             this._parent.removeHole(this);
         }
-        else{
+        else {
             this.designer.remove(this);
         }
     }

@@ -34,7 +34,7 @@ export class ImageControl extends Control {
     public render() {
         if (this._width && this._height) {
             this.designer.renderer.opacity = 1;
-            var pos = this.designer.convertPoint(this.position)
+            const pos = this.designer.convertPoint(this.position);
             this.designer.renderer.image(this._image, pos, this._width / this.designer.res, this._height / this.designer.res);
         }
     }

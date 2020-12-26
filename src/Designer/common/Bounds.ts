@@ -46,16 +46,16 @@ export class Bounds {
 
 
     public intersect(bounds: Bounds) {
-        var inLeft = (
+        const inLeft = (
             ((bounds.left >= this.left) && (bounds.left <= this.right)) || ((this.left >= bounds.left) && (this.left <= bounds.right))
         );
-        var inTop = (
+        const inTop = (
             ((bounds.top >= this.top) && (bounds.top <= this.bottom)) || ((this.top > bounds.top) && (this.top < bounds.bottom))
         );
-        var inRight = (
+        const inRight = (
             ((bounds.right >= this.left) && (bounds.right <= this.right)) || ((this.right >= bounds.left) && (this.right <= bounds.right))
         );
-        var inBottom = (
+        const inBottom = (
             ((bounds.bottom >= this.top) && (bounds.bottom <= this.bottom)) || ((this.bottom >= bounds.top) && (this.bottom <= bounds.bottom))
         );
         return ((inBottom || inTop) && (inLeft || inRight));

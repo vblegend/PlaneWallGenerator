@@ -10,12 +10,12 @@ export class ToolBox {
     public constructor(designer: VectorDesigner) {
         this.dom = document.createElement('div');
         this.dom.className = 'designer-toolplane';
-        let doagBox = document.createElement('div');
+        const doagBox = document.createElement('div');
         doagBox.oncontextmenu = (e: MouseEvent) => {
             e.preventDefault();
-        }
+        };
         doagBox.className = 'designer-toolbox';
-        doagBox.appendChild(this.createDragIcon('icon-ATS', "拖拽创建锚点", 'text/create-anchor'));
+        doagBox.appendChild(this.createDragIcon('icon-ATS', '拖拽创建锚点', 'text/create-anchor'));
         this.addBreak(doagBox);
         doagBox.appendChild(this.createDragIcon('icon-menci', '拖拽创建门', 'text/create-door'));
         this.addBreak(doagBox);
@@ -25,17 +25,17 @@ export class ToolBox {
 
 
 
-        let toolBox = document.createElement('div');
+        const toolBox = document.createElement('div');
         toolBox.oncontextmenu = (e: MouseEvent) => {
             e.preventDefault();
-        }
+        };
         toolBox.className = 'designer-toolbox';
         toolBox.style.marginTop = '30px';
-        let btnCenter = this.createButton('icon-dingwei3', '点击回到中心');
+        const btnCenter = this.createButton('icon-dingwei3', '点击回到中心');
         btnCenter.className = 'Button';
         btnCenter.onclick = () => {
             designer.moveTo(100, new Vector2());
-        }
+        };
         toolBox.appendChild(btnCenter);
 
 
@@ -60,7 +60,7 @@ export class ToolBox {
 
 
     private addBreak(parent: HTMLElement) {
-        var hr = document.createElement('hr');
+        const hr = document.createElement('hr');
         hr.className = 'break';
         parent.appendChild(hr);
     }
@@ -73,7 +73,7 @@ export class ToolBox {
         icon.classList.add('icon');
         icon.classList.add('iconfont');
         icon.classList.add(iconName);
-        var button = document.createElement('button');
+        const button = document.createElement('button');
         button.appendChild(icon);
         button.title = title;
         return button;
@@ -86,7 +86,7 @@ export class ToolBox {
         icon.classList.add('iconfont');
         icon.classList.add('drag-button');
         icon.classList.add(iconName);
-        var button = document.createElement('div');
+        const button = document.createElement('div');
         button.appendChild(icon);
         icon.draggable = true;
         icon.title = title;
@@ -94,7 +94,7 @@ export class ToolBox {
             e.dataTransfer.setData(classType, 'designer');
             e.dataTransfer.setDragImage(new Image(), 0, 0);
             e.dataTransfer.effectAllowed = 'move'; // only allow moves
-        }
+        };
         return icon;
     }
 

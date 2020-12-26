@@ -1,6 +1,6 @@
 import { GraphicDocument, WallPolygon, HolePolygon, ObjectPolygon, CylinderPolygon, CubePolygon } from './Core/Common';
 import { Anchor } from './Core/Anchor';
-import { Wall } from "./Core/Wall";
+import { Wall } from './Core/Wall';
 import { Hole } from './Core/Hole';
 import { MathHelper } from './Core/MathHelper';
 import { Cube } from './Core/Cube';
@@ -15,33 +15,32 @@ export class WallPolygonParser {
      * @param relocation 是否重定位墙的初始坐标位置为墙中心，如果为否 强的 position始终为0
      */
     public static parse(area: GraphicDocument, relocation?: boolean): ObjectPolygon[] {
-        var result: ObjectPolygon[] = [];
-        var anchors: { [key: number]: Anchor } = {};
-        var walls: { [key: number]: Wall } = {};
-
-        var heights: { [key: number]: number } = {};
+        const result: ObjectPolygon[] = [];
+        let anchors: { [key: number]: Anchor } = {};
+        let walls: { [key: number]: Wall } = {};
+        let heights: { [key: number]: number } = {};
         try {
             // parse anchors
-            for (let anchor of area.anchors) {
+            for (const anchor of area.anchors) {
                 if (anchor && anchor.id && anchor.x && anchor.y && anchors[anchor.id] == null) {
                     anchors[anchor.id] = new Anchor(anchor.id, anchor.x, anchor.y);
                 }
             }
             // parse walls
-            for (let wall of area.walls) {
+            for (const wall of area.walls) {
                 if (wall && wall.id && wall.anchors && wall.anchors.length === 2) {
-                    var object = walls[wall.id];
+                    let object = walls[wall.id];
                     if (object == null) {
-                        var from = anchors[wall.anchors[0]];
-                        var to = anchors[wall.anchors[1]];
+                        const from = anchors[wall.anchors[0]];
+                        const to = anchors[wall.anchors[1]];
                         if (from && to) {
                             object = new Wall(wall.id, from, to, wall.thick);
                             walls[wall.id] = object;
                             heights[wall.id] = wall.height;
 
                             if (wall.holes && wall.holes.length > 0) {
-                                for (let holeConfig of wall.holes) {
-                                    let hole = new Hole();
+                                for (const holeConfig of wall.holes) {
+                                    const hole = new Hole();
                                     hole.id = holeConfig.id;
                                     hole.width = holeConfig.width;
                                     hole.height = holeConfig.height;
@@ -57,16 +56,16 @@ export class WallPolygonParser {
                     }
                 }
             }
-            for (let key in anchors) {
-                var anchor = anchors[key];
+            for (const key in anchors) {
+                const anchor = anchors[key];
                 if (anchor.targets.length > 0) {
                     anchors[key].build();
                 }
             }
-            for (let key in walls) {
-                var wall = walls[key];
+            for (const key in walls) {
+                const wall = walls[key];
                 wall.update();
-                var config = new WallPolygon();
+                const config = new WallPolygon();
                 config.id = wall.id;
                 config.h = heights[wall.id];
                 config.points = MathHelper.clone2Array(wall.points);
@@ -78,8 +77,8 @@ export class WallPolygonParser {
                 }
                 // holes
                 if (wall.holes.length > 0) {
-                    for (let hole of wall.holes) {
-                        let holepolygon = new HolePolygon();
+                    for (const hole of wall.holes) {
+                        const holepolygon = new HolePolygon();
                         holepolygon.id = hole.id;
                         holepolygon.h = hole.height;
                         holepolygon.g = hole.ground;
@@ -95,8 +94,8 @@ export class WallPolygonParser {
                 result.push(config);
             }
             if (area.cylinders) {
-                for (let cylinder of area.cylinders) {
-                    let cy = new CylinderPolygon();
+                for (const cylinder of area.cylinders) {
+                    const cy = new CylinderPolygon();
                     cy.id = cylinder.id;
                     cy.p = cylinder.p;
                     cy.r = cylinder.r;
@@ -106,8 +105,8 @@ export class WallPolygonParser {
             }
 
             if (area.cubes) {
-                for (let cylinder of area.cubes) {
-                    let cube = new Cube(cylinder.id, cylinder.p[0], cylinder.p[1], cylinder.x, cylinder.z, cylinder.y);
+                for (const cylinder of area.cubes) {
+                    const cube = new Cube(cylinder.id, cylinder.p[0], cylinder.p[1], cylinder.x, cylinder.z, cylinder.y);
                     cube.update();
                     const cubepolygon = new CubePolygon();
                     cubepolygon.id = cylinder.id;

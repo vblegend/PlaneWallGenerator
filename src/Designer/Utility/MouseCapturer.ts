@@ -1,4 +1,4 @@
-import * as signals from "signals";
+import * as signals from 'signals';
 
 export class MouseCapturer {
     private _captureing: boolean;

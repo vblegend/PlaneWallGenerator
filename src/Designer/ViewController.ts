@@ -1,12 +1,12 @@
-import { Vector2 } from "../Core/Vector2";
-import { VectorDesigner } from "./VectorDesigner";
+import { Vector2 } from '../Core/Vector2';
+import { VectorDesigner } from './VectorDesigner';
 import { AnchorControl } from './Views/AnchorControl';
-import { Control } from "./Views/Control";
+import { Control } from './Views/Control';
 import { MouseCapturer } from './Utility/MouseCapturer';
 import { WallControl } from './Views/WallControl';
-import { HoleControl } from "./Views/HoleControl";
-import { Connector } from "./Common/Connector";
-import { DragService } from "./Plugins/DragService";
+import { HoleControl } from './Views/HoleControl';
+import { Connector } from './Common/Connector';
+import { DragService } from './Plugins/DragService';
 
 
 export class ViewController {
@@ -47,7 +47,7 @@ export class ViewController {
         //   window.addEventListener('keydown', this.key_down, true);
         this.designer.renderer.canvas.oncontextmenu = (e) => {
             e.preventDefault();
-        }
+        };
         this.dragService = new DragService(this.designer.renderer.canvas);
         this.dragService.onDropEnter.add(this.control_dragEnter, this);
         this.dragService.onDropLeave.add(this.control_dragLeave, this);
@@ -59,7 +59,7 @@ export class ViewController {
     private addedObject: Control;
     private control_dragEnter(e: DragEvent) {
         this.position = new Vector2(e.pageX - this.designer.renderer.canvas.offsetLeft, e.pageY - this.designer.renderer.canvas.offsetTop);
-        let viewPosition = this.designer.mapPoint(this.position);
+        const viewPosition = this.designer.mapPoint(this.position);
         if (e.dataTransfer.types.indexOf('text/create-anchor') >= 0) {
             this.dragService.allowedPutDown = true;
             this.addedObject = this.designer.createAnchor(null, viewPosition.x, viewPosition.y);
@@ -143,7 +143,7 @@ export class ViewController {
             }
         }
 
-        let moveValue = e.shiftKey ? 10 : 1;
+        const moveValue = e.shiftKey ? 10 : 1;
         let center: Vector2;
         const keycode = e.key.toLowerCase();
         if (keycode === 's') center = this.designer.center.clone().reduce(null, -moveValue);
@@ -169,28 +169,28 @@ export class ViewController {
 
 
     private wheelChange(e: WheelEvent) {
-        var deltalX = this.designer.width / 2 - e.offsetX;
-        var deltalY = this.designer.height / 2 - e.offsetY;
-        var px = new Vector2(e.offsetX, e.offsetY);
-        //计算缩放的中心点
-        var zoomPoint = new Vector2((px.x + this.designer.bounds.left / this.designer.res) * this.designer.res, (px.y + this.designer.bounds.top / this.designer.res) * this.designer.res);
-        var zoom = 0;
-        {
-            var scales = [5, 10, 20, 25, 40, 50, 80, 100, 200, 250, 400, 500, 800, 1000, 1250, 2000, 2500, 3000, 4000];
-            var index = scales.indexOf(this.designer.zoom);
-            if (index === -1) {
-                index = 1;
+        const deltalX = this.designer.width / 2 - e.offsetX;
+        const deltalY = this.designer.height / 2 - e.offsetY;
+        const px = new Vector2(e.offsetX, e.offsetY);
+        // 计算缩放的中心点
+        const zoomPoint = new Vector2((px.x + this.designer.bounds.left / this.designer.res) * this.designer.res, (px.y + this.designer.bounds.top / this.designer.res) * this.designer.res);
+        let zoom = 0;
+
+        const scales = [5, 10, 20, 25, 40, 50, 80, 100, 200, 250, 400, 500, 800, 1000, 1250, 2000, 2500, 3000, 4000];
+        let index = scales.indexOf(this.designer.zoom);
+        if (index === -1) {
+            index = 1;
+        } else {
+            if (e.deltaY < 0) {
+                index = Math.min(index + 1, scales.length - 1);
             } else {
-                if (e.deltaY < 0) {
-                    index = Math.min(index + 1, scales.length - 1);
-                } else {
-                    index = Math.max(index - 1, 0);
-                }
+                index = Math.max(index - 1, 0);
             }
-            zoom = scales[index];
         }
-        var newRes = 1 / (zoom / 100);
-        var center = new Vector2(zoomPoint.x + deltalX * newRes, zoomPoint.y + deltalY * newRes);
+        zoom = scales[index];
+
+        const newRes = 1 / (zoom / 100);
+        const center = new Vector2(zoomPoint.x + deltalX * newRes, zoomPoint.y + deltalY * newRes);
         this.designer.moveTo(zoom, center);
         this.stopEventBubble(e);
     }
@@ -221,7 +221,7 @@ export class ViewController {
                 this.designer.toolbar.visible = true;
             } else if (e.button === 0) {
                 if (this.designer.connector.commit(this.hitObject, this.position)) {
-                    var newAnchor = this.designer.connector.newAnchor;
+                    const newAnchor = this.designer.connector.newAnchor;
                     this.designer.connector = new Connector(this.designer, newAnchor);
                     this.designer.toolbar.visible = false;
                     this.mouse_move(e);
@@ -249,18 +249,18 @@ export class ViewController {
         this._press_position = this.position;
         this._dragging = true;
         this.stopEventBubble(e);
-        this.designer.renderer.canvas.style.cursor = "move";
+        this.designer.renderer.canvas.style.cursor = 'move';
     }
 
 
     private testhitObject(children: Control[], v: Vector2, excluded?: Control[]): Control {
-        for (var i = children.length - 1; i >= 0; i--) {
-            var control = children[i];
+        for (let i = children.length - 1; i >= 0; i--) {
+            const control = children[i];
             if (control.hit(v)) {
                 if (excluded != null && excluded.length > 0) {
                     if (excluded.indexOf(control) > -1) continue;
                 }
-                let child = this.testhitObject(control.children, v, excluded);
+                const child = this.testhitObject(control.children, v, excluded);
                 if (child) {
                     return child;
                 }
@@ -275,8 +275,8 @@ export class ViewController {
     private mouse_move(e: MouseEvent) {
         if (this._iscanceled) return;
 
-        let v = this.designer.mapPoint(this.position);
-        var excluded: Control[] = [];
+        const v = this.designer.mapPoint(this.position);
+        let excluded: Control[] = [];
 
         if (this._pressedObject instanceof HoleControl) {
             excluded.push(this._pressedObject);
@@ -299,9 +299,9 @@ export class ViewController {
         }
 
         if (this._dragging) {
-            var pos = this.position.sub(this._press_position);
+            const pos = this.position.sub(this._press_position);
             this._press_position = this.position;
-            var center = new Vector2(this.designer.center.x - pos.x * this.designer.res, this.designer.center.y - pos.y * this.designer.res);
+            const center = new Vector2(this.designer.center.x - pos.x * this.designer.res, this.designer.center.y - pos.y * this.designer.res);
             this.designer.moveTo(this.designer.zoom, center);
             this.stopEventBubble(e);
         }
@@ -362,7 +362,7 @@ export class ViewController {
             this.position = new Vector2(e.pageX - this.designer.renderer.canvas.offsetLeft, e.pageY - this.designer.renderer.canvas.offsetTop);
             this._dragging = false;
             this.stopEventBubble(e);
-            this.designer.renderer.canvas.style.cursor = "default";
+            this.designer.renderer.canvas.style.cursor = 'default';
         }
 
     }

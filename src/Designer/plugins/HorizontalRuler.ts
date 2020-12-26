@@ -1,6 +1,6 @@
-import { Vector2 } from "../../Core/Vector2";
-import { Renderer, HorizontalAlign, RenderType } from "../Renderer";
-import { VectorDesigner } from "../VectorDesigner";
+import { Vector2 } from '../../Core/Vector2';
+import { Renderer, HorizontalAlign, RenderType } from '../Renderer';
+import { VectorDesigner } from '../VectorDesigner';
 
 
 export class HorizontalRuler {
@@ -33,7 +33,7 @@ export class HorizontalRuler {
 
         this._canvas.oncontextmenu = (e) => {
             e.preventDefault();
-        }
+        };
 
         this.resize();
     }
@@ -52,31 +52,31 @@ export class HorizontalRuler {
 
     private renderCursor() {
         this._cursorRenderer.clear();
-        var designerlength = this.designer.bounds.right - this.designer.bounds.left;
-        var position =this.designer.cursor.position;
+        const designerlength = this.designer.bounds.right - this.designer.bounds.left;
+        const position = this.designer.cursor.position;
         if (position.x >= this.designer.bounds.left && position.x <= this.designer.bounds.right) {
             this._cursorRenderer.fontSize = 16;
-            var posx = (position.x - this.designer.bounds.left) / designerlength * this.width;
-            var text = position.x.toFixed(4);
-            var width = this._cursorRenderer.measureTextWidth(text) + this._cursorRenderer.fontSize;
-            var left = posx - width / 2;
-            var right = posx + width / 2;
+            const posx = (position.x - this.designer.bounds.left) / designerlength * this.width;
+            const text = position.x.toFixed(4);
+            const width = this._cursorRenderer.measureTextWidth(text) + this._cursorRenderer.fontSize;
+            let left = posx - width / 2;
+            let right = posx + width / 2;
             if (left < 0) {
                 right -= left;
                 left = 0;
             } else if (right > this.width) {
-                let v = right - this.width;
+                const v = right - this.width;
                 left -= v;
                 right = this.width;
             }
             this._cursorRenderer.rectangle(left, this.height - 7 - this._cursorRenderer.fontSize, right - left, this._cursorRenderer.fontSize, RenderType.ALL);
-            this._cursorRenderer.fillColor = '#ffffff'
-            this._cursorRenderer.fillText(text, left + width / 2, this.height - 7 - this._cursorRenderer.fontSize, null, HorizontalAlign.CENTER)
-            var paths: Vector2[] = [];
+            this._cursorRenderer.fillColor = '#ffffff';
+            this._cursorRenderer.fillText(text, left + width / 2, this.height - 7 - this._cursorRenderer.fontSize, null, HorizontalAlign.CENTER);
+            const paths: Vector2[] = [];
             paths.push(new Vector2(posx, this.height - 1));
             paths.push(new Vector2(posx - 5 < 0 ? 0 : posx - 5, this.height - 7));
             paths.push(new Vector2(posx + 5 > this.width ? this.width : posx + 5, this.height - 7));
-            this._cursorRenderer.fillColor = '#333333'
+            this._cursorRenderer.fillColor = '#333333';
             this._cursorRenderer.fillPath(paths, true);
         }
     }
@@ -90,22 +90,22 @@ export class HorizontalRuler {
     private render() {
         if (!this._needUpdate) return;
         this._needUpdate = false;
-        var designerlength = this.designer.bounds.right - this.designer.bounds.left;
-        var offset = this.designer.center.x % (designerlength / this.width * 100);
+        const designerlength = this.designer.bounds.right - this.designer.bounds.left;
+        const offset = this.designer.center.x % (designerlength / this.width * 100);
         this._renderer.strokeColor = '#666666';
         this._renderer.fillColor = '#666666';
         this._renderer.fontSize = 10;
-        var center = this.width / 2;
-        var offsetCenter = this.designer.center.x / this.designer.res;
-        var offsetCalibration = offset / this.designer.res;
-        var centeroffset = center - offsetCalibration;
-        var pos = 0;
-        var count = 0;
+        const center = this.width / 2;
+        const offsetCenter = this.designer.center.x / this.designer.res;
+        const offsetCalibration = offset / this.designer.res;
+        const centeroffset = center - offsetCalibration;
+        let pos = 0;
+        let count = 0;
         this._renderer.clear();
 
         while (centeroffset + pos < this.width || centeroffset - pos > 0) {
             if (centeroffset + pos < this.width) {
-                var pValue: number = null;
+                let pValue: number = null;
                 if (count % 10 === 0) {
                     pValue = (offsetCenter - offsetCalibration + pos) * this.designer.res;
                     pValue = Number.parseFloat(pValue.toFixed(2));
@@ -113,7 +113,7 @@ export class HorizontalRuler {
                 this.drawCalibration(centeroffset + pos, pValue);
             }
             if (centeroffset - pos > 0) {
-                var pValue: number = null;
+                let pValue: number = null;
                 if (count % 10 === 0) {
                     pValue = (offsetCenter - offsetCalibration - pos) * this.designer.res;
                     pValue = Number.parseFloat(pValue.toFixed(2));
@@ -127,9 +127,9 @@ export class HorizontalRuler {
         /**
          * fixed triangle pointer
          */
-        this._renderer.fillColor = '#333333'
+        this._renderer.fillColor = '#333333';
         this._renderer.fillPath([new Vector2(center - 5, 0), new Vector2(center + 5, 0), new Vector2(center, 10)], true);
-        this._renderer.strokeColor = '#aaaaaa'
+        this._renderer.strokeColor = '#aaaaaa';
         this._renderer.strokePath([new Vector2(center - 5, 0), new Vector2(center + 5, 0), new Vector2(center, 10)], true);
 
 
@@ -146,7 +146,7 @@ export class HorizontalRuler {
      * @param value 
      */
     private drawCalibration(x: number, value?: number) {
-        var calibration = this.height / 3;
+        let calibration = this.height / 3;
         if (value != null) {
             this._renderer.fillText(value.toString(), x, this.height * 0.65, null, HorizontalAlign.CENTER);
             calibration = this.height / 2;

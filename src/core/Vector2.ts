@@ -26,7 +26,7 @@ export class Vector2 implements IVector2 {
             this.y = Math.round(this.y);
             return this;
         }
-        var div = Vector2.divisors[precision];
+        const div = Vector2.divisors[precision];
         if (div == null) {
             throw new Error('Unsupported precision parameters!');
         }
@@ -70,7 +70,7 @@ export class Vector2 implements IVector2 {
 
 
     public inCircle(center: Vector2, radius: number): boolean {
-        var distance = this.distanceTo(center);
+        const distance = this.distanceTo(center);
         return distance < radius;
     }
 
@@ -135,7 +135,7 @@ export class Vector2 implements IVector2 {
      * @param v 
      */
     public update(v: Vector2): boolean {
-        let updated = !this.equals(v);
+        const updated = !this.equals(v);
         this.x = v.x;
         this.y = v.y;
         return updated;
@@ -147,7 +147,7 @@ export class Vector2 implements IVector2 {
      */
     public inPolygon(polygon: Vector2[]): boolean {
         let sum = 0;
-        for (var i = 0, l = polygon.length, j = l - 1; i < l; j = i, i++) {
+        for (let i = 0, l = polygon.length, j = l - 1; i < l; j = i, i++) {
             const sx = polygon[i].x;
             const sy = polygon[i].y;
             const tx = polygon[j].x;
@@ -157,7 +157,7 @@ export class Vector2 implements IVector2 {
                 return true;
             }
             // 点与相邻顶点连线的夹角
-            var angle = Math.atan2(sy - this.y, sx - this.x) - Math.atan2(ty - this.y, tx - this.x);
+            let angle = Math.atan2(sy - this.y, sx - this.x) - Math.atan2(ty - this.y, tx - this.x);
             // 确保夹角不超出取值范围（-π 到 π）
             if (angle >= Math.PI) {
                 angle = angle - Math.PI * 2;
@@ -167,12 +167,12 @@ export class Vector2 implements IVector2 {
             sum += angle;
         }
         // 计算回转数并判断点和多边形的几何关系
-        return Math.round(sum / Math.PI) === 0 ? false : true;
+        return Math.round(sum / Math.PI) != 0;
     }
 
     public inPolygon2(polygon: number[][]): boolean {
         let sum = 0;
-        for (var i = 0, l = polygon.length, j = l - 1; i < l; j = i, i++) {
+        for (let i = 0, l = polygon.length, j = l - 1; i < l; j = i, i++) {
             const sx = polygon[i][0];
             const sy = polygon[i][1];
             const tx = polygon[j][0];
@@ -182,7 +182,7 @@ export class Vector2 implements IVector2 {
                 return true;
             }
             // 点与相邻顶点连线的夹角
-            var angle = Math.atan2(sy - this.y, sx - this.x) - Math.atan2(ty - this.y, tx - this.x);
+            let angle = Math.atan2(sy - this.y, sx - this.x) - Math.atan2(ty - this.y, tx - this.x);
             // 确保夹角不超出取值范围（-π 到 π）
             if (angle >= Math.PI) {
                 angle = angle - Math.PI * 2;
@@ -192,7 +192,7 @@ export class Vector2 implements IVector2 {
             sum += angle;
         }
         // 计算回转数并判断点和多边形的几何关系
-        return Math.round(sum / Math.PI) === 0 ? false : true;
+        return Math.round(sum / Math.PI) != 0;
     }
 
 
@@ -203,8 +203,7 @@ export class Vector2 implements IVector2 {
     }
 
     public radian(v: Vector2): number {
-        let angle = Math.atan2(this.y - v.y, this.x - v.x);
-        return angle;
+        return Math.atan2(this.y - v.y, this.x - v.x);
     }
 
     public angle(v: Vector2): number {
@@ -231,16 +230,16 @@ export class Vector2 implements IVector2 {
      * @param a 旋转角度
      */
     public around(center: Vector2, a: number): Vector2 {
-        var ang = a / 180 * Math.PI;
-        var x = (this.x - center.x) * Math.cos(ang) - (this.y - center.y) * Math.sin(ang) + center.x;
-        var y = (this.x - center.x) * Math.sin(ang) + (this.y - center.y) * Math.cos(ang) + center.y;
+        const ang = a / 180 * Math.PI;
+        const x = (this.x - center.x) * Math.cos(ang) - (this.y - center.y) * Math.sin(ang) + center.x;
+        const y = (this.x - center.x) * Math.sin(ang) + (this.y - center.y) * Math.cos(ang) + center.y;
         return new Vector2(x, y);
     }
 
 
     public moveTo(dist: Vector2, moveDistance: number) {
-        var angle = this.angle(dist);
-        var point = new Vector2(this.x - moveDistance, this.y);
+        const angle = this.angle(dist);
+        const point = new Vector2(this.x - moveDistance, this.y);
         return point.around(this, angle);
     }
 

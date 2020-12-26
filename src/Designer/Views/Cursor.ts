@@ -1,5 +1,5 @@
-import { IVector2, Vector2 } from "../../Core/Vector2";
-import { VectorDesigner } from "../VectorDesigner";
+import { IVector2, Vector2 } from '../../Core/Vector2';
+import { VectorDesigner } from '../VectorDesigner';
 
 
 
@@ -47,7 +47,7 @@ export class Cursor {
     public render() {
         if (this._visible) {
             this.designer.renderer.opacity = 1;
-            var position = this.designer.convertPoint(this.position);
+            const position = this.designer.convertPoint(this.position);
             this.designer.renderer.strokeColor = this.horizontalLineColor;
             this.designer.renderer.line(0, position.y, this.designer.width, position.y, 1);
             this.designer.renderer.strokeColor = this.verticalLineColor;

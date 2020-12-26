@@ -1,5 +1,5 @@
-import { Anchor } from "./Anchor";
-import { Vector2 } from "./Vector2";
+import { Anchor } from './Anchor';
+import { Vector2 } from './Vector2';
 import { Hole } from './Hole';
 
 export class Wall {
@@ -48,7 +48,7 @@ export class Wall {
     }
 
     public removeHole(hole: Hole) {
-        let index = this._holes.indexOf(hole);
+        const index = this._holes.indexOf(hole);
         if (index > -1) {
             this._holes[index].unInstall();
             this._holes.splice(index, 1);

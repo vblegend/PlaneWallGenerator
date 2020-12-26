@@ -51,9 +51,9 @@ export class AnchorControl extends Control {
 
 
     protected onDraging(e: ControlDragEvent) {
-        var viewPos = e.viewPos.sub(e.offset).round(4);
-        var result: IVector2;
-        var hitObject = this.designer.viewControl.hitObject;
+        let viewPos = e.viewPos.sub(e.offset).round(4);
+        let result: IVector2;
+        const hitObject = this.designer.viewControl.hitObject;
         // 如果鼠标在墙上  吸附到墙壁上
         if (hitObject != this && hitObject instanceof WallControl) {
             result = viewPos = hitObject.getSubPoint(e.position).round(4);
@@ -73,7 +73,7 @@ export class AnchorControl extends Control {
 
     protected onEndDrag(e: ControlDragEvent) {
         this.designer.cursor.update(null);
-        var anchor = this.designer._children.find(e => e instanceof AnchorControl && e.anchor.x === this.anchor.x && e.anchor.y === this.anchor.y) as AnchorControl;
+        const anchor = this.designer._children.find((e) => e instanceof AnchorControl && e.anchor.x === this.anchor.x && e.anchor.y === this.anchor.y) as AnchorControl;
         if (anchor != null && anchor != this) {
             this.merageTo(anchor);
             this.designer.discardGrabObjects();
@@ -83,7 +83,7 @@ export class AnchorControl extends Control {
         if (this.designer.viewControl.hitObject != this) {
             if (this.designer.viewControl.hitObject instanceof WallControl) {
                 // split
-                var targetAnchor = this.designer.viewControl.hitObject.split(this.designer.viewControl.position);
+                const targetAnchor = this.designer.viewControl.hitObject.split(this.designer.viewControl.position);
                 // merage
                 this.merageTo(targetAnchor);
             } else if (this.designer.viewControl.hitObject instanceof AnchorControl) {
@@ -91,7 +91,7 @@ export class AnchorControl extends Control {
                 this.merageTo(this.designer.viewControl.hitObject);
             }
             else{
-                var viewPos = e.viewPos.sub(e.offset).round(4);
+                const viewPos = e.viewPos.sub(e.offset).round(4);
                 this.designer.adsorb.adsorption(viewPos);
                 this.setPosition(viewPos);
             }
@@ -126,23 +126,23 @@ export class AnchorControl extends Control {
 
 
     public merageTo(ANCHOR: AnchorControl): boolean {
-        //不支持合并到自己的另一端
+        // 不支持合并到自己的另一端
         if (this.anchor.targets.indexOf(ANCHOR.anchor) > -1) return false;
         // look look 与自己相连的锚点
-        for (let wall of this._walls) {
-            let otherside = wall.anchors[0] == this ? wall.anchors[1] : wall.anchors[0];
+        for (const wall of this._walls) {
+            const otherside = wall.anchors[0] == this ? wall.anchors[1] : wall.anchors[0];
             // 调整前后顺序
-            let anchors = wall.anchors[0] == this ? [ANCHOR, otherside] : [otherside, ANCHOR];
-            var poly = this.designer.createPolygon(null, anchors[0], anchors[1], wall.thickness);
+            const anchors = wall.anchors[0] == this ? [ANCHOR, otherside] : [otherside, ANCHOR];
+            const poly = this.designer.createPolygon(null, anchors[0], anchors[1], wall.thickness);
             if (poly != null) {
-                for (let hole of wall.holes) {
+                for (const hole of wall.holes) {
                     hole.remove();
                     poly.addHole(hole);
                 }
                 this.designer.add(poly);
             }
         }
-        //remove self
+        // remove self
         this.remove();
         // update anchor
         ANCHOR.update();
@@ -165,7 +165,7 @@ export class AnchorControl extends Control {
     }
 
     public removeWall(p: WallControl, a: AnchorControl) {
-        var index = this._walls.indexOf(p);
+        let index = this._walls.indexOf(p);
         if (index > -1) this._walls.splice(index, 1);
         index = this._linked.indexOf(a);
         if (index > -1) this._linked.splice(index, 1);
@@ -190,7 +190,7 @@ export class AnchorControl extends Control {
         super.remove();
         this._linked = [];
         while (this._walls.length) {
-            var wall = this._walls.shift();
+            const wall = this._walls.shift();
             wall.remove();
         }
         this._anchor.remove();
@@ -202,7 +202,7 @@ export class AnchorControl extends Control {
      * @param excluded Excluded anchor points
      */
     public updateNearby(excluded?: AnchorControl) {
-        for (let anchor of this._linked) {
+        for (const anchor of this._linked) {
             if (anchor !== excluded) {
                 anchor.update();
             }
@@ -236,7 +236,7 @@ export class AnchorControl extends Control {
         this.designer.renderer.opacity = this.opacity;
         this.designer.renderer.fillColor = this.isHover && !this.isSelected ? this.hoverColor : this.fillColor;
         this.designer.renderer.strokeColor = this.strokeColor;
-        var pt = this.designer.convertPoint(this.position);
+        const pt = this.designer.convertPoint(this.position);
         this.designer.renderer.circle(pt.x, pt.y, 5, RenderType.ALL /* / this.designer.res */);
     }
 

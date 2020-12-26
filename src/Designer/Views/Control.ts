@@ -208,7 +208,7 @@ export class Control {
                 this._hDragTimer = null;
                 if (this.designer.viewControl.hitObject == this) {
                     this._draging = true;
-                    var viewPos = this.designer.mapPoint(canvasPos);
+                    const viewPos = this.designer.mapPoint(canvasPos);
                     this._ControlDragEvent.init(canvasPos, viewPos, viewPos.sub(this.position), button);
                     this.onBeginDrag(this._ControlDragEvent);
                 }
@@ -223,7 +223,7 @@ export class Control {
      */
     protected onMouseMove(button: number, canvasPos: Vector2) {
         if (this._draging) {
-            var viewPos = this.designer.mapPoint(canvasPos);
+            const viewPos = this.designer.mapPoint(canvasPos);
             this._ControlDragEvent.init(canvasPos, viewPos, null);
             this.onDraging(this._ControlDragEvent);
         }
@@ -242,7 +242,7 @@ export class Control {
         }
         if (this._draging) {
             this._draging = false;
-            var viewPos = this.designer.mapPoint(canvasPos);
+            const viewPos = this.designer.mapPoint(canvasPos);
             this._ControlDragEvent.init(canvasPos, viewPos, null);
             this.onEndDrag(this._ControlDragEvent);
         }

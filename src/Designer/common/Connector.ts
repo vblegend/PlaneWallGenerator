@@ -1,7 +1,7 @@
-import { IVector2, Vector2 } from "../../Core/Vector2";
-import { VectorDesigner } from "../VectorDesigner";
-import { AnchorControl } from "../Views/AnchorControl";
-import { WallControl } from "../Views/WallControl";
+import { IVector2, Vector2 } from '../../Core/Vector2';
+import { VectorDesigner } from '../VectorDesigner';
+import { AnchorControl } from '../Views/AnchorControl';
+import { WallControl } from '../Views/WallControl';
 import { Control } from '../Views/Control';
 
 
@@ -15,11 +15,11 @@ export class Connector {
     public constructor(designer: VectorDesigner, origin: AnchorControl) {
         this.designer = designer;
         this.origin = origin;
-        var v = this.designer.mapPoint(this.designer.viewControl.position);
+        const v = this.designer.mapPoint(this.designer.viewControl.position);
         this.newAnchor = this.designer.createAnchor(null, v.x, v.y, true);
-        let values = origin.walls.map(e => e.thickness);
+        const values = origin.walls.map((e) => e.thickness);
         values.push(this.designer.defaultthickness);
-        let thickness = Math.max.apply(this, values);
+        const thickness = Math.max.apply(this, values);
 
 
         this.newSegment = this.designer.createPolygon(null, origin, this.newAnchor, thickness);
@@ -31,7 +31,7 @@ export class Connector {
 
     public update(canvasPoint?: Vector2, control?: Control) {
         let position: Vector2;
-        var result: IVector2;
+        let result: IVector2;
         if (control instanceof WallControl) {
             position = control.getSubPoint(canvasPoint).round(4);
             result = new Vector2(1, 1);
@@ -58,16 +58,16 @@ export class Connector {
 
 
     public commit(hover: Control, position: Vector2): boolean {
-        var point = this.newAnchor.position;
-        var anchor = this.designer._children.find(e => e instanceof AnchorControl && e.anchor.x === point.x && e.anchor.y === point.y) as AnchorControl;
+        const point = this.newAnchor.position;
+        let anchor = this.designer._children.find((e) => e instanceof AnchorControl && e.anchor.x === point.x && e.anchor.y === point.y) as AnchorControl;
         if (this.origin === anchor || this.designer.connector.origin === hover) {
             return false;
         }
         if (hover instanceof AnchorControl) {
             anchor = hover;
         }
-        let thickness = this.newSegment.thickness;
-        let height = this.newSegment.height;
+        const thickness = this.newSegment.thickness;
+        const height = this.newSegment.height;
         if (hover instanceof WallControl) {
             this.newSegment.remove(false);
             this.newAnchor.remove();

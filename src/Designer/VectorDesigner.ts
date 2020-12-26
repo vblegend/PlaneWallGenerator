@@ -1,21 +1,21 @@
-import * as signals from "signals";
-import { Vector2 } from "../Core/Vector2";
-import { Bounds } from "./Common/Bounds";
-import { Renderer } from "./Renderer";
-import { ViewController } from "./ViewController";
-import { Control } from "./Views/Control";
-import { ToolBar } from "./Menus/ToolBar";
+import * as signals from 'signals';
+import { Vector2 } from '../Core/Vector2';
+import { Bounds } from './Common/Bounds';
+import { Renderer } from './Renderer';
+import { ViewController } from './ViewController';
+import { Control } from './Views/Control';
+import { ToolBar } from './Menus/ToolBar';
 import { AnchorControl } from './Views/AnchorControl';
 import { WallControl } from './Views/WallControl';
-import { Connector } from "./Common/Connector";
-import { AdsorbService } from "./Common/AdsorbService";
+import { Connector } from './Common/Connector';
+import { AdsorbService } from './Common/AdsorbService';
 import { GraphicDocument, ObjectPolygon } from '../Core/Common';
-import { ImageControl } from "./Views/ImageControl";
-import { Cursor } from "./Views/Cursor";
-import { HoleControl } from "./Views/HoleControl";
-import { ToolBox } from "./Menus/ToolBox";
-import { CylinderControl } from "./Views/ClinderControl";
-import { CubeControl } from "./Views/CubeControl";
+import { ImageControl } from './Views/ImageControl';
+import { Cursor } from './Views/Cursor';
+import { HoleControl } from './Views/HoleControl';
+import { ToolBox } from './Menus/ToolBox';
+import { CylinderControl } from './Views/ClinderControl';
+import { CubeControl } from './Views/CubeControl';
 
 
 export class VectorDesigner {
@@ -75,7 +75,7 @@ export class VectorDesigner {
     public grabObjects(objects: Control[]) {
         this.releaseGrabObjects();
         this._adsorb.enabled = false;
-        for (let object of objects) {
+        for (const object of objects) {
             if (this.remove(object).length > 0) {
                 this._mouseGrabObjects.push(object);
             }
@@ -89,7 +89,7 @@ export class VectorDesigner {
     public releaseGrabObjects() {
         this._adsorb.enabled = false;
         while (this._mouseGrabObjects.length > 0) {
-            var object = this._mouseGrabObjects.shift();
+            const object = this._mouseGrabObjects.shift();
             this.add(object);
         }
         this._adsorb.enabled = true;
@@ -128,7 +128,7 @@ export class VectorDesigner {
                 this.toolbar.visible = false;;
             }
             this._selected = value;
-            var pt: Vector2 = null;
+            let pt: Vector2 = null;
             if (this._selected instanceof AnchorControl) {
                 pt = this.convertPoint(this._selected.position).add(new Vector2(20, 10));
             } else if (this._selected instanceof WallControl) {
@@ -219,14 +219,14 @@ export class VectorDesigner {
                 this._center = center;
             }
             this._res = 1 / (this._zoom / 100);
-            var width = this.width * this._res;
-            var height = this.height * this._res;
-            //获取新的视图范围。
+            const width = this.width * this._res;
+            const height = this.height * this._res;
+            // 获取新的视图范围。
             this._bounds = new Bounds(center.x - width / 2, center.y - height / 2, center.x + width / 2, center.y + height / 2);
         }
         //
         this.onMoved.dispatch();
-        //redraw
+        // redraw
         this.requestRender();
     }
 
@@ -265,13 +265,13 @@ export class VectorDesigner {
             this._requestRender = false;
             this.renderer.clear();
             this._background.render();
-            for (var control of this._children) {
+            for (const control of this._children) {
                 control.render();
             }
             if (this.connector) this.connector.render();
 
             if (this._mouseGrabObjects.length > 0) {
-                for (var control of this._mouseGrabObjects) {
+                for (const control of this._mouseGrabObjects) {
                     control.render();
                 }
             }
@@ -279,7 +279,7 @@ export class VectorDesigner {
             this.onRender.dispatch();
         }
         if (!this.isDisposed && this._runState) {
-            //继续下一帧
+            // 继续下一帧
             requestAnimationFrame(this.graphicRender.bind(this));
         }
     }
@@ -294,10 +294,10 @@ export class VectorDesigner {
      * @param point 
      */
     public convertPoint(point: Vector2): Vector2 {
-        var resolution = this.res;
-        var extent = this.bounds;
-        var x = (point.x / resolution + (-extent.left / resolution));
-        var y = (point.y / resolution + (-extent.top / resolution));
+        const resolution = this.res;
+        const extent = this.bounds;
+        const x = (point.x / resolution + (-extent.left / resolution));
+        const y = (point.y / resolution + (-extent.top / resolution));
         return new Vector2(x, y);
     }
 
@@ -305,8 +305,8 @@ export class VectorDesigner {
      * 将canvas坐标转换为 视图坐标
      */
     public mapPoint(point: Vector2): Vector2 {
-        var ux = (point.x + this.bounds.left / this.res) * this.res;
-        var uy = (point.y + this.bounds.top / this.res) * this.res;
+        const ux = (point.x + this.bounds.left / this.res) * this.res;
+        const uy = (point.y + this.bounds.top / this.res) * this.res;
         return new Vector2(ux, uy);
     }
 
@@ -315,16 +315,16 @@ export class VectorDesigner {
      * @param points 
      */
     public convertPoints(points: Vector2[]): Vector2[] {
-        var result = [];
-        for (let point of points) {
+        const result = [];
+        for (const point of points) {
             result.push(this.convertPoint(point));
         }
         return result;
     }
 
     public convertArrayPoints(points: number[][]): Vector2[] {
-        var result = [];
-        for (let point of points) {
+        const result = [];
+        for (const point of points) {
             result.push(this.convertPoint(new Vector2(point[0], point[1])));
         }
         return result;
@@ -340,7 +340,7 @@ export class VectorDesigner {
         y = Math.floor(y * 10000) / 10000;
         if (id == null) {
             if (!Forced) {
-                for (let anchor of this.children) {
+                for (const anchor of this.children) {
                     if (anchor instanceof AnchorControl) {
                         if (anchor.anchor.x === x && anchor.anchor.y === y) {
                             return anchor;
@@ -361,7 +361,7 @@ export class VectorDesigner {
     public createPolygon(id: number, anchor1: AnchorControl, anchor2: AnchorControl, thickness?: number): WallControl {
         if (anchor1 == anchor2) return null;
         if (anchor1.anchor.targets.indexOf(anchor2.anchor) > -1) {
-            for (let wall of anchor1.walls) {
+            for (const wall of anchor1.walls) {
                 if (wall.anchors.indexOf(anchor1) > -1 && wall.anchors.indexOf(anchor2) > -1) {
                     return wall;
                 }
@@ -429,7 +429,7 @@ export class VectorDesigner {
 
 
     public add(...ctls: Control[]) {
-        for (let ctl of ctls) {
+        for (const ctl of ctls) {
             if (ctl != null) {
                 const index = this.children.indexOf(ctl);
                 if (ctl.id && ctl.id >= this._maxSerialNumber) {
@@ -469,8 +469,8 @@ export class VectorDesigner {
 
 
     public dispatchEvents() {
-        for (let key in this._events) {
-            let value = this._events[key];
+        for (const key in this._events) {
+            const value = this._events[key];
             this._onWallChange.dispatch(value);
         }
         this._events = {};
@@ -481,7 +481,7 @@ export class VectorDesigner {
 
     public remove(...ctls: Control[]): Control[] {
         const result = [];
-        for (let ctl of ctls) {
+        for (const ctl of ctls) {
             let index = this.children.indexOf(ctl);
             if (index > -1) {
                 ctl.onUnLoad();
@@ -516,7 +516,7 @@ export class VectorDesigner {
 
     public toPolygon(relocation?: boolean): ObjectPolygon[] {
         const result: ObjectPolygon[] = [];
-        for (var control of this._children) {
+        for (const control of this._children) {
             if (control instanceof WallControl) {
                 result.push(control.toPolygon(relocation));
             } else if (control instanceof CylinderControl) {
@@ -536,7 +536,7 @@ export class VectorDesigner {
             cylinders: [],
             cubes: []
         };
-        for (var control of this._children) {
+        for (const control of this._children) {
             if (control instanceof WallControl) {
                 graphic.walls.unshift(control.serialize());
             } else if (control instanceof AnchorControl) {
@@ -557,11 +557,11 @@ export class VectorDesigner {
         this.clear();
         let map: { [key: string]: AnchorControl } = {};
         const objects: Control[] = [];
-        for (let anchor of graphic.anchors) {
+        for (const anchor of graphic.anchors) {
             map[anchor.id] = this.createAnchor(anchor.id, anchor.x, anchor.y);
             objects.push(map[anchor.id]);
         }
-        for (let wallConfig of graphic.walls) {
+        for (const wallConfig of graphic.walls) {
             const from = map[wallConfig.anchors[0]];
             const to = map[wallConfig.anchors[1]];
             if (from && to) {
@@ -570,8 +570,8 @@ export class VectorDesigner {
                     wall.height = wallConfig.height;
                     objects.push(wall);
                     if (wallConfig.holes && wallConfig.holes.length > 0) {
-                        for (let holeConfig of wallConfig.holes) {
-                            let hole = this.createHole(holeConfig.id, 0, 0);
+                        for (const holeConfig of wallConfig.holes) {
+                            const hole = this.createHole(holeConfig.id, 0, 0);
                             hole.width = holeConfig.width;
                             hole.height = holeConfig.height;
                             hole.ground = holeConfig.ground;
@@ -583,8 +583,8 @@ export class VectorDesigner {
             }
         }
         if (graphic.cylinders) {
-            for (let cylinder of graphic.cylinders) {
-                let cylider = this.createCylinder(cylinder.id, cylinder.p[0], cylinder.p[1]);
+            for (const cylinder of graphic.cylinders) {
+                const cylider = this.createCylinder(cylinder.id, cylinder.p[0], cylinder.p[1]);
                 cylider.radius = cylinder.r;
                 cylider.height = cylinder.h;
                 cylider.update();
@@ -593,8 +593,8 @@ export class VectorDesigner {
         }
 
         if (graphic.cubes) {
-            for (let cylinder of graphic.cubes) {
-                let cube = this.createCube(cylinder.id, cylinder.p[0], cylinder.p[1]);
+            for (const cylinder of graphic.cubes) {
+                const cube = this.createCube(cylinder.id, cylinder.p[0], cylinder.p[1]);
                 cube.length = cylinder.x;
                 cube.width = cylinder.z;
                 cube.height = cylinder.y;
@@ -605,7 +605,7 @@ export class VectorDesigner {
 
 
 
-        for (let key in map) {
+        for (const key in map) {
             map[key].update();
         }
         this.add.apply(this, objects);

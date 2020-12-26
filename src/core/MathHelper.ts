@@ -1,4 +1,4 @@
-import { IVector2, Vector2 } from "./Vector2";
+import { IVector2, Vector2 } from './Vector2';
 
 
 
@@ -12,21 +12,21 @@ export class MathHelper {
      * @param point 
      */
     public static getProjectivePoint(P1: Vector2, P2: Vector2, point: Vector2): Vector2 {
-        var pLine = P1;
+        const pLine = P1;
         if (P1.x === P2.x && P1.y === P2.y) {
             return P1;
         }
         if (P1.x === P2.x) {
             return new Vector2(pLine.x, point.y);
         }
-        else if (P1.y === P2.y) //垂线斜率不存在情况
+        else if (P1.y === P2.y) // 垂线斜率不存在情况
         {
             return new Vector2(point.x, pLine.y);
         }
-        //计算线的斜率
-        var k = ((P1.y - P2.y)) / (P1.x - P2.x);
-        var X = ((k * pLine.x + point.x / k + point.y - pLine.y) / (1 / k + k));
-        var Y = (-1 / k * (X - point.x) + point.y);
+        // 计算线的斜率
+        const k = ((P1.y - P2.y)) / (P1.x - P2.x);
+        const X = ((k * pLine.x + point.x / k + point.y - pLine.y) / (1 / k + k));
+        const Y = (-1 / k * (X - point.x) + point.y);
         return new Vector2(X, Y);
     }
 
@@ -64,11 +64,11 @@ export class MathHelper {
      * @param vPoints 
      */
     public static clockwiseSortPoints(vPoints: IVector2[], center: IVector2) {
-        //冒泡排序
-        for (var i = 0; i < vPoints.length - 1; i++) {
-            for (var j = 0; j < vPoints.length - i - 1; j++) {
+        // 冒泡排序
+        for (let i = 0; i < vPoints.length - 1; i++) {
+            for (let j = 0; j < vPoints.length - i - 1; j++) {
                 if (this.lessCcw(vPoints[j], vPoints[j + 1], center)) {
-                    var tmp = vPoints[j];
+                    const tmp = vPoints[j];
                     vPoints[j] = vPoints[j + 1];
                     vPoints[j + 1] = tmp;
                 }
@@ -113,9 +113,9 @@ export class MathHelper {
          * 如果 x1 = x3，那么L1与L2重合，否则平等
          * 
         */
-        var a = 0;
-        var b = 0;
-        var state = 0;
+        let a = 0;
+        let b = 0;
+        let state = 0;
         if (Math.abs(lineFirstStar.x - lineFirstEnd.x) > 0.000001) {
             a = (lineFirstEnd.y - lineFirstStar.y) / (lineFirstEnd.x - lineFirstStar.x);
             state |= 1;
@@ -125,39 +125,39 @@ export class MathHelper {
             state |= 2;
         }
         switch (state) {
-            case 0: //L1与L2都平行Y轴
+            case 0: // L1与L2都平行Y轴
                 {
                     if (lineFirstStar.x === lineSecondStar.x) {
-                        //throw new Exception("两条直线互相重合，且平行于Y轴，无法计算交点。");
+                        // throw new Exception("两条直线互相重合，且平行于Y轴，无法计算交点。");
                         return null;
                     }
                     else {
-                        //throw new Exception("两条直线互相平行，且平行于Y轴，无法计算交点。");
+                        // throw new Exception("两条直线互相平行，且平行于Y轴，无法计算交点。");
                         return null;
                     }
                 }
-            case 1: //L1存在斜率, L2平行Y轴
+            case 1: // L1存在斜率, L2平行Y轴
                 {
-                    var x = lineSecondStar.x;
-                    var y = (lineFirstStar.x - x) * (-a) + lineFirstStar.y;
+                    const x = lineSecondStar.x;
+                    const y = (lineFirstStar.x - x) * (-a) + lineFirstStar.y;
                     return new Vector2(x, y);
                 }
-            case 2: //L1 平行Y轴，L2存在斜率
+            case 2: // L1 平行Y轴，L2存在斜率
                 {
-                    var x = lineFirstStar.x;
-                    //网上有相似代码的，这一处是错误的。你可以对比case 1 的逻辑 进行分析
-                    //源code:lineSecondStar * x + lineSecondStar * lineSecondStar.X + p3.Y;
-                    var y = (lineSecondStar.x - x) * (-b) + lineSecondStar.y;
+                    const x = lineFirstStar.x;
+                    // 网上有相似代码的，这一处是错误的。你可以对比case 1 的逻辑 进行分析
+                    // 源code:lineSecondStar * x + lineSecondStar * lineSecondStar.X + p3.Y;
+                    const y = (lineSecondStar.x - x) * (-b) + lineSecondStar.y;
                     return new Vector2(x, y);
                 }
-            case 3: //L1，L2都存在斜率
+            case 3: // L1，L2都存在斜率
                 {
                     if (a === b) {
                         // throw new Exception("两条直线平行或重合，无法计算交点。");
                         return null;
                     }
-                    var x = (a * lineFirstStar.x - b * lineSecondStar.x - lineFirstStar.y + lineSecondStar.y) / (a - b);
-                    var y = a * x - a * lineFirstStar.x + lineFirstStar.y;
+                    const x = (a * lineFirstStar.x - b * lineSecondStar.x - lineFirstStar.y + lineSecondStar.y) / (a - b);
+                    const y = a * x - a * lineFirstStar.x + lineFirstStar.y;
                     return new Vector2(x, y);
                 }
         }
@@ -179,19 +179,19 @@ export class MathHelper {
     * https://www.cnblogs.com/fangsmile/p/11642784.html
     */
     public bezierCalculate(poss: Vector2[], precision: number): Vector2[] {
-        //维度，坐标轴数（二维坐标，三维坐标...）
-        let dimersion = 2;
-        //贝塞尔曲线控制点数（阶数）
-        let number = poss.length;
-        //控制点数不小于 2 ，至少为二维坐标系
+        // 维度，坐标轴数（二维坐标，三维坐标...）
+        const dimersion = 2;
+        // 贝塞尔曲线控制点数（阶数）
+        const number = poss.length;
+        // 控制点数不小于 2 ，至少为二维坐标系
         if (number < 2 || dimersion < 2)
             return null;
-        let result = [];
-        //计算杨辉三角
-        let mi = [];
+        const result = [];
+        // 计算杨辉三角
+        const mi = [];
         mi[0] = mi[1] = 1;
         for (let i = 3; i <= number; i++) {
-            let t = [];
+            const t = [];
             for (let j = 0; j < i - 1; j++) {
                 t[j] = mi[j];
             }
@@ -201,10 +201,10 @@ export class MathHelper {
             }
         }
 
-        //计算坐标点
+        // 计算坐标点
         for (let i = 0; i < precision; i++) {
-            let t = i / precision;
-            let p = new Vector2(0, 0);
+            const t = i / precision;
+            const p = new Vector2(0, 0);
             result.push(p);
             for (let j = 0; j < dimersion; j++) {
                 let temp = 0.0;
@@ -233,7 +233,7 @@ export class MathHelper {
     public calcQLintersects(p1: Vector2, p2: Vector2, p3: Vector2, a1: Vector2, a2: Vector2): Vector2[] {
         const intersections = [];
         // inverse line normal
-        const normal = { x: a1.y - a2.y, y: a2.x - a1.x, };
+        const normal = { x: a1.y - a2.y, y: a2.x - a1.x };
         // Q-coefficients
         const c2 = { x: p1.x + p2.x * -2 + p3.x, y: p1.y + p2.y * -2 + p3.y };
         const c1 = { x: p1.x * -2 + p2.x * 2, y: p1.y * -2 + p2.y * 2 };
@@ -246,7 +246,7 @@ export class MathHelper {
 
         // solve the roots
         const roots = [];
-        let d = b * b - 4 * c;
+        const d = b * b - 4 * c;
         if (d > 0) {
             // const e = Math.sqrt(d);
             roots.push((-b + Math.sqrt(d)) / 2);
@@ -267,7 +267,7 @@ export class MathHelper {
                 const point = {
                     x: this.lerp(this.lerp(p1.x, p2.x, t), this.lerp(p2.x, p3.x, t), t),
                     y: this.lerp(this.lerp(p1.y, p2.y, t), this.lerp(p2.y, p3.y, t), t)
-                }
+                };
                 const x = point.x;
                 const y = point.y;
                 // bounds checks
@@ -297,7 +297,7 @@ export class MathHelper {
 
     public static reLocation(points: number[][], center: number[]): number[] {
         for (let i = 0; i < points.length; i++) {
-            let point = points[i];
+            const point = points[i];
             point[0] -= center[0];
             point[1] -= center[1];
         }
@@ -311,7 +311,7 @@ export class MathHelper {
         let top = points[0][1];
         let bottom = points[0][1];
         for (let i = 1; i < points.length; i++) {
-            var point = points[i];
+            const point = points[i];
             if (point[0] > right) right = point[0];
             if (point[0] < left) left = point[0];
             if (point[1] > bottom) bottom = point[1];
@@ -325,7 +325,7 @@ export class MathHelper {
      * clone array
      * @param points 
      */
-    public static clone2Array(points:number[][]): number[][] {
+    public static clone2Array(points: number[][]): number[][] {
         const result: number[][] = [];
         for (let x = 0; x < points.length; x++) {
             result[x] = [];

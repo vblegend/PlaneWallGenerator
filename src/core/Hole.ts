@@ -1,5 +1,5 @@
-import { Vector2 } from "./Vector2";
-import { Wall } from "./Wall";
+import { Vector2 } from './Vector2';
+import { Wall } from './Wall';
 
 
 export class Hole {
@@ -27,7 +27,7 @@ export class Hole {
             const pos = this._parent.anchors[0].position.moveTo(this._parent.anchors[1].position, offsetDistance);
             this.position.copy(pos);
             // 计算 门对象的矩形区域，用于鼠标检测
-            let thickness = this._parent.thickness / 2 + 1;
+            const thickness = this._parent.thickness / 2 + 1;
             const l1 = new Vector2(this.position.x - this.width / 2, this.position.y - thickness);
             const l2 = new Vector2(this.position.x - this.width / 2, this.position.y + thickness);
             const r1 = new Vector2(this.position.x + this.width / 2, this.position.y - thickness);

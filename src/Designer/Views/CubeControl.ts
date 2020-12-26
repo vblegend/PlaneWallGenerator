@@ -70,8 +70,8 @@ export class CubeControl extends Control {
     }
 
     protected onDraging(e: ControlDragEvent) {
-        var viewPos = e.viewPos.sub(e.offset).round(4);
-        var result: IVector2 = this.designer.adsorb.adsorption(viewPos);
+        const viewPos = e.viewPos.sub(e.offset).round(4);
+        const result: IVector2 = this.designer.adsorb.adsorption(viewPos);
         this.position.copy(viewPos);
         this.update();
         this.designer.cursor.update(this.position, result);
@@ -80,7 +80,7 @@ export class CubeControl extends Control {
 
 
     protected onEndDrag(e: ControlDragEvent) {
-        var viewPos = e.viewPos.sub(e.offset).round(4);
+        const viewPos = e.viewPos.sub(e.offset).round(4);
         this.designer.adsorb.adsorption(viewPos);
         this.position.copy(viewPos);
         this.designer.cursor.update(null);
@@ -141,7 +141,7 @@ export class CubeControl extends Control {
 
 
     public toPolygon(relocation?: boolean): CubePolygon {
-        var config = new CubePolygon();
+        const config = new CubePolygon();
         config.id = this.id;
         config.p = [0, 0];
         config.points = MathHelper.clone2Array(this._cube.vertices);
@@ -154,7 +154,7 @@ export class CubeControl extends Control {
     }
 
     public serialize(): ElementCube {
-        let clinder: ElementCube = {
+        const clinder: ElementCube = {
             id: this.id,
             p: this.position.toArray(),
             x: this.length,

@@ -1,6 +1,6 @@
-import { Vector2 } from "../../Core/Vector2";
-import { Renderer, HorizontalAlign, RenderType } from "../Renderer";
-import { VectorDesigner } from "../VectorDesigner";
+import { Vector2 } from '../../Core/Vector2';
+import { Renderer, HorizontalAlign, RenderType } from '../Renderer';
+import { VectorDesigner } from '../VectorDesigner';
 
 
 export class VerticalRuler {
@@ -34,7 +34,7 @@ export class VerticalRuler {
 
         this._canvas.oncontextmenu = (e) => {
             e.preventDefault();
-        }
+        };
         this.resize();
     }
 
@@ -53,20 +53,20 @@ export class VerticalRuler {
 
     private renderCursor() {
         this._cursorRenderer.clear();
-        var designerlength = this.designer.bounds.bottom - this.designer.bounds.top;
-        var position = this.designer.cursor.position;
+        const designerlength = this.designer.bounds.bottom - this.designer.bounds.top;
+        const position = this.designer.cursor.position;
         if (position.y >= this.designer.bounds.top && position.y <= this.designer.bounds.bottom) {
             this._cursorRenderer.fontSize = 16;
-            var posy = (position.y - this.designer.bounds.top) / designerlength * this.height;
-            var text = position.y.toFixed(4);
-            var height = this._cursorRenderer.measureTextWidth(text) + this._cursorRenderer.fontSize;
-            var top = posy - height / 2;
-            var bottom = posy + height / 2;
+            const posy = (position.y - this.designer.bounds.top) / designerlength * this.height;
+            const text = position.y.toFixed(4);
+            const height = this._cursorRenderer.measureTextWidth(text) + this._cursorRenderer.fontSize;
+            let top = posy - height / 2;
+            let bottom = posy + height / 2;
             if (top < 0) {
                 bottom -= top;
                 top = 0;
             } else if (bottom > this.height) {
-                let v = bottom - this.height;
+                const v = bottom - this.height;
                 top -= v;
                 bottom = this.height;
             }
@@ -75,11 +75,11 @@ export class VerticalRuler {
                 this._cursorRenderer.fillColor = '#ffffff';
                 this._cursorRenderer.fillText(text, this.width - 7 - this._cursorRenderer.fontSize, top + height / 2, null, HorizontalAlign.CENTER);
             });
-            var paths: Vector2[] = [];
+            const paths: Vector2[] = [];
             paths.push(new Vector2(this.width - 1, posy));
             paths.push(new Vector2(this.width - 7, posy - 5 < 0 ? 0 : posy - 5));
             paths.push(new Vector2(this.width - 7, posy + 5 > this.height ? this.height : posy + 5));
-            this._cursorRenderer.fillColor = '#333333'
+            this._cursorRenderer.fillColor = '#333333';
             this._cursorRenderer.fillPath(paths, true);
         }
     }
@@ -90,21 +90,21 @@ export class VerticalRuler {
     private render() {
         if (!this._needUpdate) return;
         this._needUpdate = false;
-        var designerlength = this.designer.bounds.bottom - this.designer.bounds.top;
-        var offset = this.designer.center.y % (designerlength / this.height * 100);
+        const designerlength = this.designer.bounds.bottom - this.designer.bounds.top;
+        const offset = this.designer.center.y % (designerlength / this.height * 100);
         this._renderer.strokeColor = '#666666';
         this._renderer.fillColor = '#666666';
         this._renderer.fontSize = 10;
-        var center = this.height / 2;
-        var offsetCenter = this.designer.center.y / this.designer.res;
-        var offsetCalibration = offset / this.designer.res;
-        var centeroffset = center - offsetCalibration;
-        var pos = 0;
-        var count = 0;
+        const center = this.height / 2;
+        const offsetCenter = this.designer.center.y / this.designer.res;
+        const offsetCalibration = offset / this.designer.res;
+        const centeroffset = center - offsetCalibration;
+        let pos = 0;
+        let count = 0;
         this._renderer.clear();
         while (centeroffset + pos < this.height || centeroffset - pos > 0) {
             if (centeroffset + pos < this.height) {
-                var pValue: number = null;
+                let pValue: number = null;
                 if (count % 10 === 0) {
                     pValue = (offsetCenter - offsetCalibration + pos) * this.designer.res;
                     pValue = Number.parseFloat(pValue.toFixed(2));
@@ -112,7 +112,7 @@ export class VerticalRuler {
                 this.drawCalibration(centeroffset + pos, pValue);
             }
             if (centeroffset - pos > 0) {
-                var pValue: number = null;
+                let pValue: number = null;
                 if (count % 10 === 0) {
                     pValue = (offsetCenter - offsetCalibration - pos) * this.designer.res;
                     pValue = Number.parseFloat(pValue.toFixed(2));
@@ -125,9 +125,9 @@ export class VerticalRuler {
         /**
          * fixed triangle pointer
          */
-        this._renderer.fillColor = '#333333'
+        this._renderer.fillColor = '#333333';
         this._renderer.fillPath([new Vector2(0, center - 5), new Vector2(0, center + 5), new Vector2(10, center)], true);
-        this._renderer.strokeColor = '#aaaaaa'
+        this._renderer.strokeColor = '#aaaaaa';
         this._renderer.strokePath([new Vector2(0, center - 5), new Vector2(0, center + 5), new Vector2(10, center)], true);
         if (this.designer.cursor.visible) {
             this._renderer.draw(this._cursorRenderer, 0, 0);
@@ -140,7 +140,7 @@ export class VerticalRuler {
      * @param value 
      */
     private drawCalibration(y: number, value?: number) {
-        var calibration = this.width / 3;
+        let calibration = this.width / 3;
         if (value != null) {
             this._renderer.rotate(this.width * 0.65, y, 270, () => {
                 this._renderer.fillText(value.toString(), this.width * 0.65, y, null, HorizontalAlign.CENTER);

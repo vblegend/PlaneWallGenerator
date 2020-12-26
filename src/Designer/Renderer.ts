@@ -1,4 +1,4 @@
-import { Vector2 } from "../Core/Vector2";
+import { Vector2 } from '../Core/Vector2';
 
 export enum HorizontalAlign {
     LEFT = 0,
@@ -36,11 +36,11 @@ export class Renderer {
         if (canvas) {
             this._canvas = canvas;
         } else {
-            this._canvas = document.createElement("canvas");
+            this._canvas = document.createElement('canvas');
         }
         this._canvas.tabIndex = 0;
         this._canvas.style.outline = 'none';
-        this._context = this.canvas.getContext("2d");
+        this._context = this.canvas.getContext('2d');
         this._context.globalAlpha = 1.0;
         this._context.translate(0, 0);
         this._localOffset = new Vector2(0.5, 0.5);
@@ -67,7 +67,7 @@ export class Renderer {
         this._height = height;
         this.canvas.width = width;
         this.canvas.height = height;
-        var ratio = this.getPixelRatio(this.context);
+        const ratio = this.getPixelRatio(this.context);
         this.canvas.style.width = width + 'px';
         this.canvas.style.height = height + 'px';
         this.canvas.width = width * ratio;
@@ -78,7 +78,7 @@ export class Renderer {
 
 
     private getPixelRatio(context) {
-        var backingStore = context.backingStorePixelRatio ||
+        const backingStore = context.backingStorePixelRatio ||
             context.webkitBackingStorePixelRatio ||
             context.mozBackingStorePixelRatio ||
             context.msBackingStorePixelRatio ||
@@ -141,8 +141,8 @@ export class Renderer {
      * @param align 
      */
     public fillText(text: string, x: number, y: number, width?: number, align?: HorizontalAlign, vertical?: VerticalAlign) {
-        var left = x;
-        var top = y + this.fontSize * 0.95;
+        let left = x;
+        let top = y + this.fontSize * 0.95;
         if (vertical === VerticalAlign.CENTER) {
             top = top - this.fontSize / 2;
         } else if (vertical === VerticalAlign.BOTTOM) {
@@ -215,7 +215,7 @@ export class Renderer {
         if (points == null || points.length === 0) return;
         this.context.beginPath();
         this.context.moveTo(points[0].x + this._localOffset.x, points[0].y + this._localOffset.y);
-        for (var i = 1; i < points.length; i++) {
+        for (let i = 1; i < points.length; i++) {
             this.context.lineTo(points[i].x + this._localOffset.x, points[i].y + this._localOffset.y);
         }
         if (closed) {
@@ -298,7 +298,7 @@ export class Renderer {
     public fillPath(points: Vector2[], closed: boolean) {
         this.context.beginPath();
         this.context.moveTo(points[0].x + this._localOffset.x, points[0].y + this._localOffset.y);
-        for (var i = 1; i < points.length; i++) {
+        for (let i = 1; i < points.length; i++) {
             this.context.lineTo(points[i].x + this._localOffset.x, points[i].y + this._localOffset.y);
         }
         if (closed) {
@@ -316,7 +316,7 @@ export class Renderer {
     public strokePath(points: Vector2[], closed: boolean) {
         this.context.beginPath();
         this.context.moveTo(points[0].x + this._localOffset.x, points[0].y + this._localOffset.y);
-        for (var i = 1; i < points.length; i++) {
+        for (let i = 1; i < points.length; i++) {
             this.context.lineTo(points[i].x + this._localOffset.x, points[i].y + this._localOffset.y);
         }
         if (closed) {

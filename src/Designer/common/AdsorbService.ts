@@ -1,8 +1,8 @@
-import { IVector2, Vector2 } from "../../Core/Vector2";
-import { VectorDesigner } from "../VectorDesigner";
-import { AnchorControl } from "../Views/AnchorControl";
-import { CylinderControl } from "../Views/ClinderControl";
-import { CubeControl } from "../Views/CubeControl";
+import { IVector2, Vector2 } from '../../Core/Vector2';
+import { VectorDesigner } from '../VectorDesigner';
+import { AnchorControl } from '../Views/AnchorControl';
+import { CylinderControl } from '../Views/ClinderControl';
+import { CubeControl } from '../Views/CubeControl';
 
 
 export interface AdsorbResult {
@@ -55,7 +55,7 @@ export class AdsorbService {
         if (!this.enabled) return;
         this.horizontalTraces.length = 0;
         this.verticalTraces.length = 0;
-        for (let object of this.designer.children) {
+        for (const object of this.designer.children) {
             if (object instanceof AnchorControl) {
                 this.horizontalTraces.push(object.position.x);
                 this.verticalTraces.push(object.position.y);
@@ -91,11 +91,11 @@ export class AdsorbService {
      * @param value 查找的近似值
      */
     public binarySearch(array: number[], targetNum: number): number {
-        var min = 0;
-        var max = array.length - 1;
+        let min = 0;
+        let max = array.length - 1;
         while (min != max) {
-            var midIndex = Math.round((max + min) / 2);
-            var mid = (max - min);
+            const midIndex = Math.round((max + min) / 2);
+            const mid = (max - min);
             if (targetNum === array[midIndex]) {
                 return array[midIndex];
             }
@@ -125,16 +125,16 @@ export class AdsorbService {
      * @param return        Vector2 (x,y) 返回 x,y轴修正的范围 当坐标值为null时 未吸附到值
      */
     public adsorption(in_out_Point: Vector2, lessValue: number = 15): IVector2 {
-        var result: IVector2 = { x: null, y: null };
+        const result: IVector2 = { x: null, y: null };
         lessValue *= this.designer.res;
-        var x = this.binarySearch(this.horizontalTraces, in_out_Point.x);
-        var y = this.binarySearch(this.verticalTraces, in_out_Point.y);
-        var x_dis = Math.abs(x - in_out_Point.x);
+        const x = this.binarySearch(this.horizontalTraces, in_out_Point.x);
+        const y = this.binarySearch(this.verticalTraces, in_out_Point.y);
+        const x_dis = Math.abs(x - in_out_Point.x);
         if (x != null && x_dis <= lessValue) {
             in_out_Point.x = x;
             result.x = x_dis;
         }
-        var y_dis = Math.abs(y - in_out_Point.y);
+        const y_dis = Math.abs(y - in_out_Point.y);
         if (y != null && y_dis <= lessValue) {
             in_out_Point.y = y;
             result.y = y_dis;
