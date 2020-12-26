@@ -315,7 +315,7 @@ export class WallControl extends Control {
         config.points = MathHelper.clone2Array(this._segment.points);
         config.p = [0, 0];
         config.holes = [];
-        if (relocation) {
+        if (relocation && config.points.length) {
             config.p = MathHelper.getCenter(config.points);
             MathHelper.reLocation(config.points, config.p);
         }
