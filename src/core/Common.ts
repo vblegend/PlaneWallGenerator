@@ -4,11 +4,11 @@
  * 锚点信息
  */
 export interface ElementAnchor {
-    /* 锚点id */
+    /** 锚点id */
     id: number;
-    /* 锚点x坐标 */
+    /** 锚点x坐标 */
     x: number;
-    /* 锚点y坐标 */
+    /** 锚点y坐标 */
     y: number;
 }
 
@@ -28,13 +28,13 @@ export interface ElementWall {
  */
 export interface ElementHole {
     id: number;
-    /* 洞的宽度 */
+    /** 洞的宽度 */
     width: number;
-    /* 洞的位置 */
+    /** 洞的位置 */
     location: number;
-    /* 离地高度 */
+    /** 离地高度 */
     ground: number;
-    /* 洞的高度 3D属性 */
+    /** 洞的高度 3D属性 */
     height: number;
 }
 
@@ -55,11 +55,11 @@ export interface ElementClinder {
 export class ElementCube {
     public id: number;
     public p: number[];
-    /* 长 */
+    /** 长 */
     public x: number;
-    /* 宽 */
+    /** 宽 */
     public z: number;
-    /* 高 */
+    /** 高 */
     public y: number;
 }
 
@@ -73,13 +73,13 @@ export class ElementCube {
  * 图形文档对象
  */
 export interface GraphicDocument {
-    /* 锚点 */
+    /** 锚点 */
     anchors: ElementAnchor[];
-    /* 墙 */
+    /** 墙 */
     walls: ElementWall[];
-    /* 圆柱 */
+    /** 圆柱 */
     cylinders: ElementClinder[];
-    /* 立方体 */
+    /** 立方体 */
     cubes: ElementCube[];
 }
 
@@ -88,9 +88,9 @@ export interface GraphicDocument {
  * 多边形对象
  */
 export class ObjectPolygon {
-    /* 多边形Id */
+    /** 多边形Id */
     public id: number;
-    /* 多边形的位置 */
+    /** 多边形的位置 */
     public p: number[];
 }
 
@@ -101,11 +101,11 @@ export class ObjectPolygon {
  * 每面墙的多边形数据
  */
 export class WallPolygon extends ObjectPolygon {
-    /* 墙高度 */
+    /** 墙高度 */
     public h: number;
-    /* 墙的点集合 */
+    /** 墙的点集合 */
     public points: number[][];
-    /* 墙上的洞 */
+    /** 墙上的洞 */
     public holes: HolePolygon[];
 }
 
@@ -113,9 +113,9 @@ export class WallPolygon extends ObjectPolygon {
  * 圆柱的数据
  */
 export class CylinderPolygon extends ObjectPolygon {
-    /* 圆柱的半径 */
+    /** 圆柱的半径 */
     public r: number;
-    /* 圆柱的高度 */
+    /** 圆柱的高度 */
     public h: number;
 }
 
@@ -123,10 +123,10 @@ export class CylinderPolygon extends ObjectPolygon {
  * 立方体的数据
  */
 export class CubePolygon extends ObjectPolygon {
-    /* 立方体的点集合 */
+    /** 立方体的点集合 */
     public points: number[][];
 
-    /* 立方体的高度 */
+    /** 立方体的高度 */
     public h: number;
 }
 
@@ -134,10 +134,10 @@ export class CubePolygon extends ObjectPolygon {
  * 门的数据
  */
 export class HolePolygon extends ObjectPolygon {
-    /* 门的点集合 */
+    /** 门的点集合 */
     public points: number[][];
-    /* 门的高度 */
+    /** 门的高度 */
     public h: number;
-    /* 门下方离地高度 */
+    /** 门下方离地高度 */
     public g: number;
 }

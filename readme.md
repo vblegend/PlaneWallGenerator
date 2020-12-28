@@ -134,11 +134,6 @@
 * `git clone project`
 * `npm i`
 * `npm run debug`               启动无缓存Http服务+实时编译
-* 
-* 
-* **其他命令**
-* `npm run httpserver`          启动带有缓存的Http服务
-* `npm run httpserver-nocache`  启动无缓存Http服务
 * `npm run build`               启动实时编译项目至dist目录+保存自动编译
 
 
