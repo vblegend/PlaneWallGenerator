@@ -6,6 +6,7 @@ import { Connector } from '../Common/Connector';
 import { MouseCapturer } from '../Utility/MouseCapturer';
 import { HoleControl } from '../Views/HoleControl';
 import { CylinderControl } from '../Views/ClinderControl';
+import { CubeControl } from '../Views/CubeControl';
 
 
 
@@ -91,6 +92,12 @@ export class ToolBar {
                 this.designer.requestRender();
                 this.designer.dispatchEvents();
             }
+            else if (this.designer.selected instanceof CubeControl)
+            {
+                this.designer.selected.width = Number.parseFloat(value) * 100;
+                this.designer.selected.update();
+                this.designer.requestRender();
+            }
         };
 
         this.thicknessDiv.appendChild(header1);
@@ -120,6 +127,12 @@ export class ToolBar {
                 if (this.designer.selected.parent) {
                     this.designer.updateEvents(this.designer.selected.parent);
                 }
+            }
+            else if (this.designer.selected instanceof CubeControl)
+            {
+                this.designer.selected.length = Number.parseFloat(value) * 100;
+                this.designer.selected.update();
+                this.designer.requestRender();
             }
             this.designer.dispatchEvents();
         };
@@ -155,6 +168,10 @@ export class ToolBar {
                 if (this.designer.selected.parent) {
                     this.designer.updateEvents(this.designer.selected.parent);
                 }
+            } else if (this.designer.selected instanceof CubeControl)
+            {
+                this.designer.selected.height = Number.parseFloat(value) * 100;
+                this.designer.selected.update();
             }
             this.designer.dispatchEvents();
         };
@@ -360,6 +377,21 @@ export class ToolBar {
                 this.holeGroundDiv.style.display = 'none';
                 this.xInput.value = (this.designer.selected.position.x / 100).toFixed(2);
                 this.yInput.value = (this.designer.selected.position.y / 100).toFixed(2);
+
+            } else if (this.designer.selected instanceof CubeControl) {
+                this.btnConnectTo.style.display = 'none';
+                this.btnDelete.style.display = '';
+                this.btnSetting.style.display = '';
+                this.thicknessDiv.style.display = '';
+                this.heightDiv.style.display = '';
+                this.holeWidthDiv.style.display = '';
+                this.positionDiv.style.display = '';
+                this.holeGroundDiv.style.display = 'none';
+                this.xInput.value = (this.designer.selected.position.x / 100).toFixed(2);
+                this.yInput.value = (this.designer.selected.position.y / 100).toFixed(2);
+                this.holeWidthInput.value = (this.designer.selected.length / 100).toFixed(2);
+                this.thicknessInput.value = (this.designer.selected.width / 100).toFixed(2);
+                this.heightInput.value = (this.designer.selected.height / 100).toFixed(2);
 
             }
         }

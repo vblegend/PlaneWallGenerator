@@ -3,7 +3,7 @@ import { IVector2, Vector2 } from '../../Core/Vector2';
 import { Control, ControlDragEvent } from './Control';
 import { VectorDesigner } from '../VectorDesigner';
 import { RenderType, HorizontalAlign, VerticalAlign } from '../Renderer';
-import { CylinderPolygon as CylinderPolygon, ElementClinder as ElementCylinder } from '../../Core/Common';
+import { CylinderPolygon, ElementClinder as ElementCylinder } from '../../Core/Common';
 import { Cylinder } from '../../Core/Cylinder';
 
 
@@ -59,7 +59,7 @@ export class CylinderControl extends Control {
         if (!this.isDraging) {
             if (length > this.radius * 0.9) {
                 if (!this._resizeing) {
-                    this.designer.canvas.style.cursor = "none";
+                    this.designer.canvas.style.cursor = 'none';
                     this._resizeing = true;
                     this._cursorPosition = canvasPos.clone();
                 }
@@ -67,7 +67,7 @@ export class CylinderControl extends Control {
             else {
                 if (this._resizeing) {
                     this._resizeing = false;
-                    this.designer.canvas.style.cursor = "default";
+                    this.designer.canvas.style.cursor = 'default';
                     this.designer.requestRender();
                 }
             }
@@ -81,7 +81,7 @@ export class CylinderControl extends Control {
     protected onMouseLeave() {
         super.onMouseLeave();
         if (!this.isDraging && this._resizeing) {
-            this.designer.canvas.style.cursor = "default";
+            this.designer.canvas.style.cursor = 'default';
             this._resizeing = false;
         }
 
@@ -97,8 +97,8 @@ export class CylinderControl extends Control {
     }
 
     protected onDraging(e: ControlDragEvent) {
-        var viewPos = e.viewPos.sub(e.offset).round(4);
-        var result: IVector2;
+        let viewPos = e.viewPos.sub(e.offset).round(4);
+        let result: IVector2;
         if (this._resizeing) {
             viewPos = e.viewPos.round(4);
             this.radius = viewPos.distanceTo(this.position);
@@ -115,7 +115,7 @@ export class CylinderControl extends Control {
 
     protected onEndDrag(e: ControlDragEvent) {
         if (!this._resizeing) {
-            var viewPos = e.viewPos.sub(e.offset).round(4);
+            const viewPos = e.viewPos.sub(e.offset).round(4);
             this.designer.adsorb.adsorption(viewPos);
             this.position.copy(viewPos);
         }
@@ -147,7 +147,7 @@ export class CylinderControl extends Control {
     }
 
     public render() {
-        let radius = this.radius / this.designer.res;
+        const radius = this.radius / this.designer.res;
         this.designer.renderer.opacity = this.opacity;
         this.designer.renderer.fillColor = this.isHover && !this.isSelected ? this.hoverColor : this.fillColor;
         this.designer.renderer.strokeColor = this.strokeColor;
@@ -168,8 +168,8 @@ export class CylinderControl extends Control {
             this.designer.renderer.fillColor = '#111111';
             const pos = this.designer.convertPoint(this.position);
             const angle = pos.angle(this._cursorPosition);
-            let leftArrow = [new Vector2(this._cursorPosition.x - 10, this._cursorPosition.y), new Vector2(this._cursorPosition.x - 3, this._cursorPosition.y - 5), new Vector2(this._cursorPosition.x - 3, this._cursorPosition.y + 5)]
-            let rightArrow = [new Vector2(this._cursorPosition.x + 10, this._cursorPosition.y), new Vector2(this._cursorPosition.x + 3, this._cursorPosition.y + 5), new Vector2(this._cursorPosition.x + 3, this._cursorPosition.y - 5)]
+            const leftArrow = [new Vector2(this._cursorPosition.x - 10, this._cursorPosition.y), new Vector2(this._cursorPosition.x - 3, this._cursorPosition.y - 5), new Vector2(this._cursorPosition.x - 3, this._cursorPosition.y + 5)];
+            const rightArrow = [new Vector2(this._cursorPosition.x + 10, this._cursorPosition.y), new Vector2(this._cursorPosition.x + 3, this._cursorPosition.y + 5), new Vector2(this._cursorPosition.x + 3, this._cursorPosition.y - 5)];
             this.designer.renderer.rotate(this._cursorPosition.x, this._cursorPosition.y, angle, () => {
                 this.designer.renderer.polygon(leftArrow, true, RenderType.ALL);
                 this.designer.renderer.polygon(rightArrow, true, RenderType.ALL);
@@ -192,7 +192,7 @@ export class CylinderControl extends Control {
 
 
     public toPolygon(relocation?: boolean): CylinderPolygon {
-        var config = new CylinderPolygon();
+        const config = new CylinderPolygon();
         config.id = this.id;
         config.h = this.height;
         config.p = this.position.toArray();
@@ -201,7 +201,7 @@ export class CylinderControl extends Control {
     }
 
     public serialize(): ElementCylinder {
-        let clinder: ElementCylinder = {
+        const clinder: ElementCylinder = {
             id: this._clinder.id,
             p: this.position.toArray(),
             r: this.radius,
